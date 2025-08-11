@@ -1,0 +1,566 @@
+/* ============================================
+   Shopify WooCommerce Importer - CSS Variables
+   Centralized design system for consistent styling
+   ============================================ */
+
+:root {
+   /* =====================================
+       COLOR SYSTEM
+       ===================================== */
+
+   /* Primary Colors */
+   --color-primary: #2271b1;
+   --color-primary-hover: #1a5a99;
+   --color-primary-light: rgba(34, 113, 177, 0.05);
+   --color-primary-lighter: rgba(34, 113, 177, 0.02);
+   --color-primary-alpha-20: rgba(34, 113, 177, 0.2);
+   --color-primary-100: #eff6fb;
+   --color-primary-200: #d2e6f7;
+   --color-primary-300: #92c3e4;
+   --color-primary-400: #599fd9;
+   --color-primary-500: #2271b1;
+   --color-primary-600: #1a5a99;
+   --color-primary-700: #165385;
+   --color-primary-800: #133a6a;
+   --color-primary-900: #102c4d;
+
+
+   /* secondary colors */
+   --color-secondary: #0073aa;
+   --color-secondary-hover: #005f8a !important;
+   --color-secondary-light: rgba(0, 115, 170, 0.05) !important;
+   --color-secondary-lighter: rgba(0, 115, 170, 0.02) !important;
+   --color-secondary-alpha-20: rgba(0, 115, 170, 0.2) !important;
+   --color-secondary-100: #eff6fb;
+   --color-secondary-200: #d2e6f7;
+   --color-secondary-300: #92c3e4;
+   --color-secondary-400: #599fd9;
+   --color-secondary-500: #2271b1;
+   --color-secondary-600: #1a5a99;
+   --color-secondary-700: #165385;
+   --color-secondary-800: #133a6a;
+   --color-secondary-900: #102c4d;
+
+
+   /* Accent & Subtle Colors */
+   --color-accent: #f59e42;
+   --color-accent-hover: #de7c13;
+   --color-accent-light: #fff6e9;
+   --color-accent-dark: #ad5700;
+   --color-accent-100: #fff8ef;
+   --color-accent-200: #ffe5cc;
+   --color-accent-300: #ffd1a3;
+   --color-accent-400: #ffbb73;
+   --color-accent-500: #f59e42;
+   --color-accent-600: #de7c13;
+   --color-accent-700: #ad5700;
+   --color-accent-800: #7c3f00;
+   --color-accent-900: #4d2600;
+   --color-subtle: #f3f6fa;
+   --color-subtle-dark: #e1e6ed;
+   --color-subtle-accent: #f9e6cc;
+
+   /* Status Colors */
+   --color-success: #059669;
+   --color-success-light: #ecfdf5;
+   --color-success-border: #a7f3d0;
+   --color-success-dark: #065f46;
+
+   --color-error: #dc2626;
+   --color-error-light: #fef2f2;
+   --color-error-border: #fecaca;
+   --color-error-dark: #991b1b;
+   --color-required: #dc2626;
+   /* Red for required fields */
+
+   --color-warning: #d97706;
+   --color-warning-light: #fffbeb;
+   --color-warning-border: #fed7aa;
+   --color-warning-dark: #92400e;
+
+   --color-info: #0284c7;
+   --color-info-light: #f0f9ff;
+   --color-info-border: #bae6fd;
+   --color-info-dark: #1e40af;
+
+   /* Semantic State Colors */
+   --color-disabled-bg: #f3f4f6;
+   --color-readonly-bg: #f9fafb;
+   --color-focus-outline: #2271b1;
+
+   /* Neutral Colors */
+   --color-white: #ffffff;
+   --color-black: #000000;
+   --color-gray-25: #f9fafb;
+   --color-gray-50: #f8fafc;
+   --color-gray-100: #f1f5f9;
+   --color-gray-200: #e2e8f0;
+   --color-gray-300: #cbd5e1;
+   --color-gray-400: #94a3b8;
+   --color-gray-500: #64748b;
+   --color-gray-600: #475569;
+   --color-gray-700: #334155;
+   --color-gray-800: #1e293b;
+   --color-gray-900: #0f172a;
+   --color-dark-gray: #22262a;
+
+   /* Additional UI Colors */
+   --color-light-gray: #D3D3D3;
+   --color-text-muted: #666666;
+   --color-text-subtle: #9ca3af;
+   --color-text-accent: var(--color-accent-dark);
+   --color-disabled: #e5e7eb;
+   --color-placeholder: #b6bec9;
+   --color-overlay: rgba(31, 41, 55, 0.6);
+
+   /* Legacy Color Support (WordPress admin colors) */
+   --color-wp-primary: #0073aa;
+   --color-wp-text: #23282d;
+   --color-wp-text-light: #50575e;
+   --color-wp-border: #ddd;
+   --color-wp-background: #f1f1f1;
+   --color-wp-surface: #fff;
+
+   /* =====================================
+       SEMANTIC COLOR MAPPINGS
+       ===================================== */
+
+   /* Tab System */
+   --tab-active-color: var(--color-primary);
+   --tab-hover-color: var(--color-primary-light);
+   --tab-text-color: var(--color-gray-600);
+   --tab-active-text-color: var(--color-primary);
+   --tab-indicator-gradient: linear-gradient(90deg, var(--color-primary), #599fd9);
+
+   /* Form Elements */
+   --input-border: #d1d5db;
+   --input-bg: var(--color-white);
+   --input-focus-border: var(--color-primary);
+   --input-focus-shadow: var(--color-primary-alpha-20);
+   --input-text: #1f2937;
+   --input-placeholder: var(--color-placeholder);
+   --input-disabled-bg: var(--color-disabled-bg);
+
+   /* Panel & Card System */
+   --panel-bg: var(--color-white);
+   --panel-border: var(--color-gray-200);
+   --panel-border-light: var(--color-gray-100);
+   --panel-shadow: rgba(0, 0, 0, 0.05);
+   --panel-shadow-hover: rgba(0, 0, 0, 0.1);
+   --card-hover-shadow: rgba(0, 0, 0, 0.1);
+
+   /* Surface Colors */
+   --surface-primary: var(--color-white);
+   --surface-secondary: var(--color-gray-50);
+   --surface-tertiary: var(--color-gray-100);
+   --surface-accent: var(--color-accent-light);
+
+   /* Overlay Colors */
+   --overlay-bg: var(--color-overlay);
+
+   /* =====================================
+       TYPOGRAPHY SYSTEM
+       ===================================== */
+
+   /* Font Families */
+   --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+   --font-family-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+   --font-family-code: 'Fira Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+
+   /* Font Sizes */
+   --font-size-xs: 11px;
+   --font-size-sm: 12px;
+   --font-size-base: 13px;
+   --font-size-md: 14px;
+   --font-size-lg: 15px;
+   --font-size-xl: 16px;
+   --font-size-2xl: 18px;
+   --font-size-3xl: 20px;
+   --font-size-4xl: 24px;
+   --font-size-5xl: 32px;
+   --font-size-6xl: 40px;
+   --font-size-7xl: 48px;
+   --font-size-8xl: 56px;
+   --font-size-9xl: 64px;
+   --font-size-10xl: 72px;
+
+   --font-size-h1: 2rem;
+   --font-size-h2: 1.5rem;
+   --font-size-h3: 1.25rem;
+   --font-size-h4: 1.1rem;
+   --font-size-caption: 0.875rem;
+
+   /* Legacy Font Size Support */
+   --font-size-title: var(--font-size-lg);
+   --font-size-body: var(--font-size-md);
+
+   /* Font Weights */
+   --font-weight-light: 300;
+   --font-weight-normal: 400;
+   --font-weight-medium: 500;
+   --font-weight-semibold: 600;
+   --font-weight-bold: 700;
+   --font-weight-extrabold: 800;
+
+   /* Line Heights */
+   --line-height-none: 1;
+   --line-height-tight: 1.25;
+   --line-height-normal: 1.5;
+   --line-height-relaxed: 1.625;
+   --line-height-loose: 2;
+
+   /* Letter Spacing */
+   --letter-spacing-tight: -0.01em;
+   --letter-spacing-normal: 0;
+   --letter-spacing-wide: 0.02em;
+
+   /* =====================================
+       SPACING SYSTEM
+       ===================================== */
+
+   /* Base Spacing Scale */
+   --spacing-0: 0;
+   --spacing-px: 1px;
+   --spacing-0-25: 1px;
+   --spacing-0-5: 2px;
+   --spacing-0-75: 3px;
+   --spacing-1: 4px;
+   --spacing-1-5: 6px;
+   --spacing-2: 8px;
+   --spacing-2-5: 10px;
+   --spacing-3: 12px;
+   --spacing-3-5: 14px;
+   --spacing-4: 16px;
+   --spacing-5: 20px;
+   --spacing-6: 24px;
+   --spacing-7: 28px;
+   --spacing-8: 32px;
+   --spacing-9: 36px;
+   --spacing-10: 40px;
+   --spacing-12: 48px;
+   --spacing-16: 64px;
+   --spacing-20: 80px;
+   --spacing-24: 96px;
+   --spacing-32: 128px;
+
+   /* Negative Spacing */
+   --spacing-n1: -4px;
+   --spacing-n2: -8px;
+   --spacing-n4: -16px;
+
+   /* Semantic Spacing */
+   --spacing-xs: var(--spacing-1);
+   --spacing-sm: var(--spacing-2);
+   --spacing-md: var(--spacing-3);
+   --spacing-lg: var(--spacing-4);
+   --spacing-xl: var(--spacing-5);
+   --spacing-2xl: var(--spacing-6);
+   --spacing-3xl: var(--spacing-8);
+   --spacing-4xl: var(--spacing-10);
+
+   /* Layout Spacing */
+   --gutter-xs: var(--spacing-2);
+   --gutter-sm: var(--spacing-4);
+   --gutter-md: var(--spacing-6);
+   --gutter-lg: var(--spacing-8);
+   --gutter-xl: var(--spacing-10);
+
+   /* =====================================
+       BORDER SYSTEM
+       ===================================== */
+
+   /* Border Widths */
+   --border-width-0: 0;
+   --border-width-thin: 1px;
+   --border-width-thick: 2px;
+   --border-width-thicker: 4px;
+
+   /* Border Radius */
+   --radius-none: 0;
+   --radius-xs: 2px;
+   --radius-sm: 4px;
+   --radius-md: 6px;
+   --radius-lg: 8px;
+   --radius-xl: 12px;
+   --radius-2xl: 16px;
+   --radius-3xl: 24px;
+   --radius-full: 9999px;
+
+   /* =====================================
+       SHADOW SYSTEM
+       ===================================== */
+
+   /* Shadow Layers */
+   --shadow-none: none;
+   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+   /* Colored Shadows */
+   --shadow-primary: 0 4px 6px -1px rgba(34, 113, 177, 0.1);
+   --shadow-success: 0 4px 6px -1px rgba(5, 150, 105, 0.1);
+   --shadow-error: 0 4px 6px -1px rgba(220, 38, 38, 0.1);
+   --shadow-warning: 0 4px 6px -1px rgba(217, 119, 6, 0.1);
+   --shadow-accent: 0 4px 6px -1px rgba(245, 158, 66, 0.1);
+
+   /* =====================================
+       ANIMATION & TRANSITION SYSTEM
+       ===================================== */
+
+   /* Timing Functions */
+   --ease-linear: linear;
+   --ease-in: cubic-bezier(0.4, 0, 1, 1);
+   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+   /* Transition Durations */
+   --duration-75: 75ms;
+   --duration-100: 100ms;
+   --duration-150: 150ms;
+   --duration-200: 200ms;
+   --duration-300: 300ms;
+   --duration-500: 500ms;
+   --duration-700: 700ms;
+   --duration-1000: 1000ms;
+
+   /* Semantic Transitions */
+   --transition-fast: var(--duration-150) var(--ease-out);
+   --transition-normal: var(--duration-300) var(--ease-out);
+   --transition-slow: var(--duration-500) var(--ease-out);
+   --transition-all-fast: all var(--transition-fast);
+   --transition-all-normal: all var(--transition-normal);
+   --transition-all-slow: all var(--transition-slow);
+
+   /* Animation Utility */
+   --fade-in: fade-in 0.3s var(--ease-out);
+
+   /* =====================================
+       Z-INDEX SYSTEM
+       ===================================== */
+
+   --z-auto: auto;
+   --z-0: 0;
+   --z-10: 10;
+   --z-20: 20;
+   --z-30: 30;
+   --z-40: 40;
+   --z-50: 50;
+   --z-modal: 1000;
+   --z-popover: 1010;
+   --z-tooltip: 1020;
+   --z-notification: 1030;
+   --z-max: 9999;
+   --z-drawer: 1050;
+
+   /* =====================================
+       BREAKPOINTS
+       ===================================== */
+
+   --breakpoint-xs: 360px;
+   --breakpoint-sm: 640px;
+   --breakpoint-md: 768px;
+   --breakpoint-lg: 1024px;
+   --breakpoint-xl: 1280px;
+   --breakpoint-2xl: 1536px;
+
+   /* WordPress Admin Breakpoints */
+   --breakpoint-wp-mobile: 782px;
+   --breakpoint-wp-small: 480px;
+
+   /* =====================================
+       UTILITY VALUES
+       ===================================== */
+
+   /* Opacity */
+   --opacity-0: 0;
+   --opacity-10: 0.1;
+   --opacity-25: 0.25;
+   --opacity-50: 0.5;
+   --opacity-75: 0.75;
+   --opacity-90: 0.9;
+   --opacity-100: 1;
+
+   /* Max Widths */
+   --max-width-xs: 20rem;
+   --max-width-sm: 24rem;
+   --max-width-md: 28rem;
+   --max-width-lg: 32rem;
+   --max-width-xl: 36rem;
+   --max-width-2xl: 42rem;
+   --max-width-3xl: 48rem;
+   --max-width-4xl: 56rem;
+   --max-width-5xl: 64rem;
+   --max-width-6xl: 72rem;
+   --max-width-7xl: 80rem;
+
+   /* Container */
+   --container-padding: var(--spacing-4);
+   --container-max-width: var(--max-width-7xl);
+
+   /* =====================================
+       COMPONENT-SPECIFIC VARIABLES
+       ===================================== */
+
+   /* Button System */
+   --button-padding-xs: var(--spacing-1) var(--spacing-2);
+   --button-padding-sm: var(--spacing-2) var(--spacing-3);
+   --button-padding-md: var(--spacing-2-5) var(--spacing-4);
+   --button-padding-lg: var(--spacing-3) var(--spacing-6);
+   --button-border-radius: var(--radius-md);
+   --button-font-weight: var(--font-weight-medium);
+   --button-accent-bg: var(--color-accent);
+   --button-accent-color: var(--color-white);
+   --button-accent-hover-bg: var(--color-accent-hover);
+   --button-disabled-bg: var(--color-disabled-bg);
+   --button-disabled-color: var(--color-gray-400);
+
+   /* Link Styles */
+   --link-color: var(--color-primary);
+   --link-hover-color: var(--color-primary-hover);
+   --link-visited-color: #7c3aed;
+
+   /* Form Elements */
+   --form-element-height-xs: 28px;
+   --form-element-height-sm: 32px;
+   --form-element-height-md: 36px;
+   --form-element-height-lg: 40px;
+   --form-element-padding: var(--spacing-3) var(--spacing-4);
+   --form-element-border-radius: var(--radius-md);
+   --form-label-required: var(--color-required);
+
+   /* Card System */
+   --card-padding: var(--spacing-6);
+   --card-border-radius: var(--radius-lg);
+   --card-border: var(--border-width-thin) solid var(--panel-border);
+
+   /* Table System */
+   --table-cell-padding: var(--spacing-3) var(--spacing-4);
+   --table-border: var(--border-width-thin) solid var(--panel-border);
+   --table-header-bg: var(--color-subtle);
+
+   /* Tab System */
+   --tab-padding: var(--spacing-4) var(--spacing-5);
+   --tab-border-radius: var(--radius-lg);
+   --tab-indicator-height: 3px;
+
+   /* Progress Bar */
+   --progress-height-xs: 2px;
+   --progress-height-sm: 4px;
+   --progress-height-md: 8px;
+   --progress-height-lg: 12px;
+   --progress-border-radius: var(--radius-sm);
+   --progress-accent-bg: var(--color-accent);
+
+   /* Notification */
+   --notification-padding: var(--spacing-4) var(--spacing-5);
+   --notification-border-radius: var(--radius-lg);
+   --notification-border-width: var(--border-width-thin);
+   --notification-accent-width: 4px;
+   --notification-accent-color: var(--color-accent);
+
+   /* Badge */
+   --badge-bg: var(--color-accent-light);
+   --badge-color: var(--color-accent-dark);
+   --badge-border-radius: var(--radius-full);
+   --badge-font-size: var(--font-size-sm);
+
+   /* Tooltip */
+   --tooltip-bg: var(--color-gray-900);
+   --tooltip-color: var(--color-white);
+   --tooltip-padding: var(--spacing-1) var(--spacing-2);
+   --tooltip-border-radius: var(--radius-xs);
+
+   /* Drawer */
+   --drawer-bg: var(--color-white);
+   --drawer-shadow: var(--shadow-2xl);
+
+   /* Loader */
+   --loader-primary: var(--color-primary);
+   --loader-accent: var(--color-accent);
+
+   /* Divider */
+   --divider-color: var(--color-gray-200);
+   --divider-thickness: var(--border-width-thin);
+
+   /* Overlay */
+   --overlay-bg: var(--color-overlay);
+
+   /* Skeleton Loader */
+   --skeleton-bg: var(--color-gray-100);
+   --skeleton-shine: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+
+   /* Modal System */
+   --modal-backdrop-bg: rgba(17, 24, 39, 0.6);
+   --modal-bg: var(--color-white);
+   --modal-border-radius: var(--radius-lg);
+
+   /* Alert/Message System */
+   --alert-info-bg: var(--color-info-light);
+   --alert-info-border: var(--color-info-border);
+   --alert-info-color: var(--color-info-dark);
+   --alert-warning-bg: var(--color-warning-light);
+   --alert-warning-border: var(--color-warning-border);
+   --alert-warning-color: var(--color-warning-dark);
+   --alert-error-bg: var(--color-error-light);
+   --alert-error-border: var(--color-error-border);
+   --alert-error-color: var(--color-error-dark);
+   --alert-success-bg: var(--color-success-light);
+   --alert-success-border: var(--color-success-border);
+   --alert-success-color: var(--color-success-dark);
+
+   /* Focus & Outline */
+   --focus-outline-color: var(--color-focus-outline);
+   --focus-outline-width: 2px;
+   --focus-outline-style: solid;
+
+   /* Print Styles */
+   --print-bg: #ffffff;
+   --print-color: #22262a;
+}
+
+/* =====================================
+   DARK MODE SUPPORT (Future Enhancement)
+   ===================================== */
+
+@media (prefers-color-scheme: dark) {
+   :root {
+      --shadow-md: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06);
+      /* Example: --color-primary: #59abff; */
+      /* Add dark mode overrides as needed */
+   }
+}
+
+/* =====================================
+   REDUCED MOTION SUPPORT
+   ===================================== */
+
+@media (prefers-reduced-motion: reduce) {
+   :root {
+      --transition-fast: none;
+      --transition-normal: none;
+      --transition-slow: none;
+      --transition-all-fast: none;
+      --transition-all-normal: none;
+      --transition-all-slow: none;
+   }
+}
+
+/* =====================================
+   HIGH CONTRAST SUPPORT
+   ===================================== */
+
+@media (prefers-contrast: high) {
+   :root {
+      --panel-border: var(--color-gray-900);
+      --input-border: var(--color-gray-900);
+      --shadow-sm: 0 0 0 1px var(--color-gray-900);
+      --shadow-md: 0 0 0 2px var(--color-gray-900);
+      --shadow-lg: 0 0 0 3px var(--color-gray-900);
+      --divider-color: var(--color-black);
+   }
+}

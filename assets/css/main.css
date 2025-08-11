@@ -1,0 +1,337 @@
+/* ============================================
+   Shopify WooCommerce Importer - Main CSS
+   Entry point for all styles - import this file
+   ============================================ */
+
+/* Core System Files */
+@import url('./variables.css');
+@import url('./utilities.css');
+@import url('./components.css');
+
+/* =====================================
+   GLOBAL OVERRIDES & ENHANCEMENTS
+   ===================================== */
+
+/* WordPress Admin Compatibility */
+.wrap {
+    font-family: var(--font-family-primary);
+}
+
+/* Smooth scrolling for the entire application */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus management for accessibility */
+*:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-gray-400);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-500);
+}
+
+/* Selection styles */
+::selection {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+/* Print styles */
+@media print {
+    * {
+        background: transparent !important;
+        color: black !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    .swi-tabs,
+    .swi-tab-nav,
+    .button,
+    .swi-action-buttons {
+        display: none !important;
+    }
+
+    .swi-tab-content {
+        display: block !important;
+        padding: 0 !important;
+    }
+
+    .swi-tab-pane {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+}
+
+/* =====================================
+   RESPONSIVE DESIGN ENHANCEMENTS
+   ===================================== */
+
+/* Tablet and below */
+@media (max-width: 768px) {
+    .swi-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-3);
+    }
+
+    .swi-stat-card {
+        padding: var(--spacing-3);
+    }
+
+    .swi-tab-content {
+        padding: var(--spacing-4) !important;
+    }
+
+    .swi-categories-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .swi-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .swi-action-buttons {
+        flex-direction: column;
+    }
+
+    .swi-action-buttons .button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .swi-tab-button {
+        padding: var(--spacing-3) var(--spacing-2) !important;
+        font-size: var(--font-size-sm) !important;
+    }
+}
+
+/* High resolution displays */
+@media (min-resolution: 2dppx) {
+
+    .swi-stat-card,
+    .swi-notification,
+    .swi-category-card {
+        box-shadow: var(--shadow-sm);
+    }
+}
+
+/* =====================================
+   PERFORMANCE OPTIMIZATIONS
+   ===================================== */
+
+/* GPU acceleration for animations */
+.swi-stat-card,
+.swi-category-card,
+.swi-notification,
+.swi-tab-button {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Optimize repaints */
+.swi-progress-fill {
+    will-change: width;
+}
+
+/* Contain layout shifts */
+.swi-tabs {
+    contain: layout style paint;
+}
+
+/* =====================================
+   ACCESSIBILITY ENHANCEMENTS
+   ===================================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+
+    .swi-stat-card,
+    .swi-category-card,
+    .swi-notification {
+        border: var(--border-width-thick) solid var(--color-gray-900);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: var(--spacing-2) var(--spacing-3);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    z-index: var(--z-max);
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* =====================================
+   BROWSER COMPATIBILITY
+   ===================================== */
+
+/* Flexbox fallbacks */
+@supports not (display: flex) {
+    .swi-stat-card {
+        display: block;
+    }
+
+    .swi-action-buttons {
+        display: block;
+    }
+}
+
+/* Grid fallbacks */
+@supports not (display: grid) {
+    .swi-stats-grid {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .swi-categories-grid {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}
+
+/* CSS custom properties fallbacks */
+@supports not (--test: value) {
+    :root {
+        color: #333;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .swi-stat-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+    }
+}
+
+/* =====================================
+   COMPONENT STATE CLASSES
+   ===================================== */
+
+/* Loading states */
+.swi-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.swi-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--color-primary-light);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: swi-spin 1s linear infinite;
+}
+
+@keyframes swi-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error states */
+.swi-error {
+    border-color: var(--color-error) !important;
+    background-color: var(--color-error-light) !important;
+}
+
+/* Success states */
+.swi-success {
+    border-color: var(--color-success) !important;
+    background-color: var(--color-success-light) !important;
+}
+
+
+.align-center {
+    text-align: center !important;
+}
+
+.align-left {
+    text-align: left !important;
+}
+
+.align-right {
+    text-align: right !important;
+}
+
+.align-justify {
+    text-align: justify !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.align-items-start {
+    align-items: flex-start !important;
+}
+
+.align-items-baseline {
+    align-items: baseline !important;
+}

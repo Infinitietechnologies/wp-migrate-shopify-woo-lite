@@ -1,0 +1,568 @@
+/* Grid-based Form Styling for Shopify WooCommerce Importer */
+/* Import centralized CSS variables */
+@import url('../../../assets/css/variables.css');
+
+/* Form Card Styling */
+.swi-form-card {
+    background-color: var(--panel-bg) !important;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg) !important;
+    box-shadow: 0 1px 3px var(--panel-shadow);
+    overflow: hidden !important;
+    transition: all var(--transition-normal) !important;
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+.swi-form-card:hover {
+    box-shadow: 0 4px 6px var(--card-hover-shadow);
+}
+
+.swi-card-header {
+    padding: var(--spacing-lg) var(--spacing-xl) !important;
+    border-bottom: 1px solid var(--panel-border) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.swi-card-title {
+    margin: 0 !important;
+    font-size: var(--font-size-title) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    color: var(--tab-active-color) !important;
+}
+
+.swi-card-title button {
+    margin-left: var(--spacing-md) !important;
+}
+
+.swi-card-body {
+    padding: var(--spacing-lg) var(--spacing-xl) !important;
+}
+
+/* Form Field Styling */
+.swi-form-field {
+    margin-bottom: var(--spacing-xl) !important;
+}
+
+.swi-form-field:last-child {
+    margin-bottom: 0 !important;
+}
+
+.swi-form-field label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--tab-text-color);
+}
+
+.swi-form-field input[type="text"],
+.swi-form-field input[type="number"],
+.swi-form-field select {
+    width: 100% !important;
+    padding: 8px 12px !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: var(--radius-md) !important;
+    background-color: var(--input-bg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    color: var(--tab-text-color) !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.swi-form-field input[type="text"]:focus,
+.swi-form-field input[type="number"]:focus,
+.swi-form-field select:focus {
+    border-color: var(--tab-active-color) !important;
+    box-shadow: 0 0 0 3px var(--input-focus-shadow) !important;
+    outline: none !important;
+}
+
+.swi-form-field .description {
+    margin-top: var(--spacing-xs) !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+}
+
+/* Option Group Styling */
+.swi-option-group-title {
+    font-size: var(--font-size-md) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    color: var(--tab-active-color) !important;
+    margin-top: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-md) !important;
+    padding-bottom: var(--spacing-xs) !important;
+    border-bottom: 1px solid var(--panel-border-light) !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.swi-option-group-title:first-child {
+    margin-top: 0 !important;
+}
+
+/* Enhanced Checkbox Group Styling */
+.checkbox-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--spacing-sm) !important;
+    padding-bottom: var(--spacing-md) !important;
+}
+
+.checkbox-group .checkbox-label {
+    margin-bottom: var(--spacing-xs) !important;
+    padding-left: var(--spacing-sm) !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease !important;
+}
+
+.checkbox-group .checkbox-label:hover {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.checkbox-group .checkbox-label input[type="checkbox"] {
+    margin-right: var(--spacing-sm) !important;
+}
+
+/* Checkbox & Radio Styling */
+.radio-options,
+.checkbox-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--spacing-xs) !important;
+}
+
+.radio-label,
+.checkbox-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--spacing-xs) !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    user-select: none !important;
+}
+
+.radio-label input,
+.checkbox-label input {
+    margin: 0 !important;
+}
+
+/* Form Actions */
+.swi-form-actions {
+    display: flex !important;
+    gap: var(--spacing-md) !important;
+    margin-top: var(--spacing-xl) !important;
+    padding: var(--spacing-lg) !important;
+    border-top: 1px solid var(--panel-border) !important;
+    background-color: rgba(0, 0, 0, 0.02) !important;
+    justify-content: flex-end !important;
+}
+
+.swi-form-actions button {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--spacing-xs) !important;
+}
+
+/* Import Progress Card */
+.swi-progress-container.swi-card {
+    margin-top: var(--spacing-2xl) !important;
+}
+
+.swi-progress-container .swi-progress-bar {
+    height: 12px !important;
+    background-color: #e5e7eb !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+    margin-bottom: var(--spacing-md) !important;
+}
+
+.swi-progress-container .swi-progress-fill {
+    height: 100% !important;
+    background: var(--tab-indicator-gradient) !important;
+    border-radius: 999px !important;
+    transition: width 0.3s ease !important;
+}
+
+.swi-progress-container .swi-progress-info {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 14px !important;
+    margin-bottom: var(--spacing-md) !important;
+}
+
+#progress-log {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--spacing-md) !important;
+    background-color: #f9fafb !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+}
+
+/* Schedule and Email Options Styling */
+.schedule-options,
+.email-options {
+    padding: var(--spacing-sm) 0 var(--spacing-sm) var(--spacing-lg) !important;
+    border-left: 2px solid var(--highlight-color) !important;
+    margin-top: var(--spacing-xs) !important;
+    margin-bottom: var(--spacing-md) !important;
+    transition: all var(--transition-normal) !important;
+}
+
+/* Warning styles */
+.description.warning {
+    color: var(--alert-color) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-top: var(--spacing-xs) !important;
+}
+
+/* Select dropdown styling */
+.swi-form-field select {
+    max-width: 100% !important;
+    min-width: 200px !important;
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--input-border) !important;
+    background-color: var(--input-bg) !important;
+}
+
+/* Date input styling */
+input[type="datetime-local"] {
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--input-border) !important;
+    background-color: var(--input-bg) !important;
+    min-width: 200px !important;
+}
+
+/* Email input styling */
+input[type="email"] {
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--input-border) !important;
+    background-color: var(--input-bg) !important;
+    min-width: 250px !important;
+}
+
+/* Margin utilities */
+.mt-3 {
+    margin-top: 1rem !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+/* Border utilities */
+.border-none {
+    border: none !important;
+}
+
+/* Shadow utilities */
+.shadow-none {
+    box-shadow: none !important;
+}
+
+/* Visual indicator for option interdependencies */
+.option-disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+/* Option tooltips */
+.option-tooltip {
+    display: inline-block !important;
+    margin-left: var(--spacing-xs) !important;
+    color: var(--text-light) !important;
+    cursor: help !important;
+}
+
+.option-tooltip:hover {
+    color: var(--tab-active-color) !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 782px) {
+    .swi-form-actions {
+        flex-direction: column !important;
+    }
+
+    .swi-form-actions button {
+        width: 100% !important;
+    }
+}
+
+/* Conflict Resolution Radio Group */
+.conflict-resolution-field .swi-radio-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.conflict-resolution-field .swi-radio-option {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 8px 12px !important;
+    border: 1px solid var(--border-color, #ddd) !important;
+    border-radius: 6px !important;
+    background: var(--panel-bg, #fff) !important;
+    transition: all 0.2s ease !important;
+}
+
+.conflict-resolution-field .swi-radio-option:hover {
+    border-color: var(--primary-color, #007cba) !important;
+    background: var(--hover-bg, #f8f9fa) !important;
+}
+
+.conflict-resolution-field .swi-radio-option input[type="radio"] {
+    margin: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.conflict-resolution-field .swi-radio-option input[type="radio"]:checked+.swi-radio-text {
+    font-weight: 500 !important;
+    color: var(--primary-color, #007cba) !important;
+}
+
+.conflict-resolution-field .swi-radio-text {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    color: var(--text-color, #333) !important;
+    user-select: none !important;
+}
+
+.conflict-resolution-field .description {
+    margin-top: 12px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    color: var(--muted-text, #666) !important;
+    font-style: italic !important;
+}
+
+/* Runtime Conflict Resolution Modal */
+.swi-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 10000 !important;
+    display: none !important;
+    /* Hidden by default */
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.swi-modal.show {
+    display: flex !important;
+    /* Show when needed */
+}
+
+.swi-modal-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+.swi-modal-content {
+    position: relative !important;
+    background: white !important;
+    border-radius: 8px !important;
+    max-width: 600px !important;
+    width: 90% !important;
+    max-height: 80vh !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+    animation: modalSlideIn 0.3s ease-out !important;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.swi-modal-header {
+    padding: 20px 24px !important;
+    border-bottom: 1px solid #ddd !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: #f8f9fa !important;
+}
+
+.swi-modal-header h3 {
+    margin: 0 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+}
+
+.swi-modal-close {
+    background: none !important;
+    border: none !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    color: #666 !important;
+    transition: all 0.2s ease !important;
+}
+
+.swi-modal-close:hover {
+    background: #e9ecef !important;
+    color: #333 !important;
+}
+
+.swi-modal-body {
+    padding: 24px !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+}
+
+.conflict-info {
+    margin-bottom: 24px !important;
+    padding: 16px !important;
+    background: #f8f9fa !important;
+    border-radius: 6px !important;
+    border-left: 4px solid #ffc107 !important;
+}
+
+.conflict-item {
+    margin-bottom: 12px !important;
+}
+
+.conflict-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+.conflict-item strong {
+    display: inline-block !important;
+    width: 200px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+}
+
+.conflict-item code {
+    background: #e9ecef !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    font-size: 13px !important;
+    margin: 0 8px !important;
+}
+
+.conflict-item a {
+    margin-left: 8px !important;
+    font-size: 13px !important;
+    text-decoration: none !important;
+}
+
+.conflict-resolution-options h4 {
+    margin: 0 0 16px 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+}
+
+.resolution-choices {
+    margin-bottom: 20px !important;
+}
+
+.resolution-choice {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    border: 2px solid #e9ecef !important;
+    border-radius: 6px !important;
+    margin-bottom: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.resolution-choice:hover {
+    border-color: #007cba !important;
+    background: #f8f9fa !important;
+}
+
+.resolution-choice input[type="radio"] {
+    margin: 4px 0 0 0 !important;
+    flex-shrink: 0 !important;
+}
+
+.resolution-choice input[type="radio"]:checked+.choice-content {
+    color: #007cba !important;
+}
+
+.choice-content {
+    flex: 1 !important;
+}
+
+.choice-content strong {
+    display: block !important;
+    margin-bottom: 4px !important;
+    font-weight: 600 !important;
+}
+
+.choice-content small {
+    color: #666 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+}
+
+.batch-options {
+    padding: 16px !important;
+    background: #e3f2fd !important;
+    border-radius: 6px !important;
+    border: 1px solid #bbdefb !important;
+}
+
+.batch-choice {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    color: #1976d2 !important;
+}
+
+.swi-modal-footer {
+    padding: 16px 24px !important;
+    border-top: 1px solid #ddd !important;
+    background: #f8f9fa !important;
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: flex-end !important;
+}
+
+.swi-modal-footer button {
+    min-width: 100px !important;
+}

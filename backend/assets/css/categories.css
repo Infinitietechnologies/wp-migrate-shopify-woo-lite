@@ -1,0 +1,211 @@
+/**
+ * CSS for Category Import Tab
+ */
+/* Import centralized CSS variables */
+@import url('../../../assets/css/variables.css');
+
+/* Category Grid Layout */
+.swi-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-4);
+    margin-top: var(--spacing-4);
+    max-height: 500px;
+    overflow-y: auto;
+    padding: var(--spacing-2);
+    border: var(--border-width-thin) solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--surface-secondary);
+}
+
+/* Category Card */
+.swi-category-card {
+    display: flex;
+    background: var(--panel-bg);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+    transition: var(--transition-all-normal);
+    border-left: var(--border-width-thick) solid transparent;
+}
+
+.swi-category-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-left-color: var(--color-primary);
+}
+
+/* Category Checkbox */
+.swi-category-checkbox {
+    margin-right: var(--spacing-3);
+    display: flex;
+    align-items: flex-start;
+}
+
+.swi-category-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+/* Category Content */
+.swi-category-content {
+    flex: 1;
+}
+
+.swi-category-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: #1d2327;
+}
+
+.swi-category-handle {
+    color: #757575;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.swi-category-meta {
+    font-size: 12px;
+    color: #50575e;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.swi-category-products {
+    background: #f0f0f1;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+/* Filter & Search UI */
+.swi-card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.swi-search-box {
+    position: relative;
+    width: 220px;
+}
+
+.swi-search-input {
+    width: 100%;
+    padding: 6px 30px 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #dcdcde;
+}
+
+.swi-search-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background: none;
+    border: none;
+    color: #646970;
+    cursor: pointer;
+}
+
+.swi-filter-container {
+    position: relative;
+}
+
+.swi-filter-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    padding: 10px;
+    width: 220px;
+    z-index: 10;
+}
+
+.swi-filter-group {
+    margin-bottom: 8px;
+}
+
+.swi-filter-group select {
+    width: 100%;
+}
+
+.swi-selection-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Status Indicators */
+.swi-status-success {
+    color: #00a32a;
+    padding: 8px;
+    background-color: #edfaef;
+    border-left: 4px solid #00a32a;
+    margin-top: 10px;
+}
+
+.swi-status-error {
+    color: #d63638;
+    padding: 8px;
+    background-color: #fcf0f1;
+    border-left: 4px solid #d63638;
+    margin-top: 10px;
+}
+
+.swi-status-in-progress {
+    color: #2271b1;
+    padding: 8px;
+    background-color: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    margin-top: 10px;
+}
+
+/* Progress Bar */
+.swi-progress {
+    height: 20px;
+    background-color: #f0f0f1;
+    border-radius: 3px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.swi-progress-bar {
+    height: 100%;
+    background-color: #2271b1;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.swi-progress-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    font-size: 12px;
+    line-height: 20px;
+}
+
+/* Empty State */
+.swi-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #646970;
+}
+
+.swi-empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.swi-empty-icon .dashicons {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+}

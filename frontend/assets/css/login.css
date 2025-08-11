@@ -1,0 +1,135 @@
+/* Demo Login Section Styles - WordPress Simple */
+#wmsw-demo-login-container {
+    text-align: center;
+    margin-top: 24px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#wmsw-demo-login-container h3 {
+    margin: 0 0 12px 0;
+    color: #23282d;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+#wmsw-demo-login-container p {
+    margin: 0 0 0 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+#wmsw-demo-login-container p.password {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+#wmsw-demo-login-btn {
+    margin-top: 12px;
+    background: #0073aa;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+    min-width: 140px;
+}
+
+#wmsw-demo-login-btn:hover {
+    background: #005177;
+}
+
+#wmsw-demo-login-btn:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+#wmsw-demo-credentials {
+    display: none;
+    margin-top: 15px;
+    padding: 12px;
+    background: white;
+    border: 1px solid #0073aa;
+    border-radius: 3px;
+}
+
+#wmsw-demo-credentials h4,
+.credentials-title {
+    margin: 0 0 8px 0;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#wmsw-demo-credentials p,
+.credentials-item {
+    margin: 4px 0;
+    color: #444;
+    font-size: 13px;
+}
+
+#wmsw-demo-credentials p strong,
+.credentials-item strong {
+    color: #23282d;
+    font-weight: 600;
+}
+
+#wmsw-demo-credentials p:last-child,
+.credentials-item:last-child {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
+.credentials-container {
+    margin-top: 15px;
+    padding: 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    display: block;
+}
+
+#wmsw-demo-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px 14px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+    border: 1px solid #c3e6cb;
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive design for mobile */
+@media (max-width: 480px) {
+    #wmsw-demo-login-container {
+        margin: 16px 10px;
+        padding: 16px;
+        max-width: none;
+    }
+    
+    #wmsw-demo-login-btn {
+        padding: 12px 24px;
+        min-width: 160px;
+    }
+    
+    #wmsw-demo-login-container h3 {
+        font-size: 15px;
+    }
+} 

@@ -1,0 +1,997 @@
+# French translation for Shopify to WooCommerce Importer
+# Copyright (C) 2024 Infinitietech
+# This file is distributed under the same license as the Shopify to WooCommerce Importer package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Migrate & Import Shopify to WooCommerce 1.0.0\n"
+"Report-Msgid-Bugs-To: https://infinitietech.com/shopify-woo-importer\n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: wp-migrate-shopify-woo\n"
+
+#: shopify-woo-importer.php:191
+msgid "WP Migrate & Import Shopify to WooCommerce"
+msgstr "WP Migrate & Import Shopify vers WooCommerce"
+
+#: shopify-woo-importer.php:191
+msgid "requires WooCommerce to be installed and active."
+msgstr "nécessite que WooCommerce soit installé et actif."
+
+#: backend/views/dashboard.php:35
+msgid "Shopify to WooCommerce Importer"
+msgstr "Importateur Shopify vers WooCommerce"
+
+#: backend/views/dashboard.php:38
+msgid "Manage your Shopify store connections and import data to WooCommerce."
+msgstr "Gérez vos connexions de magasins Shopify et importez des données vers WooCommerce."
+
+#: backend/views/dashboard.php:53
+msgid "Connect your first store"
+msgstr "Connectez votre premier magasin"
+
+#: backend/views/dashboard.php:62
+msgid "No stores connected yet"
+msgstr "Aucun magasin connecté pour le moment"
+
+#: backend/views/dashboard.php:63
+msgid "Get started by connecting your first Shopify store to begin importing products, customers, orders, and more."
+msgstr "Commencez par connecter votre premier magasin Shopify pour importer des produits, clients, commandes et plus encore."
+
+#: backend/views/dashboard.php:88
+msgid "Connected Stores"
+msgstr "Magasins connectés"
+
+#: backend/views/dashboard.php:98
+msgid "Pending Tasks"
+msgstr "Tâches en attente"
+
+#: backend/views/dashboard.php:108
+msgid "Completed"
+msgstr "Terminé"
+
+#: backend/views/dashboard.php:118
+msgid "Failed"
+msgstr "Échoué"
+
+#: backend/views/dashboard.php:129
+msgid "Quick Actions"
+msgstr "Actions rapides"
+
+#: backend/views/dashboard.php:135
+msgid "Connect Store"
+msgstr "Connecter le magasin"
+
+#: backend/views/dashboard.php:136
+msgid "Add your first Shopify store to start importing data"
+msgstr "Ajoutez votre premier magasin Shopify pour commencer à importer des données"
+
+#: backend/views/dashboard.php:142
+msgid "Manage Stores"
+msgstr "Gérer les magasins"
+
+#: backend/views/dashboard.php:143
+msgid "View and manage your connected stores"
+msgstr "Afficher et gérer vos magasins connectés"
+
+#: backend/views/dashboard.php:149
+msgid "View Logs"
+msgstr "Voir les journaux"
+
+#: backend/views/dashboard.php:150
+msgid "Check import history and system logs"
+msgstr "Vérifier l'historique d'importation et les journaux système"
+
+#: backend/views/dashboard.php:156
+msgid "Settings"
+msgstr "Paramètres"
+
+#: backend/views/dashboard.php:157
+msgid "Configure plugin settings and preferences"
+msgstr "Configurer les paramètres et préférences du plugin"
+
+#: backend/views/dashboard.php:164
+msgid "Import Data"
+msgstr "Importer des données"
+
+#: backend/views/dashboard.php:170
+msgid "Products"
+msgstr "Produits"
+
+#: backend/views/dashboard.php:173
+msgid "Customers"
+msgstr "Clients"
+
+#: backend/views/dashboard.php:176
+msgid "Orders"
+msgstr "Commandes"
+
+#: backend/views/dashboard.php:179
+msgid "Pages"
+msgstr "Pages"
+
+#: backend/views/dashboard.php:182
+msgid "Blogs"
+msgstr "Blogs"
+
+#: backend/views/dashboard.php:185
+msgid "Coupons"
+msgstr "Coupons"
+
+#: backend/views/dashboard.php:195
+msgid "No Stores Connected"
+msgstr "Aucun magasin connecté"
+
+#: backend/views/dashboard.php:196
+msgid "Connect your first Shopify store to start importing data. You can import products, customers, orders, pages, blogs, and coupons."
+msgstr "Connectez votre premier magasin Shopify pour commencer à importer des données. Vous pouvez importer des produits, clients, commandes, pages, blogs et coupons."
+
+#: backend/views/dashboard.php:200
+msgid "View Documentation"
+msgstr "Voir la documentation"
+
+#: backend/views/dashboard.php:210
+msgid "Recent Activity"
+msgstr "Activité récente"
+
+#: backend/views/dashboard.php:211
+msgid "No recent activity found. Import data to see activity here."
+msgstr "Aucune activité récente trouvée. Importez des données pour voir l'activité ici."
+
+#: backend/views/import-logs.php:285
+msgid "Date/Time"
+msgstr "Date/Heure"
+
+#: backend/views/import-logs.php:286
+msgid "Level"
+msgstr "Niveau"
+
+#: backend/views/import-logs.php:287
+msgid "Store"
+msgstr "Magasin"
+
+#: backend/views/import-logs.php:288
+msgid "Task"
+msgstr "Tâche"
+
+#: backend/views/import-logs.php:289
+msgid "Message"
+msgstr "Message"
+
+#: backend/partials/components/status-badge.php:20
+msgid "Pending"
+msgstr "En attente"
+
+#: backend/partials/components/status-badge.php:24
+msgid "Processing"
+msgstr "En cours"
+
+#: backend/partials/components/status-badge.php:28
+msgid "Completed"
+msgstr "Terminé"
+
+#: backend/partials/components/status-badge.php:32
+msgid "Failed"
+msgstr "Échoué"
+
+#: backend/partials/components/status-badge.php:36
+msgid "Paused"
+msgstr "En pause"
+
+#: backend/partials/components/status-badge.php:40
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: backend/partials/components/notification.php:85
+msgid "Dismiss notification"
+msgstr "Fermer la notification"
+
+#: backend/partials/forms/field-mapping.php:183
+msgid "Optional transform function"
+msgstr "Fonction de transformation optionnelle"
+
+#: backend/partials/forms/field-mapping.php:253
+msgid "Remove mapping"
+msgstr "Supprimer le mapping"
+
+#: backend/partials/forms/field-mapping.php:254
+msgid "Remove"
+msgstr "Supprimer"
+
+#: backend/partials/forms/field-mapping.php:259
+msgid "Transform Functions"
+msgstr "Fonctions de transformation"
+
+#: backend/partials/forms/field-mapping.php:261
+msgid "Available transform functions you can use in the Transform field:"
+msgstr "Fonctions de transformation disponibles que vous pouvez utiliser dans le champ Transform :"
+
+#: backend/partials/forms/field-mapping.php:264
+msgid "Convert to lowercase"
+msgstr "Convertir en minuscules"
+
+#: backend/partials/forms/field-mapping.php:265
+msgid "Convert to uppercase"
+msgstr "Convertir en majuscules"
+
+#: backend/partials/forms/field-mapping.php:266
+msgid "Capitalize first letter"
+msgstr "Mettre en majuscule la première lettre"
+
+#: backend/partials/forms/field-mapping.php:267
+msgid "Capitalize each word"
+msgstr "Mettre en majuscule chaque mot"
+
+#: backend/partials/forms/field-mapping.php:268
+msgid "Remove HTML tags"
+msgstr "Supprimer les balises HTML"
+
+#: backend/partials/forms/field-mapping.php:269
+msgid "Remove whitespace"
+msgstr "Supprimer les espaces"
+
+#: backend/partials/forms/field-mapping.php:270
+msgid "Format as price"
+msgstr "Formater comme prix"
+
+#: backend/partials/forms/field-mapping.php:271
+msgid "Convert boolean to yes/no"
+msgstr "Convertir booléen en oui/non"
+
+#: backend/partials/forms/field-mapping.php:320
+msgid "Are you sure you want to reset all mappings to default values?"
+msgstr "Êtes-vous sûr de vouloir réinitialiser tous les mappings aux valeurs par défaut ?"
+
+#: backend/partials/tables/scheduled-tasks.php:137
+msgid "Edit"
+msgstr "Modifier"
+
+#: backend/partials/tables/scheduled-tasks.php:143
+msgid "Run Now"
+msgstr "Exécuter maintenant"
+
+#: backend/partials/tables/scheduled-tasks.php:149
+msgid "Pause"
+msgstr "Pause"
+
+#: includes/processors/WMSW_OrderProcessor.php:83
+msgid "Fetching orders from Shopify..."
+msgstr "Récupération des commandes depuis Shopify..."
+
+#: includes/processors/WMSW_OrderProcessor.php:101
+msgid "Found %d orders. Starting import..."
+msgstr "%d commandes trouvées. Début de l'importation..."
+
+#: includes/processors/WMSW_OrderProcessor.php:109
+msgid "No orders found to import."
+msgstr "Aucune commande trouvée à importer."
+
+#: includes/processors/WMSW_OrderProcessor.php:162
+msgid "Import stopped due to timeout. Processed %d orders in %d batches."
+msgstr "Importation arrêtée en raison du délai d'attente. %d commandes traitées en %d lots."
+
+#: includes/processors/WMSW_OrderProcessor.php:226
+msgid "Processing order %s..."
+msgstr "Traitement de la commande %s..."
+
+#: includes/processors/WMSW_OrderProcessor.php:244
+msgid "Error processing order %s: %s"
+msgstr "Erreur lors du traitement de la commande %s : %s"
+
+#: includes/processors/WMSW_OrderProcessor.php:311
+msgid "Import completed. Imported: %d, Skipped: %d, Errors: %d"
+msgstr "Importation terminée. Importés : %d, Ignorés : %d, Erreurs : %d"
+
+#: includes/processors/WMSW_OrderProcessor.php:412
+msgid "Order %s already exists"
+msgstr "La commande %s existe déjà"
+
+#: includes/processors/WMSW_OrderProcessor.php:426
+msgid "Failed to create WooCommerce order"
+msgstr "Échec de la création de la commande WooCommerce"
+
+#: includes/processors/WMSW_OrderProcessor.php:450
+msgid "Order %s imported successfully"
+msgstr "Commande %s importée avec succès"
+
+#: includes/processors/WMSW_OrderProcessor.php:692
+msgid "Product not found"
+msgstr "Produit non trouvé"
+
+#: includes/processors/WMSW_OrderProcessor.php:726
+msgid "Shipping"
+msgstr "Livraison"
+
+#: includes/processors/WMSW_OrderProcessor.php:741
+msgid "Tax"
+msgstr "Taxe"
+
+#: includes/processors/WMSW_OrderProcessor.php:786
+msgid "Shopify refund"
+msgstr "Remboursement Shopify"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1054
+msgid "Welcome to %s"
+msgstr "Bienvenue sur %s"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1063
+msgid "Welcome to %s!"
+msgstr "Bienvenue sur %s !"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1066
+msgid "Hello %s,"
+msgstr "Bonjour %s,"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1068
+msgid "Hello,"
+msgstr "Bonjour,"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1071
+msgid "Your account has been created on our store. You can now log in to manage your account, view orders, and more."
+msgstr "Votre compte a été créé sur notre boutique. Vous pouvez maintenant vous connecter pour gérer votre compte, consulter vos commandes et plus encore."
+
+#: includes/processors/WMSW_CustomerProcessor.php:1072
+msgid "Please use the password reset feature on the login page to set your password."
+msgstr "Veuillez utiliser la fonction de réinitialisation de mot de passe sur la page de connexion pour définir votre mot de passe."
+
+#: includes/processors/WMSW_CustomerProcessor.php:1077
+msgid "Visit Your Account"
+msgstr "Visiter votre compte"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1080
+msgid "Thank you for being our customer!"
+msgstr "Merci d'être notre client !"
+
+#: includes/processors/WMSW_CustomerProcessor.php:1081
+msgid "The %s Team"
+msgstr "L'équipe %s"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:48
+msgid "\"%s\" is a WordPress reserved word"
+msgstr "\"%s\" est un mot réservé WordPress"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:122
+msgid "Append number (e.g., slug-2)"
+msgstr "Ajouter un numéro (ex. : slug-2)"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:123
+msgid "Add a number to make the slug unique"
+msgstr "Ajouter un numéro pour rendre le slug unique"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:130
+msgid "Append date (e.g., slug-jul2025)"
+msgstr "Ajouter une date (ex. : slug-jul2025)"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:131
+msgid "Add current month/year to make unique"
+msgstr "Ajouter le mois/année actuel pour rendre unique"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:139
+msgid "Add prefix (%s-slug)"
+msgstr "Ajouter un préfixe (%s-slug)"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:140
+msgid "Add prefix to identify as imported content"
+msgstr "Ajouter un préfixe pour identifier comme contenu importé"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:147
+msgid "WordPress auto-generated unique slug"
+msgstr "Slug unique généré automatiquement par WordPress"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:148
+msgid "Let WordPress generate a unique slug automatically"
+msgstr "Laisser WordPress générer automatiquement un slug unique"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:155
+msgid "Enter custom slug manually"
+msgstr "Saisir manuellement un slug personnalisé"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:156
+msgid "Specify a custom slug for this content"
+msgstr "Spécifier un slug personnalisé pour ce contenu"
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:194
+msgid "A %s with this slug already exists: \"%s\""
+msgstr "Un %s avec ce slug existe déjà : \"%s\""
+
+#: includes/helpers/WMSW_SlugConflictResolver.php:214
+msgid "A %s with this slug already exists: \"%s\""
+msgstr "Un %s avec ce slug existe déjà : \"%s\""
+
+#: includes/helpers/WMSW_SecurityHelper.php:58
+msgid "Security check failed"
+msgstr "Échec de la vérification de sécurité"
+
+#: includes/helpers/WMSW_SecurityHelper.php:79
+msgid "You do not have permission to perform this action"
+msgstr "Vous n'avez pas la permission d'effectuer cette action"
+
+#: includes/helpers/WMSW_SecurityHelper.php:125
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Vous n'avez pas les permissions suffisantes pour accéder à cette page."
+
+#: includes/helpers/WMSW_SecurityHelper.php:151
+msgid "Required field \"%s\" is missing"
+msgstr "Le champ requis \"%s\" est manquant"
+
+#: includes/helpers/WMSW_SecurityHelper.php:208
+msgid "Missing field: "
+msgstr "Champ manquant : "
+
+#: includes/handlers/WMSW_CustomerHandler.php:71
+msgid "No store specified"
+msgstr "Aucun magasin spécifié"
+
+#: includes/handlers/WMSW_CustomerHandler.php:84
+msgid "Store not found"
+msgstr "Magasin non trouvé"
+
+#: includes/handlers/WMSW_CustomerHandler.php:112
+msgid "No customers found matching your criteria"
+msgstr "Aucun client trouvé correspondant à vos critères"
+
+#: includes/handlers/WMSW_CustomerHandler.php:127
+msgid "Found %d customers matching your criteria"
+msgstr "%d clients trouvés correspondant à vos critères"
+
+#: includes/handlers/WMSW_CustomerHandler.php:327
+msgid "No store selected."
+msgstr "Aucun magasin sélectionné."
+
+#: includes/handlers/WMSW_CustomerHandler.php:337
+msgid "Invalid store selected."
+msgstr "Magasin sélectionné invalide."
+
+#: includes/handlers/WMSW_CustomerHandler.php:369
+msgid "Starting import..."
+msgstr "Début de l'importation..."
+
+#: includes/handlers/WMSW_CustomerHandler.php:396
+msgid "Customer import started successfully! You can close this page and the import will continue in the background."
+msgstr "L'importation des clients a démarré avec succès ! Vous pouvez fermer cette page et l'importation se poursuivra en arrière-plan."
+
+#: includes/handlers/WMSW_CustomerHandler.php:429
+msgid "Store not found"
+msgstr "Magasin non trouvé"
+
+#: includes/handlers/WMSW_CustomerHandler.php:447
+msgid "Fetching customers from Shopify..."
+msgstr "Récupération des clients depuis Shopify..."
+
+#: includes/handlers/WMSW_CustomerHandler.php:472
+msgid "Continuing customer import..."
+msgstr "Poursuite de l'importation des clients..."
+
+#: includes/handlers/WMSW_CustomerHandler.php:493
+msgid "Import complete. Imported: %d, Updated: %d, Failed: %d, Skipped: %d"
+msgstr "Importation terminée. Importés : %d, Mis à jour : %d, Échoués : %d, Ignorés : %d"
+
+#: includes/handlers/WMSW_CustomerHandler.php:514
+msgid "Error: "
+msgstr "Erreur : "
+
+#: includes/handlers/WMSW_CustomerHandler.php:531
+msgid "Missing job ID"
+msgstr "ID de tâche manquant"
+
+#: includes/handlers/WMSW_CustomerHandler.php:543
+msgid "Import job not found"
+msgstr "Tâche d'importation non trouvée"
+
+#: includes/handlers/WMSW_CustomerHandler.php:557
+msgid "Processing..."
+msgstr "Traitement..."
+
+#: includes/handlers/WMSW_CustomerHandler.php:581
+msgid "No store specified"
+msgstr "Aucun magasin spécifié"
+
+#: includes/handlers/WMSW_CustomerHandler.php:622
+msgid "Active customer import found"
+msgstr "Importation de clients active trouvée"
+
+#: includes/handlers/WMSW_CustomerHandler.php:627
+msgid "No active customer imports found"
+msgstr "Aucune importation de clients active trouvée"
+
+#: includes/handlers/WMSW_OrderHandler.php:75
+msgid "Please select a store."
+msgstr "Veuillez sélectionner un magasin."
+
+#: includes/handlers/WMSW_OrderHandler.php:83
+msgid "Store not found."
+msgstr "Magasin non trouvé."
+
+#: includes/handlers/WMSW_OrderHandler.php:125
+msgid "Guest"
+msgstr "Invité"
+
+#: includes/handlers/WMSW_OrderHandler.php:127
+msgid "Guest"
+msgstr "Invité"
+
+#: includes/handlers/WMSW_OrderHandler.php:128
+msgid "Guest"
+msgstr "Invité"
+
+#: includes/handlers/WMSW_OrderHandler.php:149
+msgid "No orders found or unable to fetch orders."
+msgstr "Aucune commande trouvée ou impossible de récupérer les commandes."
+
+#: includes/handlers/WMSW_OrderHandler.php:159
+msgid "Failed to preview orders: "
+msgstr "Échec de l'aperçu des commandes : "
+
+#: includes/handlers/WMSW_OrderHandler.php:182
+msgid "Please select a store."
+msgstr "Veuillez sélectionner un magasin."
+
+#: includes/handlers/WMSW_OrderHandler.php:190
+msgid "Store not found."
+msgstr "Magasin non trouvé."
+
+#: includes/handlers/WMSW_OrderHandler.php:204
+msgid "Failed to create import session"
+msgstr "Échec de la création de la session d'importation"
+
+#: includes/handlers/WMSW_OrderHandler.php:215
+msgid "Initializing order import..."
+msgstr "Initialisation de l'importation des commandes..."
+
+#: includes/handlers/WMSW_OrderHandler.php:249
+msgid "Orders import started successfully."
+msgstr "L'importation des commandes a démarré avec succès."
+
+#: includes/handlers/WMSW_OrderHandler.php:260
+msgid "Failed to start orders import: "
+msgstr "Échec du démarrage de l'importation des commandes : "
+
+#: includes/handlers/WMSW_OrderHandler.php:283
+msgid "Invalid progress key."
+msgstr "Clé de progression invalide."
+
+#: includes/handlers/WMSW_OrderHandler.php:292
+msgid "Import progress not found."
+msgstr "Progression de l'importation non trouvée."
+
+#: includes/handlers/WMSW_OrderHandler.php:312
+msgid "Store not found."
+msgstr "Magasin non trouvé."
+
+#: includes/handlers/WMSW_OrderHandler.php:323
+msgid "Import process started."
+msgstr "Processus d'importation démarré."
+
+#: includes/handlers/WMSW_OrderHandler.php:525
+msgid "No store specified"
+msgstr "Aucun magasin spécifié"
+
+#: includes/handlers/WMSW_OrderHandler.php:573
+msgid "Active order import found"
+msgstr "Importation de commandes active trouvée"
+
+#: includes/handlers/WMSW_OrderHandler.php:578
+msgid "No active order imports found"
+msgstr "Aucune importation de commandes active trouvée"
+
+#: includes/handlers/WMSW_ProductHandler.php:64
+msgid "No store specified"
+msgstr "Aucun magasin spécifié"
+
+#: includes/handlers/WMSW_ProductHandler.php:77
+msgid "Store not found"
+msgstr "Magasin non trouvé"
+
+#: includes/handlers/WMSW_ProductHandler.php:121
+msgid "No products found matching your criteria"
+msgstr "Aucun produit trouvé correspondant à vos critères"
+
+#: includes/handlers/WMSW_ProductHandler.php:151
+msgid "Found %d products matching your criteria"
+msgstr "%d produits trouvés correspondant à vos critères"
+
+#: includes/handlers/WMSW_ProductHandler.php:890
+msgid "No store specified"
+msgstr "Aucun magasin spécifié"
+
+#: includes/handlers/WMSW_ProductHandler.php:902
+msgid "Store not found"
+msgstr "Magasin non trouvé"
+
+#: includes/handlers/WMSW_ProductHandler.php:969
+msgid "An import is already running for this store."
+msgstr "Une importation est déjà en cours pour ce magasin."
+
+#: includes/handlers/WMSW_ProductHandler.php:983
+msgid "Failed to create import session"
+msgstr "Échec de la création de la session d'importation"
+
+#: includes/handlers/WMSW_ProductHandler.php:992
+msgid "Product import has started. You can monitor progress in the logs."
+msgstr "L'importation des produits a démarré. Vous pouvez surveiller la progression dans les journaux."
+
+#: includes/handlers/WMSW_ProductHandler.php:1076
+msgid "Another import is already running. Please wait for it to complete."
+msgstr "Une autre importation est déjà en cours. Veuillez attendre qu'elle se termine."
+
+#: includes/handlers/WMSW_ProductHandler.php:1095
+msgid "Failed to get product count"
+msgstr "Échec de l'obtention du nombre de produits"
+
+#: includes/handlers/WMSW_ProductHandler.php:1297
+msgid "Import ID not specified"
+msgstr "ID d'importation non spécifié"
+
+#: includes/handlers/WMSW_ProductHandler.php:1310
+msgid "Import session not found"
+msgstr "Session d'importation non trouvée"
+
+#: includes/handlers/WMSW_ProductHandler.php:1347
+msgid "No store specified"
+msgstr "Aucun magasin spécifié"
+
+#: includes/handlers/WMSW_ProductHandler.php:1374
+msgid "Active import found"
+msgstr "Importation active trouvée"
+
+#: includes/handlers/WMSW_ProductHandler.php:1379
+msgid "No active imports found"
+msgstr "Aucune importation active trouvée"
+
+#: includes/handlers/WMSW_SettingsHandler.php:172
+msgid "Custom table update failed. Last SQL error: %s"
+msgstr "Échec de la mise à jour de la table personnalisée. Dernière erreur SQL : %s"
+
+#: backend/WMSW_Backend.php:285
+msgid "Connecting..."
+msgstr "Connexion..."
+
+#: backend/WMSW_Backend.php:286
+msgid "Deactivating..."
+msgstr "Désactivation..."
+
+#: backend/WMSW_Backend.php:287
+msgid "Activating..."
+msgstr "Activation..."
+
+#: backend/WMSW_Backend.php:288
+msgid "Deleting..."
+msgstr "Suppression..."
+
+#: backend/WMSW_Backend.php:289
+msgid "Saving store..."
+msgstr "Sauvegarde du magasin..."
+
+#: backend/WMSW_Backend.php:290
+msgid "Loading..."
+msgstr "Chargement..."
+
+#: backend/WMSW_Backend.php:291
+msgid "Loading stores..."
+msgstr "Chargement des magasins..."
+
+#: backend/WMSW_Backend.php:292
+msgid "Testing connection..."
+msgstr "Test de connexion..."
+
+#: backend/WMSW_Backend.php:293
+msgid "Success!"
+msgstr "Succès !"
+
+#: backend/WMSW_Backend.php:294
+msgid "Error occurred"
+msgstr "Une erreur s'est produite"
+
+#: backend/WMSW_Backend.php:295
+msgid "Invalid shop domain format. Please enter a valid Shopify store domain."
+msgstr "Format de domaine de boutique invalide. Veuillez saisir un domaine de boutique Shopify valide."
+
+#: backend/WMSW_Backend.php:296
+msgid "Invalid access token format. Please enter a valid Shopify access token."
+msgstr "Format de jeton d'accès invalide. Veuillez saisir un jeton d'accès Shopify valide."
+
+#: backend/WMSW_Backend.php:297
+msgid "Invalid API version format. Please enter a valid Shopify API version."
+msgstr "Format de version API invalide. Veuillez saisir une version API Shopify valide."
+
+#: backend/WMSW_Backend.php:298
+msgid "Are you sure you want to deactivate this store? You can reactivate it later."
+msgstr "Êtes-vous sûr de vouloir désactiver ce magasin ? Vous pourrez le réactiver plus tard."
+
+#: backend/WMSW_Backend.php:299
+msgid "Are you sure you want to activate this store? It will start syncing data."
+msgstr "Êtes-vous sûr de vouloir activer ce magasin ? Il commencera à synchroniser les données."
+
+#: backend/WMSW_Backend.php:300
+msgid "Are you sure you want to delete this store? This action cannot be undone."
+msgstr "Êtes-vous sûr de vouloir supprimer ce magasin ? Cette action ne peut pas être annulée."
+
+#: backend/WMSW_Backend.php:301
+msgid "Store saved successfully!"
+msgstr "Magasin sauvegardé avec succès !"
+
+#: backend/WMSW_Backend.php:302
+msgid "Store deleted successfully!"
+msgstr "Magasin supprimé avec succès !"
+
+#: backend/WMSW_Backend.php:304
+msgid "Please select a store first."
+msgstr "Veuillez d'abord sélectionner un magasin."
+
+#: backend/WMSW_Backend.php:305
+msgid "Failed to start import."
+msgstr "Échec du démarrage de l'importation."
+
+#: backend/WMSW_Backend.php:306
+msgid "Server error. Please try again."
+msgstr "Erreur serveur. Veuillez réessayer."
+
+#: backend/WMSW_Backend.php:307
+msgid "Import scheduled successfully!"
+msgstr "Importation programmée avec succès !"
+
+#: backend/WMSW_Backend.php:308
+msgid "Failed to schedule import."
+msgstr "Échec de la programmation de l'importation."
+
+#: backend/WMSW_Backend.php:309
+msgid "Failed to preview products."
+msgstr "Échec de l'aperçu des produits."
+
+#: backend/WMSW_Backend.php:310
+msgid "High thread counts may cause server performance issues or timeouts."
+msgstr "Un nombre élevé de threads peut causer des problèmes de performance serveur ou des délais d'attente."
+
+#: backend/WMSW_Backend.php:311
+msgid "Import has been scheduled successfully."
+msgstr "L'importation a été programmée avec succès."
+
+#: backend/WMSW_Backend.php:312
+msgid "Failed to schedule the import."
+msgstr "Échec de la programmation de l'importation."
+
+#: backend/WMSW_Backend.php:313
+msgid "Please enter a valid email address."
+msgstr "Veuillez saisir une adresse e-mail valide."
+
+#: backend/WMSW_Backend.php:314
+msgid "Processing Options"
+msgstr "Options de traitement"
+
+#: backend/WMSW_Backend.php:315
+msgid "Scheduling Options"
+msgstr "Options de programmation"
+
+#: backend/WMSW_Backend.php:316
+msgid "Notification Options"
+msgstr "Options de notification"
+
+#: backend/WMSW_Backend.php:317
+msgid "Show Advanced Filters"
+msgstr "Afficher les filtres avancés"
+
+#: backend/WMSW_Backend.php:318
+msgid "Hide Advanced Filters"
+msgstr "Masquer les filtres avancés"
+
+#: backend/WMSW_Backend.php:321
+msgid "Import completed successfully!"
+msgstr "Importation terminée avec succès !"
+
+#: backend/WMSW_Backend.php:322
+msgid "Customer Preview"
+msgstr "Aperçu des clients"
+
+#: backend/WMSW_Backend.php:323
+msgid "No customers found matching your criteria."
+msgstr "Aucun client trouvé correspondant à vos critères."
+
+#: backend/WMSW_Backend.php:324
+msgid "Please fill in Shop Domain and Access Token first."
+msgstr "Veuillez d'abord remplir le domaine de boutique et le jeton d'accès."
+
+#: backend/WMSW_Backend.php:325
+msgid "Validation Error"
+msgstr "Erreur de validation"
+
+#: backend/WMSW_Backend.php:326
+msgid "Success!"
+msgstr "Succès !"
+
+#: backend/WMSW_Backend.php:327
+msgid "Connection Failed"
+msgstr "Échec de connexion"
+
+#: backend/WMSW_Backend.php:328
+msgid "Missing store ID or security token."
+msgstr "ID de magasin ou jeton de sécurité manquant."
+
+#: backend/WMSW_Backend.php:329
+msgid "Are you sure you want to delete this store? This action cannot be undone."
+msgstr "Êtes-vous sûr de vouloir supprimer ce magasin ? Cette action ne peut pas être annulée."
+
+#: backend/WMSW_Backend.php:330
+msgid "Are you sure you want to deactivate this store?"
+msgstr "Êtes-vous sûr de vouloir désactiver ce magasin ?"
+
+#: backend/WMSW_Backend.php:331
+msgid "Delete Store"
+msgstr "Supprimer le magasin"
+
+#: backend/WMSW_Backend.php:332
+msgid "Deactivate Store"
+msgstr "Désactiver le magasin"
+
+#: backend/WMSW_Backend.php:333
+msgid "Delete"
+msgstr "Supprimer"
+
+#: backend/WMSW_Backend.php:334
+msgid "Deactivate"
+msgstr "Désactiver"
+
+#: backend/WMSW_Backend.php:335
+msgid "Cancel"
+msgstr "Annuler"
+
+#: backend/WMSW_Backend.php:336
+msgid "Action successful."
+msgstr "Action réussie."
+
+#: backend/WMSW_Backend.php:337
+msgid "Failed to process request."
+msgstr "Échec du traitement de la demande."
+
+#: backend/WMSW_Backend.php:338
+msgid "AJAX request failed."
+msgstr "Requête AJAX échouée."
+
+#: backend/WMSW_Backend.php:339
+msgid "Are you sure you want to set this store as default?"
+msgstr "Êtes-vous sûr de vouloir définir ce magasin par défaut ?"
+
+#: backend/WMSW_Backend.php:340
+msgid "Processing..."
+msgstr "Traitement..."
+
+#: backend/WMSW_Backend.php:341
+msgid "Set Default Store"
+msgstr "Définir le magasin par défaut"
+
+#: backend/WMSW_Backend.php:342
+msgid "Set as Default"
+msgstr "Définir par défaut"
+
+#: backend/WMSW_Backend.php:343
+msgid "Store set as default successfully."
+msgstr "Magasin défini par défaut avec succès."
+
+#: backend/WMSW_Backend.php:344
+msgid "Failed to set store as default."
+msgstr "Échec de la définition du magasin par défaut."
+
+#: backend/WMSW_Backend.php:345
+msgid "Copying..."
+msgstr "Copie..."
+
+#: backend/WMSW_Backend.php:346
+msgid "Exporting..."
+msgstr "Exportation..."
+
+#: backend/WMSW_Backend.php:348
+msgid "Customer Preview"
+msgstr "Aperçu des clients"
+
+#: backend/WMSW_Backend.php:349
+msgid "No customers found matching your criteria."
+msgstr "Aucun client trouvé correspondant à vos critères."
+
+#: backend/WMSW_Backend.php:351
+msgid "Please fill in Shop Domain and Access Token first."
+msgstr "Veuillez d'abord remplir le domaine de boutique et le jeton d'accès."
+
+#: backend/WMSW_Backend.php:352
+msgid "Validation Error"
+msgstr "Erreur de validation"
+
+#: backend/WMSW_Backend.php:353
+msgid "Success!"
+msgstr "Succès !"
+
+#: backend/WMSW_Backend.php:354
+msgid "Connection Failed"
+msgstr "Échec de connexion"
+
+#: backend/WMSW_Backend.php:355
+msgid "Missing store ID or security token."
+msgstr "ID de magasin ou jeton de sécurité manquant."
+
+#: backend/WMSW_Backend.php:356
+msgid "Are you sure you want to delete this store? This action cannot be undone."
+msgstr "Êtes-vous sûr de vouloir supprimer ce magasin ? Cette action ne peut pas être annulée."
+
+#: backend/WMSW_Backend.php:357
+msgid "Are you sure you want to deactivate this store?"
+msgstr "Êtes-vous sûr de vouloir désactiver ce magasin ?"
+
+#: backend/WMSW_Backend.php:358
+msgid "Delete Store"
+msgstr "Supprimer le magasin"
+
+#: backend/WMSW_Backend.php:359
+msgid "Deactivate Store"
+msgstr "Désactiver le magasin"
+
+#: backend/WMSW_Backend.php:360
+msgid "Delete"
+msgstr "Supprimer"
+
+#: backend/WMSW_Backend.php:361
+msgid "Deactivate"
+msgstr "Désactiver"
+
+#: backend/WMSW_Backend.php:362
+msgid "Cancel"
+msgstr "Annuler"
+
+#: backend/WMSW_Backend.php:363
+msgid "Action successful."
+msgstr "Action réussie."
+
+#: backend/WMSW_Backend.php:364
+msgid "Failed to process request."
+msgstr "Échec du traitement de la demande."
+
+#: backend/WMSW_Backend.php:365
+msgid "AJAX request failed."
+msgstr "Requête AJAX échouée."
+
+#: backend/WMSW_Backend.php:366
+msgid "Are you sure you want to set this store as default?"
+msgstr "Êtes-vous sûr de vouloir définir ce magasin par défaut ?"
+
+#: backend/WMSW_Backend.php:368
+msgid "Processing..."
+msgstr "Traitement..."
+
+#: backend/WMSW_Backend.php:370
+msgid "Set Default Store"
+msgstr "Définir le magasin par défaut"
+
+#: backend/WMSW_Backend.php:371
+msgid "Set as Default"
+msgstr "Définir par défaut"
+
+#: backend/WMSW_Backend.php:372
+msgid "Store set as default successfully."
+msgstr "Magasin défini par défaut avec succès."
+
+#: backend/WMSW_Backend.php:373
+msgid "Failed to set store as default."
+msgstr "Échec de la définition du magasin par défaut."
+
+#: backend/WMSW_Backend.php:374
+msgid "Copying..."
+msgstr "Copie..."
+
+#: backend/WMSW_Backend.php:375
+msgid "Store copied successfully. The store domain has been modified with a unique suffix to avoid conflicts."
+msgstr "Magasin copié avec succès. Le domaine du magasin a été modifié avec un suffixe unique pour éviter les conflits."
+
+#: backend/WMSW_Backend.php:376
+msgid "Store Copied"
+msgstr "Magasin copié"
+
+#: backend/WMSW_Backend.php:377
+msgid "Failed to copy store."
+msgstr "Échec de la copie du magasin."
+
+#: backend/WMSW_Backend.php:378
+msgid "Please select a store first."
+msgstr "Veuillez d'abord sélectionner un magasin." 
