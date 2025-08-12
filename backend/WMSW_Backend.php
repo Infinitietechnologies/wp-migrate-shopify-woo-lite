@@ -230,7 +230,7 @@ class WMSW_Backend
             true
         );
 
-       
+
 
         // Coupon Importer
         wp_enqueue_script(
@@ -317,7 +317,7 @@ class WMSW_Backend
                     'store_copied_title' => \esc_attr__('Store Copied', 'wp-migrate-shopify-woo'),
                     'store_copied_error' => \esc_attr__('Failed to copy store.', 'wp-migrate-shopify-woo'),
                     'please_select_store_first' => \esc_attr__('Please select a store first.', 'wp-migrate-shopify-woo'),
-                    
+
                     // Additional strings for hardcoded text in JavaScript
                     'import_completed_successfully' => \esc_attr__('Import completed successfully!', 'wp-migrate-shopify-woo'),
                     'error_loading_store' => \esc_attr__('Error loading store:', 'wp-migrate-shopify-woo'),
@@ -344,7 +344,7 @@ class WMSW_Backend
                     'disabled' => \esc_attr__('Disabled', 'wp-migrate-shopify-woo'),
                     'active' => \esc_attr__('Active', 'wp-migrate-shopify-woo'),
                     'email_label' => \esc_attr__('Email:', 'wp-migrate-shopify-woo'),
-                    
+
                     // Additional strings for JavaScript files
                     'dismiss_notification' => \esc_attr__('Dismiss notification', 'wp-migrate-shopify-woo'),
                     'dismiss_banner' => \esc_attr__('Dismiss banner', 'wp-migrate-shopify-woo'),
@@ -366,7 +366,7 @@ class WMSW_Backend
                     'import_failed_title' => \esc_attr__('Import Failed', 'wp-migrate-shopify-woo'),
                     'feature_not_available' => \esc_attr__('Feature Not Available', 'wp-migrate-shopify-woo'),
                     'preview_not_implemented' => \esc_attr__('preview functionality is not yet implemented.', 'wp-migrate-shopify-woo'),
-                    
+
                     // Settings page strings
                     'failed_to_save_setting' => \esc_attr__('Failed to save setting.', 'wp-migrate-shopify-woo'),
                     'setting_loaded' => \esc_attr__('Setting loaded.', 'wp-migrate-shopify-woo'),
@@ -425,7 +425,7 @@ class WMSW_Backend
                     'confirm_default_title' => \esc_attr__('Are you sure?', 'wp-migrate-shopify-woo'),
                     'yes' => \esc_attr__('Yes', 'wp-migrate-shopify-woo'),
                     'no' => \esc_attr__('No', 'wp-migrate-shopify-woo'),
-                    
+
                     // Page importer specific strings
                     'please_select_store_first' => \esc_attr__('Please select a store first.', 'wp-migrate-shopify-woo'),
                     'no_store_selected' => \esc_attr__('No Store Selected', 'wp-migrate-shopify-woo'),
@@ -467,7 +467,7 @@ class WMSW_Backend
                     'resuming_page_import' => \esc_attr__('Resuming page import progress tracking...', 'wp-migrate-shopify-woo'),
                     'error_checking_page_imports' => \esc_attr__('Error checking for active page imports', 'wp-migrate-shopify-woo'),
                     'dismiss_notification' => \esc_attr__('Dismiss notification', 'wp-migrate-shopify-woo'),
-                    
+
                     // Blog importer specific strings
                     'please_select_what_to_import' => \esc_attr__('Please select what to import.', 'wp-migrate-shopify-woo'),
                     'validation_error' => \esc_attr__('Validation Error', 'wp-migrate-shopify-woo'),
@@ -501,7 +501,7 @@ class WMSW_Backend
                     'import_scheduled' => \esc_attr__('Import Scheduled', 'wp-migrate-shopify-woo'),
                     'scheduling_failed' => \esc_attr__('Scheduling Failed', 'wp-migrate-shopify-woo'),
                     'server_error' => \esc_attr__('Server Error', 'wp-migrate-shopify-woo'),
-                    
+
                     // Logs specific strings
                     'invalid_log_id' => \esc_attr__('Invalid log ID provided', 'wp-migrate-shopify-woo'),
                     'failed_to_load_log_details' => \esc_attr__('Failed to Load Log Details', 'wp-migrate-shopify-woo'),
@@ -585,20 +585,22 @@ class WMSW_Backend
      */
     public function verify_shopify_connection()
     {
-        // Check nonce and permissions in one call
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate required fields
         $required_fields = ['shop_url', 'api_key', 'api_password'];
         foreach ($required_fields as $field) {
-            if (empty($_POST[$field])) {
+            if (!isset($_POST[$field]) || empty($_POST[$field])) {
                 wp_send_json_error(['message' => __('Please fill in all required fields', 'wp-migrate-shopify-woo')]);
             }
         }
 
-        $shop_url = sanitize_text_field($_POST['shop_url']);
-        $api_key = sanitize_text_field($_POST['api_key']);
-        $api_password = sanitize_text_field($_POST['api_password']);
+        $shop_url = empty($_POST['shop_url']) ? '' : sanitize_text_field(wp_unslash($_POST['shop_url']));
+        $api_key = empty($_POST['api_key']) ? '' : sanitize_text_field(wp_unslash($_POST['api_key']));
+        $api_password = empty($_POST['api_password']) ? '' : sanitize_text_field(wp_unslash($_POST['api_password']));
 
         // Create client and test connection
         try {
@@ -627,15 +629,17 @@ class WMSW_Backend
      */
     public function get_store()
     {
-        // Check nonce and permissions in one call
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate store ID
-        if (empty($_POST['store_id'])) {
+        if (!isset($_POST['store_id']) || empty($_POST['store_id'])) {
             wp_send_json_error(['message' => __('No store specified', 'wp-migrate-shopify-woo')]);
         }
 
-        $store_id = intval($_POST['store_id']);
+        $store_id = intval(wp_unslash($_POST['store_id']));
 
         try {
             $handler = new WMSW_StoreHandler();
@@ -706,16 +710,21 @@ class WMSW_Backend
      */
     public function ajax_test_shopify_connection()
     {
-        // Check nonce and permissions with specific capability
-        WMSW_SecurityHelper::verifyAdminRequest('nonce', 'swi-admin-nonce', 'manage_woocommerce');
-
-        $shop_domain = sanitize_text_field($_POST['shop_domain'] ?? '');
-        $access_token = sanitize_text_field($_POST['access_token'] ?? '');
-        $api_version = sanitize_text_field($_POST['api_version'] ?? '2023-10');
-
-        if (empty($shop_domain) || empty($access_token)) {
-            wp_send_json_error(['message' => __('Shop domain and access token are required', 'wp-migrate-shopify-woo')]);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
         }
+
+        if (!isset($_POST['shop_domain']) || empty($_POST['shop_domain'])) {
+            wp_send_json_error(['message' => __('Shop domain is required', 'wp-migrate-shopify-woo')]);
+        }
+        if (!isset($_POST['access_token']) || empty($_POST['access_token'])) {
+            wp_send_json_error(['message' => __('Access token is required', 'wp-migrate-shopify-woo')]);
+        }
+
+        $shop_domain = sanitize_text_field(wp_unslash($_POST['shop_domain']));
+        $access_token = sanitize_text_field(wp_unslash($_POST['access_token']));
+        $api_version = sanitize_text_field(wp_unslash($_POST['api_version'] ?? '2023-10'));
 
 
         try {
@@ -770,12 +779,17 @@ class WMSW_Backend
      */
     public function ajax_set_default_store()
     {
-        // Check nonce and permissions
-        WMSW_SecurityHelper::verifyAdminRequest('nonce', 'swi-admin-nonce', 'manage_woocommerce');
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
-        $store_id = isset($_POST['store_id']) ? intval($_POST['store_id']) : 0;
-        if (!$store_id) {
+        if (!isset($_POST['store_id']) || empty($_POST['store_id'])) {
             wp_send_json_error(['message' => __('Missing store ID.', 'wp-migrate-shopify-woo')]);
+        }
+        $store_id = intval(wp_unslash($_POST['store_id']));
+        if (!$store_id) {
+            wp_send_json_error(['message' => __('Invalid store ID.', 'wp-migrate-shopify-woo')]);
         }
 
         try {
@@ -798,7 +812,10 @@ class WMSW_Backend
      */
     public function ajax_get_stores()
     {
-        WMSW_SecurityHelper::verifyAdminRequest('nonce', 'swi-admin-nonce', 'manage_woocommerce');
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
         $stores = WMSW_ShopifyStore::get_all();
         wp_send_json_success(['stores' => $stores]);
     }
@@ -808,10 +825,18 @@ class WMSW_Backend
      */
     public function ajax_fetch_shopify_categories()
     {
-        check_ajax_referer('swi-admin-nonce', 'nonce');
-        $store_id = intval($_POST['store_id'] ?? 0);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
+
+        if (!isset($_POST['store_id']) || empty($_POST['store_id'])) {
+            wp_send_json_error(['message' => __('Missing store ID.', 'wp-migrate-shopify-woo')]);
+        }
+
+        $store_id = intval(wp_unslash($_POST['store_id']));
         if (!$store_id) {
-            wp_send_json_error(['message' => 'Missing store ID.']);
+            wp_send_json_error(['message' => __('Invalid store ID.', 'wp-migrate-shopify-woo')]);
         }
         $store = WMSW_ShopifyStore::get($store_id);
         if (!$store) {
@@ -830,11 +855,22 @@ class WMSW_Backend
      */
     public function ajax_import_shopify_categories()
     {
-        WMSW_SecurityHelper::verifyAdminRequest('nonce', 'swi-admin-nonce', 'manage_woocommerce');
-        $store_id = intval($_POST['store_id'] ?? 0);
-        $category_ids = $_POST['category_ids'] ?? [];
-        if (!$store_id || empty($category_ids)) {
-            wp_send_json_error(['message' => 'Missing store or categories.']);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
+        if (!isset($_POST['store_id']) || empty($_POST['store_id'])) {
+            wp_send_json_error(['message' => __('Missing store ID.', 'wp-migrate-shopify-woo')]);
+        }
+        if (!isset($_POST['category_ids']) || empty($_POST['category_ids'])) {
+            wp_send_json_error(['message' => __('Missing category IDs.', 'wp-migrate-shopify-woo')]);
+        }
+
+        $store_id = intval(wp_unslash($_POST['store_id']));
+        $category_ids = array_map('sanitize_text_field', wp_unslash($_POST['category_ids']));
+
+        if (!$store_id) {
+            wp_send_json_error(['message' => __('Invalid store ID.', 'wp-migrate-shopify-woo')]);
         }
         $store = WMSW_ShopifyStore::get($store_id);
         if (!$store) {
@@ -886,30 +922,11 @@ class WMSW_Backend
                 ]
             );
         } catch (\Exception $e) {
-            // Just log the error (only in debug mode)
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && WMSW_Logger::isDebugModeEnabled()) {
-                error_log('Error logging category import: ' . $e->getMessage());
+            // Log the error using WordPress logger if available
+            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                $logger->error('Error logging category import: ' . $e->getMessage());
             }
         }
     }
-
-    /**
-     * Helper to log debug messages to WordPress debug.log
-     * 
-     * @param string $message Message to log
-     * @return void
-     */
-    private function debugToLog($message)
-    {
-        // Use enhanced debug mode checking
-        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && WMSW_Logger::isDebugModeEnabled()) {
-            if (is_array($message) || is_object($message)) {
-                error_log('[WMSW_Backend] ' . print_r($message, true));
-            } else {
-                error_log('[WMSW_Backend] ' . $message);
-            }
-        }
-    }
-
-
 }

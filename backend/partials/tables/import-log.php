@@ -36,13 +36,11 @@ $per_page = 20;
 $logs = []; // This should be populated by the Logger service
 $total_logs = 0; // This should be the total count from the Logger service
 
+// Use the ImportLog model for database operations
+use ShopifyWooImporter\Models\WMSW_ImportLog;
+
 // Get available stores for filter
-global $wpdb;
-$stores_table = $wpdb->prefix . WMSW_STORES_TABLE;
-
-$active_status = intval(1);
-
-$stores = $wpdb->get_results($wpdb->prepare("SELECT * FROM %s WHERE status = %d;", [$stores_table, $active_status]));
+$stores = WMSW_ImportLog::get_available_stores();
 ?>
 
 <div class="swi-table-container">

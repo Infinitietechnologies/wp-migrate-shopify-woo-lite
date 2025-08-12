@@ -9,7 +9,8 @@ use ShopifyWooImporter\Helpers\WMSW_EncryptionHelper;
  * Shopify Store Model
  */
 class WMSW_ShopifyStore
-{    private $id;
+{
+    private $id;
     private $store_name;
     private $shop_domain;
     private $access_token;
@@ -34,7 +35,7 @@ class WMSW_ShopifyStore
         $this->id = $data['id'] ?? null;
         $this->store_name = $data['store_name'] ?? '';
         $this->shop_domain = $data['shop_domain'] ?? '';
-        
+
         // Decrypt access token if it's encrypted
         $access_token = $data['access_token'] ?? '';
         if (!empty($access_token) && WMSW_EncryptionHelper::is_encrypted($access_token)) {
@@ -42,7 +43,7 @@ class WMSW_ShopifyStore
         } else {
             $this->access_token = $access_token;
         }
-        
+
         $this->api_version = $data['api_version'] ?? WMSW_SHOPIFY_API_VERSION;
         $this->is_active = $data['is_active'] ?? 1;
         $this->is_default = $data['is_default'] ?? 0;
@@ -58,13 +59,13 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
-        
+
         // Encrypt access token before saving
         $encrypted_token = '';
         if (!empty($this->access_token)) {
             $encrypted_token = WMSW_EncryptionHelper::encrypt($this->access_token);
         }
-        
+
         $data = [
             'store_name' => $this->store_name,
             'shop_domain' => $this->shop_domain,
@@ -129,7 +130,7 @@ class WMSW_ShopifyStore
 
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id),
+            $wpdb->prepare("SELECT * FROM". esc_sql($wpdb->prefix . WMSW_STORES_TABLE)." WHERE id = %d", $id),
             \ARRAY_A
         );
 
@@ -143,9 +144,8 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . WMSW_STORES_TABLE;
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM $table WHERE shop_domain = %s", $shop_domain),
+            $wpdb->prepare("SELECT * FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." WHERE shop_domain = %s", $shop_domain),
             ARRAY_A
         );
 
@@ -161,7 +161,7 @@ class WMSW_ShopifyStore
 
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
         $rows = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM `{$table}` WHERE is_active = %d ORDER BY store_name", 1),
+            $wpdb->prepare("SELECT * FROM ".esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." WHERE is_active = %d ORDER BY store_name", 1),
             ARRAY_A
         );
 
@@ -196,7 +196,7 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
-        $rows = $wpdb->get_results("SELECT * FROM `{$table}` ORDER BY store_name", ARRAY_A);
+        $rows = $wpdb->get_results("SELECT * FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." ORDER BY store_name", ARRAY_A);
         $stores = [];
         foreach ($rows as $row) {
             $stores[] = [
@@ -237,7 +237,8 @@ class WMSW_ShopifyStore
     public function get_api_version()
     {
         return $this->api_version;
-    }    public function get_is_active()
+    }
+    public function get_is_active()
     {
         return $this->is_active;
     }
@@ -274,7 +275,8 @@ class WMSW_ShopifyStore
     public function set_api_version($api_version)
     {
         $this->api_version = $api_version;
-    }    public function set_is_active($is_active)
+    }
+    public function set_is_active($is_active)
     {
         $this->is_active = $is_active;
     }
@@ -286,7 +288,7 @@ class WMSW_ShopifyStore
     {
         $this->last_sync = $last_sync;
     }
-    
+
     /**
      * Migrate existing plaintext tokens to encrypted format
      * This method should be called once during plugin update
@@ -295,29 +297,29 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
-        
+
         // Get all stores with non-empty access tokens
         $stores = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT id, access_token FROM `{$table}` WHERE access_token != %s AND access_token IS NOT NULL",
+                "SELECT id, access_token FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." WHERE access_token != %s AND access_token IS NOT NULL",
                 ''
             ),
             ARRAY_A
         );
-        
+
         $migrated_count = 0;
-        
+
         foreach ($stores as $store) {
             $token = $store['access_token'];
-            
+
             // Skip if already encrypted
             if (WMSW_EncryptionHelper::is_encrypted($token)) {
                 continue;
             }
-            
+
             // Encrypt the token
             $encrypted_token = WMSW_EncryptionHelper::encrypt($token);
-            
+
             // Update the database
             $result = $wpdb->update(
                 $table,
@@ -326,15 +328,15 @@ class WMSW_ShopifyStore
                 ['%s'],
                 ['%d']
             );
-            
+
             if ($result !== false) {
                 $migrated_count++;
             }
         }
-        
+
         return $migrated_count;
     }
-    
+
     /**
      * Get decrypted access token for internal use
      * This ensures we always get the plaintext token for API calls
@@ -343,12 +345,56 @@ class WMSW_ShopifyStore
     {
         return $this->access_token; // Already decrypted in populate()
     }
-    
+
     /**
      * Check if current access token is valid (not empty)
      */
     public function has_valid_token()
     {
         return !empty($this->access_token);
+    }
+
+    public static function get_all_active_stores(int $get_active = 1)
+    {
+        global $wpdb;
+
+        $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
+
+        // Get all column names
+        $columns = $wpdb->get_col("SHOW COLUMNS FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) .");
+
+        // Remove access_token column
+        $columns = array_diff($columns, ['access_token']);
+
+        // Build SELECT list
+        $select_columns = implode(', ', array_map('esc_sql', $columns));
+
+        // Query only active stores
+        if ($get_active == 1) {
+            $rows = $wpdb->get_results(
+                $wpdb->prepare("SELECT %s FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . "WHERE is_active = %d", $select_columns, 1),
+                ARRAY_A
+            );
+        } else {
+            $rows = $wpdb->get_results(
+                $wpdb->prepare("SELECT %s FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE), $select_columns),
+                ARRAY_A
+            );
+        }
+
+        return $rows;
+    }
+
+
+    public static function get_all_stores_count(int $get_active = 1)
+    {
+        global $wpdb;
+        $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
+        if ($get_active == 1) {
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE is_active = 1");
+        } else {
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE));
+        }
+        return $count;
     }
 }

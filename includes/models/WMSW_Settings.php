@@ -42,7 +42,8 @@ class WMSW_Settings
         $table = $wpdb->prefix . WMSW_SETTINGS_TABLE;
 
         if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-            error_log("[WMSW_Settings::save] Saving setting: " . print_r([
+            $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+            $logger->debug("[WMSW_Settings::save] Saving setting: " . json_encode([
                 'id' => $this->id,
                 'key' => $this->settingKey,
                 'storeId' => $this->storeId,
@@ -61,39 +62,26 @@ class WMSW_Settings
 
                 if ($this->id) {
                     if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                        error_log("[WMSW_Settings::save] Updating existing record ID: " . $this->id);
+                        $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                        $logger->debug("[WMSW_Settings::save] Updating existing record ID: " . $this->id);
                     }
                     $result = $wpdb->update($table, $data, ['id' => $this->id]);
                     if ($result === false) {
                         if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                            error_log("[WMSW_Settings::save] Update failed. SQL Error: " . $wpdb->last_error);
+                            $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                            $logger->error("[WMSW_Settings::save] Update failed. SQL Error: " . $wpdb->last_error);
                         }
                         return false;
                     }
                 } else {
-                    if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                        error_log("[WMSW_Settings::save] Inserting new record");
-                    }
                     $data['created_at'] = current_time('mysql');
                     $result = $wpdb->insert($table, $data);
                     if ($result === false) {
-                        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                            error_log("[WMSW_Settings::save] Insert failed. SQL Error: " . $wpdb->last_error);
-                        }
                         return false;
                     }
                     $this->id = $wpdb->insert_id;
                 }
-
-                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                    error_log("[WMSW_Settings::save] Operation successful. Result: " . var_export($result, true));
-                }
-                return true;
             } catch (\Throwable $e) {
-                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                    error_log("[WMSW_Settings::save] Exception: " . $e->getMessage());
-                }
-                return false;
             }
         }
     }
@@ -110,7 +98,7 @@ class WMSW_Settings
             $where .= ' AND store_id = %d';
             $params[] = $storeId;
         }
-        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE $where ORDER BY updated_at DESC LIMIT 1", ...$params), 'ARRAY_A');
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE) . " WHERE %s ORDER BY updated_at DESC LIMIT 1", $where), 'ARRAY_A');
         if ($row) {
             $row['setting_value'] = self::maybeUnserialize($row['setting_value']);
             return new self($row);
@@ -147,18 +135,12 @@ class WMSW_Settings
     public static function update($key, $value, $storeId = null, $isGlobal = false, $type = 'string')
     {
         // Debug: Log every update attempt (only in debug mode)
-        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-            error_log("[WMSW_Settings::update] Attempting to save setting: key={$key}, storeId={$storeId}, isGlobal={$isGlobal}, type={$type}, value=" . print_r($value, true));
-        }
         $setting = self::get($key, $storeId, $isGlobal);
         if ($setting) {
             $setting->settingValue = $value;
             $setting->settingType = $type;
             $setting->isGlobal = $isGlobal ? 1 : 0;
             $result = $setting->save();
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                error_log("[WMSW_Settings::update] Updated existing setting: key={$key}, result=" . var_export($result, true));
-            }
             return $result;
         } else {
             $setting = new self([
@@ -169,9 +151,6 @@ class WMSW_Settings
                 'is_global' => $isGlobal ? 1 : 0,
             ]);
             $result = $setting->save();
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                error_log("[WMSW_Settings::update] Inserted new setting: key={$key}, result=" . var_export($result, true));
-            }
             return $result;
         }
     }

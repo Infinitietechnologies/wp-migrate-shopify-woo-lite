@@ -16,16 +16,12 @@ if (isset($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($
     $nonce_verified = true;
 }
 
-// Get logs data
-global $wpdb;
-$logs_table   = esc_sql($wpdb->prefix . WMSW_LOGS_TABLE);
-$tasks_table  = esc_sql($wpdb->prefix . WMSW_TASKS_TABLE);
-$stores_table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
+// Use the ImportLog model for all database operations
+use ShopifyWooImporter\Models\WMSW_ImportLog;
 
 // Pagination and filters (only if nonce is verified or for initial page load)
 $page     = 1;
 $per_page = 50;
-$offset   = 0;
 $active_status = intval(1);
 
 // Filters
@@ -38,7 +34,6 @@ $search_query     = '';
 
 if ($nonce_verified || !isset($_GET['_wpnonce'])) {
     $page     = isset($_GET['paged']) ? absint(wp_unslash($_GET['paged'])) : 1;
-    $offset   = ($page - 1) * $per_page;
     
     $date_from        = sanitize_text_field(wp_unslash($_GET['date_from'] ?? ''));
     $date_to          = sanitize_text_field(wp_unslash($_GET['date_to'] ?? ''));
@@ -48,87 +43,34 @@ if ($nonce_verified || !isset($_GET['_wpnonce'])) {
     $search_query     = sanitize_text_field(wp_unslash($_GET['search'] ?? ''));
 }
 
-// Build query
-$where_conditions = [];
-$where_values     = [];
+// Build filters array for the model
+$filters = [];
+if ($level_filter) $filters['level'] = $level_filter;
+if ($store_filter) $filters['store_id'] = $store_filter;
+if ($task_type_filter) $filters['task_type'] = $task_type_filter;
+if ($search_query) $filters['search'] = $search_query;
+if ($date_from) $filters['date_from'] = $date_from;
+if ($date_to) $filters['date_to'] = $date_to;
 
-if ($level_filter) {
-    $where_conditions[] = "l.level = %s";
-    $where_values[]     = $level_filter;
-}
+// Get logs data using the model
+$logs_data = WMSW_ImportLog::get_logs_with_context($filters, $page, $per_page);
+$logs = $logs_data['logs'];
+$total_items = $logs_data['total_count'];
+$pagination = $logs_data['pagination'];
 
-if ($store_filter) {
-    $where_conditions[] = "s.id = %d";
-    $where_values[]     = $store_filter;
-}
-
-if ($task_type_filter) {
-    $where_conditions[] = "t.task_type = %s";
-    $where_values[]     = $task_type_filter;
-}
-
-if ($search_query) {
-    $where_conditions[] = "l.message LIKE %s";
-    $where_values[]     = '%' . $wpdb->esc_like($search_query) . '%';
-}
-
-if ($date_from) {
-    $where_conditions[] = "DATE(l.created_at) >= %s";
-    $where_values[]     = $date_from;
-}
-
-if ($date_to) {
-    $where_conditions[] = "DATE(l.created_at) <= %s";
-    $where_values[]     = $date_to;
-}
-
-$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-
-// Get total count
-if ($where_values) {
-    $total_items = $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT COUNT(*) FROM `{$logs_table}` l
-             LEFT JOIN `{$tasks_table}` t ON l.task_id = t.id
-             LEFT JOIN `{$stores_table}` s ON t.store_id = s.id
-             {$where_clause}",
-            $where_values
-        )
-    );
-} else {
-    $total_items = $wpdb->get_var(
-        "SELECT COUNT(*) FROM `{$logs_table}` l
-         LEFT JOIN `{$tasks_table}` t ON l.task_id = t.id
-         LEFT JOIN `{$stores_table}` s ON t.store_id = s.id"
-    );
-}
-
-// Get logs
-$logs = $wpdb->get_results(
-    $wpdb->prepare(
-        "SELECT l.*, t.task_type, s.store_name
-         FROM `{$logs_table}` l
-         LEFT JOIN `{$tasks_table}` t ON l.task_id = t.id
-         LEFT JOIN `{$stores_table}` s ON t.store_id = s.id
-         {$where_clause}
-         ORDER BY l.created_at DESC
-         LIMIT %d OFFSET %d",
-        array_merge($where_values, [$per_page, $offset])
-    )
-);
-
-$stores = $wpdb->get_results($wpdb->prepare("SELECT * FROM %s WHERE status = %d;", [$stores_table, $active_status]));
-
-$task_types = $wpdb->get_results($wpdb->prepare("SELECT DISTINCT task_type FROM %s WHERE task_type IS NOT NULL ORDER BY task_type", [$tasks_table]));
+// Get available stores and task types for filters
+$stores = WMSW_ImportLog::get_available_stores();
+$task_types = WMSW_ImportLog::get_available_task_types();
 
 // Get statistics
-$error_count   = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %s WHERE level = %s", [$logs_table, 'error']));
-$warning_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %s WHERE level = %s", [$logs_table, 'warning']));
-$info_count    = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %s WHERE level = %s", [$logs_table, 'info']));
-$debug_count   = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %s WHERE level = %s", [$logs_table, 'debug']));
+$stats = WMSW_ImportLog::get_statistics();
+$error_count = $stats['error'];
+$warning_count = $stats['warning'];
+$info_count = $stats['info'];
+$debug_count = $stats['debug'];
 
 // Pagination
-$total_pages = ceil($total_items / $per_page);
+$total_pages = $pagination['total_pages'];
 ?>
 
 
@@ -357,83 +299,81 @@ $total_pages = ceil($total_items / $per_page);
             <!-- Pagination -->
             <?php if ($total_pages > 1): ?>
                 <div class="swi-pagination">
-                    <?php
-                    // Build safe query args for pagination
-                    $safe_query_args = [
-                        'page' => 'wp-migrate-shopify-woo-logs',
-                        '_wpnonce' => wp_create_nonce('wmsw_logs_filter')
-                    ];
-                    
-                    // Add filters only if they exist and are safe
-                    if ($date_from) $safe_query_args['date_from'] = $date_from;
-                    if ($date_to) $safe_query_args['date_to'] = $date_to;
-                    if ($level_filter) $safe_query_args['level'] = $level_filter;
-                    if ($store_filter) $safe_query_args['store_id'] = $store_filter;
-                    if ($task_type_filter) $safe_query_args['task_type'] = $task_type_filter;
-                    if ($search_query) $safe_query_args['search'] = $search_query;
-                    
-                    // Previous page link
-                    if ($page > 1):
-                        $prev_url = add_query_arg(array_merge($safe_query_args, ['paged' => $page - 1]), admin_url('admin.php'));
-                    ?>
-                        <a href="<?php echo esc_url($prev_url); ?>" class="swi-pagination-item">
-                            <span class="dashicons dashicons-arrow-left-alt2"></span>
-                        </a>
-                    <?php endif; ?>
+                                <?php
+            // Build safe query args for pagination
+            $safe_query_args = [
+                'page' => 'wp-migrate-shopify-woo-logs',
+                '_wpnonce' => wp_create_nonce('wmsw_logs_filter')
+            ];
+            
+            // Add filters only if they exist and are safe
+            if ($date_from) $safe_query_args['date_from'] = $date_from;
+            if ($date_to) $safe_query_args['date_to'] = $date_to;
+            if ($level_filter) $safe_query_args['level'] = $level_filter;
+            if ($store_filter) $safe_query_args['store_id'] = $store_filter;
+            if ($task_type_filter) $safe_query_args['task_type'] = $task_type_filter;
+            if ($search_query) $safe_query_args['search'] = $search_query;
+            
+            // Previous page link
+            if ($pagination['has_previous']):
+                $prev_url = add_query_arg(array_merge($safe_query_args, ['paged' => $pagination['previous_page']]), admin_url('admin.php'));
+            ?>
+                <a href="<?php echo esc_url($prev_url); ?>" class="swi-pagination-item">
+                    <span class="dashicons dashicons-arrow-left-alt2"></span>
+                </a>
+            <?php endif; ?>
 
-                    <?php
-                    // Page numbers
-                    $start_page = max(1, $page - 2);
-                    $end_page = min($total_pages, $page + 2);
+            <?php
+            // Page numbers
+            $start_page = max(1, $pagination['current_page'] - 2);
+            $end_page = min($pagination['total_pages'], $pagination['current_page'] + 2);
 
-                    if ($start_page > 1): ?>
-                        <a href="<?php echo esc_url(add_query_arg(array_merge($safe_query_args, ['paged' => 1]), admin_url('admin.php'))); ?>" class="swi-pagination-item">
-                            1
-                        </a>
-                        <?php if ($start_page > 2): ?>
-                            <span class="swi-pagination-item">...</span>
-                        <?php endif; ?>
-                    <?php endif; ?>
+            if ($start_page > 1): ?>
+                <a href="<?php echo esc_url(add_query_arg(array_merge($safe_query_args, ['paged' => 1]), admin_url('admin.php'))); ?>" class="swi-pagination-item">
+                    1
+                </a>
+                <?php if ($start_page > 2): ?>
+                    <span class="swi-pagination-item">...</span>
+                <?php endif; ?>
+            <?php endif; ?>
 
-                    <?php for ($i = $start_page; $i <= $end_page; $i++):
-                        $is_active = $i === $page;
-                        $url = add_query_arg(array_merge($safe_query_args, ['paged' => $i]), admin_url('admin.php'));
-                    ?>
-                        <a href="<?php echo esc_url($url); ?>" class="swi-pagination-item <?php echo $is_active ? 'active' : ''; ?>">
-                            <?php echo esc_html($i); ?>
-                        </a>
-                    <?php endfor; ?>
+            <?php for ($i = $start_page; $i <= $end_page; $i++):
+                $is_active = $i === $pagination['current_page'];
+                $url = add_query_arg(array_merge($safe_query_args, ['paged' => $i]), admin_url('admin.php'));
+            ?>
+                <a href="<?php echo esc_url($url); ?>" class="swi-pagination-item <?php echo $is_active ? 'active' : ''; ?>">
+                    <?php echo esc_html($i); ?>
+                </a>
+            <?php endfor; ?>
 
-                    <?php if ($end_page < $total_pages): ?>
-                        <?php if ($end_page < $total_pages - 1): ?>
-                            <span class="swi-pagination-item">...</span>
-                        <?php endif; ?>
-                        <a href="<?php echo esc_url(add_query_arg(array_merge($safe_query_args, ['paged' => $total_pages]), admin_url('admin.php'))); ?>" class="swi-pagination-item">
-                            <?php echo esc_html($total_pages); ?>
-                        </a>
-                    <?php endif; ?>
+            <?php if ($end_page < $pagination['total_pages']): ?>
+                <?php if ($end_page < $pagination['total_pages'] - 1): ?>
+                    <span class="swi-pagination-item">...</span>
+                <?php endif; ?>
+                <a href="<?php echo esc_url(add_query_arg(array_merge($safe_query_args, ['paged' => $pagination['total_pages']]), admin_url('admin.php'))); ?>" class="swi-pagination-item">
+                    <?php echo esc_html($pagination['total_pages']); ?>
+                </a>
+            <?php endif; ?>
 
-                    <?php
-                    // Next page link
-                    if ($page < $total_pages):
-                        $next_url = add_query_arg(array_merge($safe_query_args, ['paged' => $page + 1]), admin_url('admin.php'));
-                    ?>
-                        <a href="<?php echo esc_url($next_url); ?>" class="swi-pagination-item">
-                            <span class="dashicons dashicons-arrow-right-alt2"></span>
-                        </a>
-                    <?php endif; ?>
+            <?php
+            // Next page link
+            if ($pagination['has_next']):
+                $next_url = add_query_arg(array_merge($safe_query_args, ['paged' => $pagination['next_page']]), admin_url('admin.php'));
+            ?>
+                <a href="<?php echo esc_url($next_url); ?>" class="swi-pagination-item">
+                    <span class="dashicons dashicons-arrow-right-alt2"></span>
+                </a>
+            <?php endif; ?>
                 </div>
 
                 <div class="swi-pagination-info">
                     <?php
-                    $from = (($page - 1) * $per_page) + 1;
-                    $to = min($page * $per_page, $total_items);
                     echo esc_html(sprintf(
                         // translators: %1$d is the first item number, %2$d is the last item number, %3$d is the total number of logs
                         __('Showing %1$d-%2$d of %3$d logs', 'wp-migrate-shopify-woo'),
-                        $from,
-                        $to,
-                        $total_items
+                        $pagination['from'],
+                        $pagination['to'],
+                        $pagination['total_items']
                     ));
                     ?>
                 </div>

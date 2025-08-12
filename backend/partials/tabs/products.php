@@ -4,6 +4,8 @@
  * Products Import Tab
  */
 
+use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
@@ -11,12 +13,8 @@ if (!defined('ABSPATH')) {
 
 // Get available stores
 global $wpdb;
-$stores_table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
 
-
-$active_status = intval(1);
-
-$stores = $wpdb->get_results($wpdb->prepare("SELECT * FROM $stores_table WHERE is_active = %d;",  $active_status));
+$stores = WMSW_ShopifyStore::get_all_active_stores();
 
 
 // Load product import settings
@@ -90,9 +88,9 @@ $product_settings = wp_parse_args($product_settings, $product_defaults);
                         <select name="store_id" class="swi-form-select" id="store_id" required>
                             <option value=""><?php esc_html_e('Choose a store...', 'wp-migrate-shopify-woo'); ?></option>
                             <?php foreach ($stores as $store): ?>
-                                <option value="<?php echo esc_attr($store->id); ?>"
-                                    <?php echo $store->is_default == 1 ? 'selected' : '' ?>>
-                                    <?php echo esc_html($store->store_name . ' (' . $store->shop_domain . ')'); ?>
+                                <option value="<?php echo esc_attr($store['id']); ?>"
+                                    <?php echo $store['is_default'] == 1 ? 'selected' : '' ?>>
+                                    <?php echo esc_html($store['store_name'] . ' (' . $store['shop_domain'] . ')'); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>

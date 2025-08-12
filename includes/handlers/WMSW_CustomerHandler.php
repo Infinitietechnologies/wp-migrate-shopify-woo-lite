@@ -21,6 +21,7 @@ use function get_transient;
 use function delete_transient;
 use function wp_schedule_single_event;
 use function time;
+use function wp_verify_nonce;
 
 /**
  * Customer Handler
@@ -63,18 +64,20 @@ class WMSW_CustomerHandler
      */
     public function previewCustomers()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate store ID
-        if (empty($_POST['store_id'])) {
+        if (!isset($_POST['store_id']) || empty($_POST['store_id'])) {
             wp_send_json_error([
                 'message' => __('No store specified', 'wp-migrate-shopify-woo')
             ]);
             return;
         }
 
-        $store_id = intval($_POST['store_id']);
+        $store_id = intval(wp_unslash($_POST['store_id']));
 
         $store_details = new WMSW_ShopifyStore();
         $store = $store_details->find($store_id);
@@ -88,7 +91,12 @@ class WMSW_CustomerHandler
         }
 
         // Get options from request
-        $options = isset($_POST['options']) ? array_map('sanitize_text_field', $_POST['options']) : [];
+        $options = [];
+        if (isset($_POST['options']) && is_array($_POST['options'])) {
+            $options = array_map(function($value) {
+                return sanitize_text_field(wp_unslash($value));
+            }, sanitize_text_field(wp_unslash($_POST['options'])));
+        }
 
         // Set preview limit
         $options['limit'] = isset($options['preview_limit']) ? intval($options['preview_limit']) : 10;
@@ -164,11 +172,11 @@ class WMSW_CustomerHandler
 
         // Only log detailed API response in debug mode
         if ($this->logger->isDebugEnabled()) {
-            error_log('Shopify API response: ' . print_r($response, true));
+            $this->logger->debug('Shopify API response: ' . json_encode($response));
         }
 
         if (isset($response['errors'])) {
-            $this->logger->error('Error retrieving customers: ' . print_r($response['errors'], true));
+            $this->logger->error('Error retrieving customers: ' . json_encode($response['errors']));
             return [];
         }
 
@@ -320,17 +328,19 @@ class WMSW_CustomerHandler
      */
     public function startCustomersImport()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate store ID
-        if (empty($_POST['store_id'])) {
+        if (!isset($_POST['store_id']) || empty(sanitize_text_field(wp_unslash($_POST['store_id'])))) {
             wp_send_json_error([
                 'message' => __('No store selected.', 'wp-migrate-shopify-woo')
             ]);
         }
 
-        $store_id = intval($_POST['store_id']);
+        $store_id = intval(wp_unslash($_POST['store_id']));
         $store_details = new WMSW_ShopifyStore();
         $store = $store_details->find($store_id);
 
@@ -342,14 +352,14 @@ class WMSW_CustomerHandler
 
         // Collect import options
         $options = [
-            'import_addresses' => isset($_POST['import_addresses']) && $_POST['import_addresses'] == '1',
-            'import_tags' => isset($_POST['import_tags']) && $_POST['import_tags'] == '1',
-            'send_welcome_email' => isset($_POST['send_welcome_email']) && $_POST['send_welcome_email'] == '1',
-            'batch_size' => isset($_POST['batch_size']) ? intval($_POST['batch_size']) : 10,
-            'customer_state' => !empty($_POST['customer_state']) ? sanitize_text_field($_POST['customer_state']) : '',
-            'tags' => !empty($_POST['tags']) ? sanitize_text_field($_POST['tags']) : '',
-            'date_from' => !empty($_POST['date_from']) ? sanitize_text_field($_POST['date_from']) : '',
-            'date_to' => !empty($_POST['date_to']) ? sanitize_text_field($_POST['date_to']) : '',
+            'import_addresses' => isset($_POST['import_addresses']) && sanitize_text_field(wp_unslash($_POST['import_addresses'])) == '1',
+            'import_tags' => isset($_POST['import_tags']) && sanitize_text_field(wp_unslash($_POST['import_tags'])) == '1',
+            'send_welcome_email' => isset($_POST['send_welcome_email']) && sanitize_text_field(wp_unslash($_POST['send_welcome_email'])) == '1',
+            'batch_size' => isset($_POST['batch_size']) ? intval(sanitize_text_field(wp_unslash($_POST['batch_size']))) : 10,
+            'customer_state' => !empty($_POST['customer_state']) ? sanitize_text_field(wp_unslash($_POST['customer_state'])) : '',
+            'tags' => !empty($_POST['tags']) ? sanitize_text_field(wp_unslash($_POST['tags'])) : '',
+            'date_from' => !empty($_POST['date_from']) ? sanitize_text_field(wp_unslash($_POST['date_from'])) : '',
+            'date_to' => !empty($_POST['date_to']) ? sanitize_text_field(wp_unslash($_POST['date_to'])) : '',
             'overwrite_existing' => true, // Set to true by default to match processor's default
         ];
 
@@ -525,8 +535,10 @@ class WMSW_CustomerHandler
      */
     public function getImportProgress()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Check job ID
         if (empty($_POST['job_id'])) {
@@ -536,7 +548,7 @@ class WMSW_CustomerHandler
             return;
         }
 
-        $job_id = sanitize_text_field($_POST['job_id']);
+        $job_id = sanitize_text_field(wp_unslash($_POST['job_id']));
 
         // Get import data from transient
         $import_data = \get_transient($job_id);
@@ -573,8 +585,10 @@ class WMSW_CustomerHandler
      */
     public function checkActiveImports()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Get store ID
         $store_id = isset($_POST['store_id']) ? intval($_POST['store_id']) : 0;

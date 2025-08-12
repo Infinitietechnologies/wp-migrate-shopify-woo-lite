@@ -4,20 +4,15 @@
  * Customers Import Tab
  */
 
+use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
 // Get available stores
-global $wpdb;
-$stores_table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
-
-
-$active_status = intval(1);
-
-$stores = $stores = $wpdb->get_results($wpdb->prepare("SELECT * FROM $stores_table WHERE is_active = %d;",  $active_status));
-
+$stores = WMSW_ShopifyStore::get_all_active_stores();
 
 ?>
 

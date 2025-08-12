@@ -20,6 +20,8 @@ use function get_transient;
 use function delete_transient;
 use function wp_schedule_single_event;
 use function time;
+use function wp_verify_nonce;
+use function absint;
 
 /**
  * Order Handler
@@ -63,12 +65,14 @@ class WMSW_OrderHandler
      */
     public function previewOrders()
     {
-        // Verify nonce and permissions for security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         try {
             $store_id = absint($_POST['store_id'] ?? 0);
-            $order_status = isset($_POST['order_status']) ? array_map('sanitize_text_field', $_POST['order_status']) : ['open', 'closed'];
+            $order_status = isset($_POST['order_status']) ? array_map('sanitize_text_field', sanitize_text_field(wp_unslash($_POST['order_status']))) : ['open', 'closed'];
             $limit = absint($_POST['limit'] ?? 5);
 
             if (!$store_id) {
@@ -168,15 +172,17 @@ class WMSW_OrderHandler
      */
     public function startOrdersImport()
     {
-        // Verify nonce and permissions for security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         try {
             $store_id = absint($_POST['store_id'] ?? 0);
-            $order_status = isset($_POST['order_status']) ? array_map('sanitize_text_field', $_POST['order_status']) : ['open', 'closed'];
-            $create_customers = isset($_POST['create_customers']) ? (bool)$_POST['create_customers'] : true;
-            $import_notes = isset($_POST['import_notes']) ? (bool)$_POST['import_notes'] : true;
-            $import_refunds = isset($_POST['import_refunds']) ? (bool)$_POST['import_refunds'] : false;
+            $order_status = isset($_POST['order_status']) ? array_map('sanitize_text_field', sanitize_text_field(wp_unslash($_POST['order_status']))) : ['open', 'closed'];
+            $create_customers = isset($_POST['create_customers']) ? (bool)sanitize_text_field(wp_unslash($_POST['create_customers'])) : true;
+            $import_notes = isset($_POST['import_notes']) ? (bool)sanitize_text_field(wp_unslash($_POST['import_notes'])) : true;
+            $import_refunds = isset($_POST['import_refunds']) ? (bool)sanitize_text_field(wp_unslash($_POST['import_refunds'])) : false;
 
             if (!$store_id) {
                 wp_send_json_error([
@@ -269,13 +275,13 @@ class WMSW_OrderHandler
      */
     public function getOrdersImportProgress()
     {
-        // Verify nonce and permissions for security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
         
-        // Debug logging to track what's being received (only in debug mode)
-        $this->logger->debugLog('POST data in getOrdersImportProgress: ' . print_r($_POST, true));
         
-        $progress_key = sanitize_text_field($_POST['progress_key'] ?? '');
+        $progress_key = sanitize_text_field(wp_unslash($_POST['progress_key'] ?? ''));
 
         $this->logger->debugLog('Using progress_key: ' . $progress_key);
 
@@ -294,7 +300,6 @@ class WMSW_OrderHandler
             ]);
         }
 
-        $this->logger->debugLog('Returning progress data: ' . print_r($progress, true));
         wp_send_json_success($progress);
     }
 
@@ -515,11 +520,13 @@ class WMSW_OrderHandler
      */
     public function checkActiveImports()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Get store ID
-        $store_id = isset($_POST['store_id']) ? intval($_POST['store_id']) : 0;
+        $store_id = isset($_POST['store_id']) ? intval(sanitize_text_field(wp_unslash($_POST['store_id']))) : 0;
         
         if (!$store_id) {
             wp_send_json_error([
@@ -534,9 +541,9 @@ class WMSW_OrderHandler
         
         // Get active import for this store with type 'orders'
         $active_import = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$table_name} WHERE store_id = %d AND import_type = 'orders' AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
+            "SELECT * FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND import_type = 'orders' AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
             $store_id
-        ), ARRAY_A);
+        ), \ARRAY_A);
 
         if ($active_import) {
             // Calculate percentage

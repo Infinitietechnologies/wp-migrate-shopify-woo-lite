@@ -72,7 +72,7 @@ The demo role includes only essential capabilities:
 
 ### Files Created/Modified
 
-1. **`includes/handlers/WMSW_DemoUserHandler.php`** - Main demo user management class
+1. **`includes/handlers/WMSW_DemoUserHandler.php`** - Main demo user management class (REMOVED)
 2. **`includes/handlers/WMSW_ActivationHandler.php`** - Updated to create demo user on activation
 3. **`backend/WMSW_Backend.php`** - Updated to use plugin-specific capabilities and display demo user notice
 4. **`includes/handlers/WMSW_DeactivationHandler.php`** - Updated to clean up demo user on deactivation
@@ -131,7 +131,7 @@ The demo role includes only essential capabilities:
 
 The demo user and role can be removed using:
 ```php
-\ShopifyWooImporter\Handlers\WMSW_DemoUserHandler::remove_demo_role_and_user();
+\ShopifyWooImporter\Handlers\WMSW_DemoUserHandler::remove_demo_role_and_user(); // REMOVED
 ```
 
 This is typically called during plugin uninstallation.
@@ -139,10 +139,10 @@ This is typically called during plugin uninstallation.
 ## Customization
 
 ### Adding New Capabilities
-To add new capabilities to the demo role, update the `$plugin_capabilities` array in `WMSW_DemoUserHandler.php`.
+To add new capabilities to the demo role, update the `$plugin_capabilities` array in `WMSW_DemoUserHandler.php`. (FILE REMOVED)
 
 ### Modifying Demo User Details
-Update the constants in `WMSW_DemoUserHandler.php`:
+Update the constants in `WMSW_DemoUserHandler.php`: (FILE REMOVED)
 - `DEMO_USER_LOGIN`
 - `DEMO_USER_EMAIL`
 - `DEMO_USER_PASSWORD`
@@ -159,7 +159,7 @@ Modify the `hide_admin_menus_for_demo()` method to show/hide specific admin menu
 
 ### Demo User Not Created
 - Check if the activation hook is properly registered
-- Verify that the `WMSW_DemoUserHandler` class is loaded
+- Verify that the `WMSW_DemoUserHandler` class is loaded (CLASS REMOVED)
 - Check WordPress error logs for any activation errors
 
 ### Permission Issues

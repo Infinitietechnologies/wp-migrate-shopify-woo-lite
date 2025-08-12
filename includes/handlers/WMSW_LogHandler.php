@@ -31,8 +31,9 @@ class WMSW_LogHandler
      */
     public function add_log()
     {
-        if (!WMSW_SecurityHelper::verifyAdminRequest()) {
-            \wp_send_json_error(['message' => 'Invalid security token.']);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
         }
         $logger = new WMSW_Logger();
         try {
@@ -52,10 +53,10 @@ class WMSW_LogHandler
             \wp_send_json_success(['message' => 'Log entry created and completed.']);
         } catch (\Exception $e) {
             $logger->error('Log entry failed', [
-                    'status' => 'failed',
+                'status' => 'failed',
                 'error' => $e->getMessage(),
                 'data' => $_POST
-                ]);
+            ]);
             \wp_send_json_error(['message' => 'Failed to add log: ' . $e->getMessage()]);
         }
     }
@@ -65,8 +66,9 @@ class WMSW_LogHandler
      */
     public function get_logs()
     {
-        if (!WMSW_SecurityHelper::verifyAdminRequest()) {
-            \wp_send_json_error(['message' => 'Invalid security token.']);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
         }
         try {
             $logs_data = WMSW_LogProcessor::get_logs($_POST);
@@ -92,18 +94,19 @@ class WMSW_LogHandler
      */
     public function clear_old_logs()
     {
-        if (!WMSW_SecurityHelper::verifyAdminRequest()) {
-            \wp_send_json_error(['message' => 'Invalid security token.']);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
         }
         $logger = new WMSW_Logger();
         try {
             $logger->info('Clear old logs started', [
                 'status' => 'pending',
-                    'action' => 'clear_old_logs',
+                'action' => 'clear_old_logs',
                 'user_id' => \get_current_user_id(),
-                    'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+                'ip' => isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '',
             ]);
-            $days = isset($_POST['days']) ? intval($_POST['days']) : 30;
+            $days = isset($_POST['days']) ? intval(sanitize_text_field(wp_unslash($_POST['days']))) : 30;
             $result = WMSW_LogProcessor::clear_old_logs($days);
             // Add a special log entry that should never be cleared
             $user_id = \get_current_user_id();
@@ -123,10 +126,10 @@ class WMSW_LogHandler
             \wp_send_json_success(['result' => $result]);
         } catch (\Exception $e) {
             $logger->error('Clear old logs failed', [
-                    'status' => 'failed',
+                'status' => 'failed',
                 'error' => $e->getMessage(),
                 'data' => $_POST
-                ]);
+            ]);
             \wp_send_json_error(['message' => 'Failed to clear logs: ' . $e->getMessage()]);
         }
     }
@@ -136,16 +139,17 @@ class WMSW_LogHandler
      */
     public function export_logs_csv()
     {
-        if (!WMSW_SecurityHelper::verifyAdminRequest()) {
-            \wp_send_json_error(['message' => 'Invalid security token.']);
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
         }
         $logger = new WMSW_Logger();
         try {
             $logger->info('Export logs started', [
                 'status' => 'pending',
-                    'action' => 'export_logs',
+                'action' => 'export_logs',
                 'user_id' => \get_current_user_id(),
-                    'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+                'ip' => isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '',
             ]);
             $csv = WMSW_LogProcessor::export_logs_csv($_POST);
             $logger->info('Export logs completed', [
@@ -154,13 +158,11 @@ class WMSW_LogHandler
             \wp_send_json_success(['csv' => $csv]);
         } catch (\Exception $e) {
             $logger->error('Export logs failed', [
-                    'status' => 'failed',
+                'status' => 'failed',
                 'error' => $e->getMessage(),
                 'data' => $_POST
             ]);
             \wp_send_json_error(['message' => 'Failed to export logs: ' . $e->getMessage()]);
         }
     }
-
-
 }

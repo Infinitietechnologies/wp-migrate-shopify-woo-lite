@@ -135,7 +135,11 @@ class WMSW_SecurityHelper
      */
     public static function sanitizeStoreId($field = 'store_id')
     {
-        return isset($_POST[$field]) ? intval($_POST[$field]) : 0;
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
+        return isset($_POST[$field]) ? intval(sanitize_text_field(wp_unslash($_POST[$field]))) : 0;
     }
 
     /**
@@ -146,12 +150,16 @@ class WMSW_SecurityHelper
      */
     public static function validateRequiredFields($requiredFields)
     {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
         foreach ($requiredFields as $field) {
             if (empty($_POST[$field])) {
                 wp_send_json_error([
                     'message' => sprintf(
                         /* translators: %s: field name */
-                        __('Required field "%s" is missing', 'wp-migrate-shopify-woo'), 
+                        __('Required field "%s" is missing', 'wp-migrate-shopify-woo'),
                         $field
                     ),
                     'error_type' => 'validation',
@@ -171,11 +179,15 @@ class WMSW_SecurityHelper
      */
     public static function getPostData($field, $default = '', $sanitizer = 'sanitize_text_field')
     {
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
+
         if (!isset($_POST[$field])) {
             return $default;
         }
 
-        $value = wp_unslash($_POST[$field]);
+        $value = sanitize_text_field(wp_unslash($_POST[$field]));
 
         switch ($sanitizer) {
             case 'sanitize_email':
@@ -220,44 +232,53 @@ class WMSW_SecurityHelper
     /**
      * Output escaping for different contexts
      */
-    public static function escapeHtml($data) {
+    public static function escapeHtml($data)
+    {
         return esc_html($data);
     }
 
-    public static function escapeAttr($data) {
+    public static function escapeAttr($data)
+    {
         return esc_attr($data);
     }
 
-    public static function escapeJs($data) {
+    public static function escapeJs($data)
+    {
         return esc_js($data);
     }
 
-    public static function escapeUrl($data) {
+    public static function escapeUrl($data)
+    {
         return esc_url($data);
     }
 
     /**
      * Advanced validator methods
      */
-    public static function validateEmail($email) {
+    public static function validateEmail($email)
+    {
         return is_email($email) ? $email : false;
     }
 
-    public static function validateUrl($url) {
+    public static function validateUrl($url)
+    {
         return wp_http_validate_url($url) ? $url : false;
     }
 
-    public static function validateNumericRange($value, $min, $max) {
+    public static function validateNumericRange($value, $min, $max)
+    {
         $num = floatval($value);
         return ($num >= $min && $num <= $max) ? $num : false;
     }
 
-    public static function validateStringLength($string, $minLength, $maxLength) {
+    public static function validateStringLength($string, $minLength, $maxLength)
+    {
         $length = strlen($string);
         return ($length >= $minLength && $length <= $maxLength) ? $string : false;
     }
 
-    public static function validateArrayValues($array, $allowedValues) {
+    public static function validateArrayValues($array, $allowedValues)
+    {
         if (!is_array($array)) {
             return false;
         }
@@ -298,10 +319,14 @@ class WMSW_SecurityHelper
             return;
         }
 
-        if (is_array($message) || is_object($message)) {
-            error_log($prefix . ' ' . json_encode($message, JSON_PRETTY_PRINT));
-        } else {
-            error_log($prefix . ' ' . $message);
+        // Use WordPress logger if available, otherwise use WordPress debug log
+        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+            $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+            if (is_array($message) || is_object($message)) {
+                $logger->debug($prefix . ' ' . json_encode($message, JSON_PRETTY_PRINT));
+            } else {
+                $logger->debug($prefix . ' ' . $message);
+            }
         }
     }
 }

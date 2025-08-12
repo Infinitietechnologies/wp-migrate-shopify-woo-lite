@@ -750,7 +750,7 @@ class WMSW_ProductProcessor
 
             // Set status (published or draft)
             if ($this->logger->isDebugEnabled()) {
-                error_log('Shopify product status: ' . json_encode($shopify_product['status']));
+                $this->logger->debug('Shopify product status: ' . json_encode($shopify_product['status']));
             }
             $this->logger->debug('Shopify product status received', ['status' => $shopify_product['status']]);
 
@@ -833,7 +833,7 @@ class WMSW_ProductProcessor
         $image_ids = [];
 
         if ($this->logger->isDebugEnabled()) {
-            error_log('Shopify product images: ' . json_encode($shopify_product['images']));
+            $this->logger->debug('Shopify product images: ' . json_encode($shopify_product['images']));
         }
 
         foreach ($shopify_product['images'] as $image) {

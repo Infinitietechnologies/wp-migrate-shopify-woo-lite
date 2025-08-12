@@ -35,10 +35,10 @@ class WMSW_ActivationHandler
         global $wpdb;
         require_once \ABSPATH . 'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();
-        
+
         // Drop existing tables if they exist to avoid conflicts
         $this->drop_existing_tables();
-        
+
         // Shopify stores table
         $stores_table = $wpdb->prefix . \WMSW_STORES_TABLE;
         $stores_sql = "CREATE TABLE $stores_table (
@@ -107,7 +107,7 @@ class WMSW_ActivationHandler
             KEY next_run (next_run),
             KEY status (status)
         ) $charset_collate;";
-        
+
         // Store logs table
         $store_logs_table = $wpdb->prefix . \WMSW_STORE_LOGS_TABLE;
         $store_logs_sql = "CREATE TABLE $store_logs_table (
@@ -121,7 +121,7 @@ class WMSW_ActivationHandler
             KEY store_id (store_id),
             KEY user_id (user_id)
         ) $charset_collate;";
-        
+
         // Settings table
         $settings_table = $wpdb->prefix . \WMSW_SETTINGS_TABLE;
         $settings_sql = "CREATE TABLE $settings_table (
@@ -137,7 +137,7 @@ class WMSW_ActivationHandler
             UNIQUE KEY unique_setting (store_id, setting_key),
             KEY is_global (is_global)
         ) $charset_collate;";
-        
+
         // Import sessions table
         $imports_table = $wpdb->prefix . \WMSW_IMPORTS_TABLE;
         $imports_sql = "CREATE TABLE $imports_table (
@@ -166,7 +166,7 @@ class WMSW_ActivationHandler
             KEY status (status),
             KEY progress_percentage (progress_percentage)
         ) $charset_collate;";
-        
+
         // Run the SQL queries
         \dbDelta($stores_sql);
         \dbDelta($logs_sql);
@@ -187,23 +187,16 @@ class WMSW_ActivationHandler
 
         // If the current version is different from the plugin version
         if (version_compare($current_version, WMSW_VERSION, '<')) {
-            
+
             // Migrate existing tokens to encrypted format (for version 1.1+)
             if (version_compare($current_version, '1.1.0', '<')) {
                 // Import the ShopifyStore model to handle token migration
                 require_once WMSW_PLUGIN_DIR . 'includes/models/WMSW_ShopifyStore.php';
-                
+
                 // Run the token migration
                 try {
                     WMSW_ShopifyStore::migrate_tokens_to_encrypted();
-                    
-                    // Log successful migration
-                    if (defined('WMSW_DEBUG') && WMSW_DEBUG) {
-                        error_log('WMSW: Successfully migrated Shopify access tokens to encrypted format');
-                    }
-                } catch (Exception $e) {
-                    // Log migration error but don't halt activation
-                    error_log('WMSW: Error migrating tokens to encrypted format: ' . $e->getMessage());
+                } catch (\Exception $e) {
                 }
             }
 
@@ -274,7 +267,7 @@ class WMSW_ActivationHandler
     private function drop_existing_tables()
     {
         global $wpdb;
-        
+
         $tables = [
             $wpdb->prefix . \WMSW_STORES_TABLE,
             $wpdb->prefix . \WMSW_TASKS_TABLE,
@@ -284,9 +277,15 @@ class WMSW_ActivationHandler
             $wpdb->prefix . \WMSW_SETTINGS_TABLE,
             $wpdb->prefix . \WMSW_IMPORTS_TABLE
         ];
-        
+
         foreach ($tables as $table) {
-            $wpdb->query("DROP TABLE IF EXISTS $table");
+            $escaped_table = esc_sql($table);
+            $wpdb->query(
+                $wpdb->prepare(
+                    "DROP TABLE IF EXISTS `%s`", 
+                    $escaped_table
+                )
+            );
         }
     }
 
@@ -297,7 +296,7 @@ class WMSW_ActivationHandler
     {
         // Load database helper for comprehensive structure checks
         require_once WMSW_PLUGIN_DIR . 'includes/helpers/WMSW_DatabaseHelper.php';
-        
+
         // Run comprehensive structure checks for all tables
         \ShopifyWooImporter\Helpers\WMSW_DatabaseHelper::ensure_all_table_structures();
     }

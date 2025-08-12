@@ -53,8 +53,9 @@ class WMSW_DatabaseHelper
             return; // Let the activation handler create it
         }
 
-        // Get existing columns
-        $columns = $wpdb->get_results("DESCRIBE $logs_table");
+        // Get existing columns - use esc_sql for table name in DESCRIBE
+        $escaped_table = \esc_sql($wpdb->prefix . WMSW_LOGS_TABLE);
+        $columns = $wpdb->get_results("DESCRIBE `{esc_sql($wpdb->prefix . WMSW_LOGS_TABLE)}`");
         $existing_columns = [];
 
         foreach ($columns as $column) {
@@ -74,17 +75,20 @@ class WMSW_DatabaseHelper
         // Add missing columns
         foreach ($required_columns as $column_name => $definition) {
             if (!isset($existing_columns[$column_name])) {
-                $wpdb->query("ALTER TABLE $logs_table ADD COLUMN $column_name $definition");
+                // Use esc_sql for table and column names since %i is only supported in WP 6.2+
+                $escaped_column = \esc_sql($column_name);
+                $wpdb->query("ALTER TABLE " . esc_sql($wpdb->prefix . WMSW_LOGS_TABLE) . "ADD COLUMN" .
+                    esc_sql($column_name) . esc_sql($definition));
             }
         }
 
         // Handle column renames if needed
         if (isset($existing_columns['import_id']) && !isset($existing_columns['task_id'])) {
-            $wpdb->query("ALTER TABLE $logs_table CHANGE import_id task_id bigint(20) NOT NULL");
+            $wpdb->query("ALTER TABLE `{esc_sql($wpdb->prefix . WMSW_LOGS_TABLE)}` CHANGE import_id task_id bigint(20) NOT NULL");
         }
 
         if (isset($existing_columns['log_level']) && !isset($existing_columns['level'])) {
-            $wpdb->query("ALTER TABLE $logs_table CHANGE log_level level varchar(50) NOT NULL");
+            $wpdb->query("ALTER TABLE `{esc_sql($wpdb->prefix . WMSW_LOGS_TABLE)}` CHANGE log_level level varchar(50) NOT NULL");
         }
     }
 
@@ -100,8 +104,9 @@ class WMSW_DatabaseHelper
             return;
         }
 
-        // Check for duplicate keys and remove them
-        $indexes = $wpdb->get_results("SHOW INDEX FROM $settings_table");
+        // Check for duplicate keys and remove them - use esc_sql for table name in SHOW INDEX
+        $escaped_table = \esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE);
+        $indexes = $wpdb->get_results("SHOW INDEX FROM `{esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE)}`");
         $setting_key_indexes = [];
 
         foreach ($indexes as $index) {
@@ -115,7 +120,7 @@ class WMSW_DatabaseHelper
             // Keep the unique constraint, remove the simple key
             foreach ($setting_key_indexes as $index) {
                 if ($index->Key_name !== 'unique_setting') {
-                    $wpdb->query("ALTER TABLE $settings_table DROP INDEX {$index->Key_name}");
+                    $wpdb->query("ALTER TABLE " . esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE) . " DROP INDEX " . esc_sql($index->Key_name));
                 }
             }
         }
@@ -245,8 +250,10 @@ class WMSW_DatabaseHelper
     {
         global $wpdb;
 
+        // Use esc_sql for table name since SHOW COLUMNS doesn't support placeholders
+        $escaped_table = \esc_sql($table_name);
         $result = $wpdb->get_results($wpdb->prepare(
-            "SHOW COLUMNS FROM $table_name LIKE %s",
+            "SHOW COLUMNS FROM " . esc_sql($table_name) . "LIKE %s",
             $column_name
         ));
 
@@ -260,7 +267,9 @@ class WMSW_DatabaseHelper
     {
         global $wpdb;
 
-        $result = $wpdb->get_var("SHOW TABLES LIKE '$table_name'");
+        // Use esc_sql for table name since SHOW TABLES doesn't support placeholders
+        $escaped_table = \esc_sql($table_name);
+        $result = $wpdb->get_var("SHOW TABLES LIKE " . esc_sql($table_name));
         return $result === $table_name;
     }
 
@@ -272,7 +281,8 @@ class WMSW_DatabaseHelper
         global $wpdb;
 
         if (!self::column_exists($table_name, $column_name)) {
-            $wpdb->query("ALTER TABLE $table_name ADD COLUMN $column_name $definition");
+            // Use esc_sql for table and column names since ALTER TABLE doesn't support placeholders
+            $wpdb->query("ALTER TABLE " . esc_sql($table_name) . " ADD COLUMN " . esc_sql($column_name) . " " . esc_sql($definition));
             return true;
         }
 
@@ -287,7 +297,11 @@ class WMSW_DatabaseHelper
         global $wpdb;
 
         if (self::column_exists($table_name, $old_name) && !self::column_exists($table_name, $new_name)) {
-            $wpdb->query("ALTER TABLE $table_name CHANGE $old_name $new_name $definition");
+            // Use esc_sql for table and column names since ALTER TABLE doesn't support placeholders
+            $escaped_table = \esc_sql($table_name);
+            $escaped_old_name = \esc_sql($old_name);
+            $escaped_new_name = \esc_sql($new_name);
+            $wpdb->query("ALTER TABLE " . esc_sql($table_name) . " CHANGE " . esc_sql($old_name) . " " . esc_sql($new_name) . " " . esc_sql($definition));
             return true;
         }
 
@@ -327,8 +341,9 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
 
+        // Use esc_sql for table name since it's a constant table name
         $import_log = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $import_id)
+            $wpdb->prepare("SELECT * FROM " . esc_sql($table_name) . " WHERE id = %d", $import_id)
         );
 
         if ($import_log) {
@@ -382,8 +397,10 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
 
+        // Use esc_sql for table name since it's a constant table name
+        $escaped_table = \esc_sql($table_name);
         $import_id = $wpdb->get_var(
-            "SELECT id FROM {$table_name} WHERE status = 'in_progress' ORDER BY id DESC LIMIT 1"
+            "SELECT id FROM " . esc_sql($table_name) . " WHERE status = 'in_progress' ORDER BY id DESC LIMIT 1"
         );
 
         if ($import_id) {
@@ -412,9 +429,11 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . WMSW_MAPPINGS_TABLE;
 
+        // Use esc_sql for table name since it's a constant table name
+        $escaped_table = \esc_sql($table_name);
         $product_id = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT woocommerce_id FROM {$table_name} WHERE shopify_id = %s AND object_type = 'product'",
+                "SELECT woocommerce_id FROM " . esc_sql($table_name) . " WHERE shopify_id = %s AND object_type = 'product'",
                 $shopify_id
             )
         );
@@ -445,9 +464,11 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . WMSW_MAPPINGS_TABLE;
 
+        // Use esc_sql for table name since it's a constant table name
+        $escaped_table = \esc_sql($table_name);
         $shopify_id = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT shopify_id FROM {$table_name} WHERE woocommerce_id = %d AND object_type = 'product'",
+                "SELECT shopify_id FROM " . esc_sql($table_name) . " WHERE woocommerce_id = %d AND object_type = 'product'",
                 $woocommerce_id
             )
         );
@@ -478,9 +499,11 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . WMSW_MAPPINGS_TABLE;
 
+        // Use esc_sql for table name since it's a constant table name
+        $escaped_table = \esc_sql($table_name);
         $exists = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM {$table_name} WHERE shopify_id = %s AND object_type = %s",
+                "SELECT id FROM " . esc_sql($table_name) . " WHERE shopify_id = %s AND object_type = %s",
                 $shopify_id,
                 $object_type
             )

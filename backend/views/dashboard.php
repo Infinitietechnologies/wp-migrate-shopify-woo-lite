@@ -4,33 +4,17 @@
  * Dashboard View
  */
 
+use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
 // Get dashboard data
-global $wpdb;
-$stores_table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
-$tasks_table = esc_sql($wpdb->prefix . WMSW_TASKS_TABLE);
+$total_stores = WMSW_ShopifyStore::get_all_stores_count(1);
 
-
-$total_stores = $wpdb->get_var("SELECT COUNT(*) FROM `{$stores_table}` WHERE is_active = 1");
-
-
-$total_stores_all = $wpdb->get_var("SELECT COUNT(*) FROM `{$stores_table}`");
-$pending_tasks = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$tasks_table}` WHERE status = %s", 'pending'));
-$completed_tasks = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$tasks_table}` WHERE status = %s", 'completed'));
-$failed_tasks = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$tasks_table}` WHERE status = %s", 'failed'));
-
-// Recent tasks
-$recent_tasks = $wpdb->get_results(
-    "SELECT t.*, s.store_name 
-     FROM `{$tasks_table}` t 
-     LEFT JOIN `{$stores_table}` s ON t.store_id = s.id 
-     ORDER BY t.created_at DESC 
-     LIMIT 5"
-);
+$total_stores_all = WMSW_ShopifyStore::get_all_stores_count(0);
 
 // Include notification component
 require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
@@ -98,72 +82,6 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                     <?php endif; ?>
                 </div>
             </div>
-
-            <?php if ($total_stores > 0): ?>
-                <div class="swi-stat-card swi-stat-card-pending d-none">
-                    <div class="swi-stat-icon">
-                        <span class="dashicons dashicons-clock"></span>
-                    </div>
-                    <div class="swi-stat-content">
-                        <h3><?php echo esc_html($pending_tasks); ?></h3>
-                        <p><?php esc_html_e('Pending Tasks', 'wp-migrate-shopify-woo'); ?></p>
-                    </div>
-                </div>
-
-                <div class="swi-stat-card swi-stat-card-completed d-none">
-                    <div class="swi-stat-icon">
-                        <span class="dashicons dashicons-yes-alt"></span>
-                    </div>
-                    <div class="swi-stat-content">
-                        <h3><?php echo esc_html($completed_tasks); ?></h3>
-                        <p><?php esc_html_e('Completed', 'wp-migrate-shopify-woo'); ?></p>
-                    </div>
-                </div>
-
-                <div class="swi-stat-card swi-stat-card-failed d-none">
-                    <div class="swi-stat-icon">
-                        <span class="dashicons dashicons-warning"></span>
-                    </div>
-                    <div class="swi-stat-content">
-                        <h3><?php echo esc_html($failed_tasks); ?></h3>
-                        <p><?php esc_html_e('Failed', 'wp-migrate-shopify-woo'); ?></p>
-                    </div>
-                </div>
-            <?php else: ?>
-                <!-- Empty state stats cards -->
-                <div class="swi-stat-card swi-stat-card-empty w-25 d-none">
-                    <div class="swi-stat-icon">
-                        <span class="dashicons dashicons-clock"></span>
-                    </div>
-                    <div class="swi-stat-content">
-                        <h3>-</h3>
-                        <p><?php esc_html_e('Pending Tasks', 'wp-migrate-shopify-woo'); ?></p>
-                        <small class="swi-stat-note"><?php esc_html_e('No stores connected', 'wp-migrate-shopify-woo'); ?></small>
-                    </div>
-                </div>
-
-                <div class="swi-stat-card swi-stat-card-empty d-none">
-                    <div class="swi-stat-icon">
-                        <span class="dashicons dashicons-yes-alt"></span>
-                    </div>
-                    <div class="swi-stat-content">
-                        <h3>-</h3>
-                        <p><?php esc_html_e('Completed', 'wp-migrate-shopify-woo'); ?></p>
-                        <small class="swi-stat-note"><?php esc_html_e('No stores connected', 'wp-migrate-shopify-woo'); ?></small>
-                    </div>
-                </div>
-
-                <div class="swi-stat-card swi-stat-card-empty d-none">
-                    <div class="swi-stat-icon">
-                        <span class="dashicons dashicons-warning"></span>
-                    </div>
-                    <div class="swi-stat-content">
-                        <h3>-</h3>
-                        <p><?php esc_html_e('Failed', 'wp-migrate-shopify-woo'); ?></p>
-                        <small class="swi-stat-note"><?php esc_html_e('No stores connected', 'wp-migrate-shopify-woo'); ?></small>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
 
         <!-- Quick Actions Section -->

@@ -39,9 +39,13 @@ function wmsw_uninstall_plugin()
         foreach ($tables as $table) {
             // Note: WordPress doesn't provide a built-in method for dropping tables
             // This is the standard approach used in WordPress plugins
-            $result = $wpdb->query("DROP TABLE IF EXISTS `$table`");
+            // Use esc_sql for table names since %i is only supported in WP 6.2+
+            $escaped_table = esc_sql($table);
+            $result = $wpdb->query("DROP TABLE IF EXISTS `{$escaped_table}`");
             if ($result === false) {
-                error_log("Failed to drop table: $table");
+                if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                    error_log("Failed to drop table: $table");
+                }
             }
         }
 
@@ -54,7 +58,9 @@ function wmsw_uninstall_plugin()
         // Remove user meta using WordPress functions with caching
         $user_meta_deleted = delete_metadata('user', 0, 'wmsw_user_preferences', '', true);
         if ($user_meta_deleted === false) {
-            error_log("Failed to delete user meta: wmsw_user_preferences");
+            if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log("Failed to delete user meta: wmsw_user_preferences");
+            }
         }
 
         // Remove post meta using WordPress functions with caching
@@ -70,7 +76,9 @@ function wmsw_uninstall_plugin()
         foreach ($post_meta_keys as $meta_key) {
             $post_meta_deleted = delete_metadata('post', 0, $meta_key, '', true);
             if ($post_meta_deleted === false) {
-                error_log("Failed to delete post meta: $meta_key");
+                if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                    error_log("Failed to delete post meta: $meta_key");
+                }
             }
         }
 

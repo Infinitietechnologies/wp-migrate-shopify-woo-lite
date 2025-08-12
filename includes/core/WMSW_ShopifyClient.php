@@ -2006,7 +2006,7 @@ class WMSW_ShopifyClient
         }
 
         if ($this->debug_mode) {
-            error_log("Making REST API request for price rules: " . $url);
+            $this->logger->debug("Making REST API request for price rules: " . $url);
         }
 
         // Make REST API request
@@ -2075,7 +2075,7 @@ class WMSW_ShopifyClient
         }
 
         if ($this->debug_mode) {
-            error_log("Making REST API request for discount codes: " . $url);
+            $this->logger->debug("Making REST API request for discount codes: " . $url);
         }
 
         // Make REST API request

@@ -16,6 +16,9 @@ use function sanitize_email;
 use function absint;
 use function update_option;
 use function get_option;
+use function wp_verify_nonce;
+use function wp_unslash;
+use function __;
 
 /**
  * Settings Handler
@@ -23,8 +26,22 @@ use function get_option;
  */
 class WMSW_SettingsHandler
 {
+    /** @var WMSW_Logger */
+    private $logger;
+    
+    /** @var array */
+    private $defaultOptions = [
+        'import_batch_size' => 50,
+        'enable_auto_sync' => false,
+        'sync_interval' => 'hourly',
+        'preserve_shopify_ids' => false,
+        'log_retention_days' => 30,
+        'enable_debug_mode' => false
+    ];
+
     public function __construct()
     {
+        $this->logger = new WMSW_Logger();
         $this->initHooks();
     }
 
@@ -36,28 +53,91 @@ class WMSW_SettingsHandler
     }
 
     /**
-     * AJAX: Save a setting or multiple settings (single or bulk)
+     * Validate and sanitize AJAX request
+     *
+     * @param string $nonceKey
+     * @return array|false Sanitized POST data or false if validation fails
+     */
+    private function validateAjaxRequest($nonceKey = 'swi-admin-nonce')
+    {
+        if (!isset($_POST['nonce']) || empty($_POST['nonce'])) {
+            wp_send_json_error(['message' => __('Missing nonce', 'wp-migrate-shopify-woo')]);
+            return false;
+        }
+
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), $nonceKey)) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            return false;
+        }
+
+        return $_POST;
+    }
+
+    /**
+     * Sanitize setting value based on type
+     *
+     * @param mixed $value
+     * @param string $type
+     * @return mixed Sanitized value
+     */
+    private function sanitizeSettingValue($value, $type = 'string')
+    {
+        switch ($type) {
+            case 'integer':
+                return absint($value);
+            case 'boolean':
+                return (bool) $value;
+            case 'email':
+                return sanitize_email($value);
+            case 'textarea':
+                return sanitize_textarea_field($value);
+            case 'string':
+            default:
+                return sanitize_text_field($value);
+        }
+    }
+
+    /**
+     * AJAX: Get a setting value
      */
     public function getSetting()
     {
-        WMSW_SecurityHelper::verifyAdminRequest();
-        $key = sanitize_text_field($_POST['key'] ?? '');
-        $storeId = isset($_POST['store_id']) ? intval($_POST['store_id']) : null;
-        $isGlobal = !empty($_POST['is_global']) ? true : false;
-        if (!$key) {
-            wp_send_json_error(['message' => 'Missing setting key.']);
+        $postData = $this->validateAjaxRequest();
+        if (!$postData) {
+            return;
         }
-        $setting = WMSW_Settings::get($key, $storeId, $isGlobal);
-        if ($setting) {
-            wp_send_json_success([
-                'key' => $setting->getSettingKey(),
-                'value' => $setting->getSettingValue(),
-                'type' => $setting->getSettingType(),
-                'is_global' => $setting->getIsGlobal(),
-                'store_id' => $setting->getStoreId(),
+
+        $key = sanitize_text_field(wp_unslash($postData['key'] ?? ''));
+        $storeId = isset($postData['store_id']) ? absint(wp_unslash($postData['store_id'])) : null;
+        $isGlobal = !empty(sanitize_text_field(wp_unslash($postData['is_global'] ?? '')));
+
+        if (!$key) {
+            wp_send_json_error(['message' => __('Missing setting key.', 'wp-migrate-shopify-woo')]);
+            return;
+        }
+
+        try {
+            $setting = WMSW_Settings::get($key, $storeId, $isGlobal);
+            
+            if ($setting) {
+                wp_send_json_success([
+                    'key' => $setting->getSettingKey(),
+                    'value' => $setting->getSettingValue(),
+                    'type' => $setting->getSettingType(),
+                    'is_global' => $setting->getIsGlobal(),
+                    'store_id' => $setting->getStoreId(),
+                ]);
+            } else {
+                wp_send_json_error(['message' => __('Setting not found.', 'wp-migrate-shopify-woo')]);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error getting setting', [
+                'key' => $key,
+                'store_id' => $storeId,
+                'is_global' => $isGlobal,
+                'error' => $e->getMessage()
             ]);
-        } else {
-            wp_send_json_error(['message' => 'Setting not found.']);
+            wp_send_json_error(['message' => __('Error retrieving setting.', 'wp-migrate-shopify-woo')]);
         }
     }
 
@@ -66,18 +146,36 @@ class WMSW_SettingsHandler
      */
     public function deleteSetting()
     {
-        WMSW_SecurityHelper::verifyAdminRequest();
-        $key = sanitize_text_field($_POST['key'] ?? '');
-        $storeId = isset($_POST['store_id']) ? intval($_POST['store_id']) : null;
-        $isGlobal = !empty($_POST['is_global']) ? true : false;
-        if (!$key) {
-            wp_send_json_error(['message' => 'Missing setting key.']);
+        $postData = $this->validateAjaxRequest();
+        if (!$postData) {
+            return;
         }
-        $result = WMSW_Settings::delete($key, $storeId, $isGlobal);
-        if ($result) {
-            wp_send_json_success(['message' => 'Setting deleted.']);
-        } else {
-            wp_send_json_error(['message' => 'Failed to delete setting.']);
+
+        $key = sanitize_text_field(wp_unslash($postData['key'] ?? ''));
+        $storeId = isset($postData['store_id']) ? absint(wp_unslash($postData['store_id'])) : null;
+        $isGlobal = !empty(sanitize_text_field(wp_unslash($postData['is_global'] ?? '')));
+
+        if (!$key) {
+            wp_send_json_error(['message' => __('Missing setting key.', 'wp-migrate-shopify-woo')]);
+            return;
+        }
+
+        try {
+            $result = WMSW_Settings::delete($key, $storeId, $isGlobal);
+            
+            if ($result) {
+                wp_send_json_success(['message' => __('Setting deleted successfully.', 'wp-migrate-shopify-woo')]);
+            } else {
+                wp_send_json_error(['message' => __('Failed to delete setting.', 'wp-migrate-shopify-woo')]);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error deleting setting', [
+                'key' => $key,
+                'store_id' => $storeId,
+                'is_global' => $isGlobal,
+                'error' => $e->getMessage()
+            ]);
+            wp_send_json_error(['message' => __('Error deleting setting.', 'wp-migrate-shopify-woo')]);
         }
     }
 
@@ -86,81 +184,23 @@ class WMSW_SettingsHandler
      */
     public function saveSettings()
     {
+        $postData = $this->validateAjaxRequest();
+        if (!$postData) {
+            return;
+        }
+
         try {
-            WMSW_SecurityHelper::verifyAdminRequest();
-
-            // Get all form data
-            $formData = $_POST;
-
             // Remove WordPress specific fields
-            unset($formData['action'], $formData['nonce']);
+            unset($postData['action'], $postData['nonce']);
 
             // Sanitize and prepare options array
-            $options = [
-                'import_batch_size' => absint($formData['import_batch_size'] ?? 50),
-                'enable_auto_sync' => isset($formData['enable_auto_sync']),
-                'sync_interval' => sanitize_text_field($formData['sync_interval'] ?? 'hourly'),
-                'preserve_shopify_ids' => isset($formData['preserve_shopify_ids']),
-                'log_retention_days' => absint($formData['log_retention_days'] ?? 30),
-                'enable_debug_mode' => isset($formData['enable_debug_mode'])
-            ];
+            $options = $this->prepareOptions($postData);
 
             // Save to WordPress options
             update_option('wmsw_options', $options);
 
-            // Save each setting to the custom table as global, track failures
-            $failedSettings = [];
-            global $wpdb;
-            foreach ($options as $key => $value) {
-                try {
-                    if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                        $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
-                        $logger->debug('Attempting to save setting', [
-                            'key' => $key,
-                            'value' => $value,
-                            'global' => true
-                        ]);
-                    }
-                    
-                    // Try to get current setting first to check if it exists
-                    $current = WMSW_Settings::get($key, null, true);
-                    if ($current) {
-                        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                            error_log("Current setting exists for key {$key}: " . print_r($current, true));
-                        }
-                    } else {
-                        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                            error_log("No existing setting found for key {$key}");
-                        }
-                    }
-
-                    $ok = WMSW_Settings::update($key, $value, null, true, 'string');
-                    
-                    if (!$ok) {
-                        $failedSettings[] = [
-                            'key' => $key,
-                            'value' => $value,
-                            'reason' => sprintf(
-                                /* translators: %s: SQL error message */
-                                __('Custom table update failed. Last SQL error: %s', 'wp-migrate-shopify-woo'),
-                                $wpdb->last_error
-                            )
-                        ];
-                        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                            error_log("Failed to save setting {$key}. SQL error: " . $wpdb->last_error);
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                        error_log("Exception while saving setting {$key}: " . $e->getMessage());
-                    }
-                    $failedSettings[] = [
-                        'key' => $key,
-                        'value' => $value,
-                        'reason' => $e->getMessage()
-                    ];
-                }
-            }
+            // Save each setting to the custom table as global
+            $failedSettings = $this->saveSettingsToCustomTable($options);
 
             if (empty($failedSettings)) {
                 wp_send_json_success([
@@ -178,19 +218,105 @@ class WMSW_SettingsHandler
                     'options' => $options
                 ]);
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
+            $this->logger->error('Settings save error', [
+                'exception' => $e->getMessage(),
+                'context' => $postData ?? []
+            ]);
+            wp_send_json_error([
+                'message' => __('An error occurred while saving settings.', 'wp-migrate-shopify-woo'),
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
-                $logger->error('Settings save error: ' . $e->getMessage(), [
-                    'exception' => $e,
-                    'context' => isset($formData) ? $formData : []
+    /**
+     * Prepare and sanitize options from form data
+     *
+     * @param array $formData
+     * @return array
+     */
+    private function prepareOptions(array $formData): array
+    {
+        $options = [];
+        
+        foreach ($this->defaultOptions as $key => $defaultValue) {
+            $value = $formData[$key] ?? $defaultValue;
+            
+            switch ($key) {
+                case 'import_batch_size':
+                case 'log_retention_days':
+                    $options[$key] = absint($value);
+                    break;
+                case 'enable_auto_sync':
+                case 'preserve_shopify_ids':
+                case 'enable_debug_mode':
+                    $options[$key] = isset($formData[$key]);
+                    break;
+                case 'sync_interval':
+                    $options[$key] = sanitize_text_field($value);
+                    break;
+                default:
+                    $options[$key] = $this->sanitizeSettingValue($value);
+            }
+        }
+        
+        return $options;
+    }
+
+    /**
+     * Save settings to custom table
+     *
+     * @param array $options
+     * @return array Array of failed settings
+     */
+    private function saveSettingsToCustomTable(array $options): array
+    {
+        $failedSettings = [];
+        global $wpdb;
+
+        foreach ($options as $key => $value) {
+            try {
+                $this->logger->debug('Saving setting to custom table', [
+                    'key' => $key,
+                    'value' => $value,
+                    'global' => true
+                ]);
+
+                $success = WMSW_Settings::update($key, $value, null, true, 'string');
+                
+                if (!$success) {
+                    $failedSettings[] = [
+                        'key' => $key,
+                        'value' => $value,
+                        'reason' => sprintf(
+                            /* translators: %s: SQL error message */
+                            __('Custom table update failed. Last SQL error: %s', 'wp-migrate-shopify-woo'),
+                            $wpdb->last_error
+                        )
+                    ];
+                    
+                    $this->logger->error('Failed to save setting to custom table', [
+                        'key' => $key,
+                        'value' => $value,
+                        'sql_error' => $wpdb->last_error
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                $failedSettings[] = [
+                    'key' => $key,
+                    'value' => $value,
+                    'reason' => $e->getMessage()
+                ];
+                
+                $this->logger->error('Exception while saving setting to custom table', [
+                    'key' => $key,
+                    'value' => $value,
+                    'error' => $e->getMessage()
                 ]);
             }
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                error_log('Settings save error: ' . $e->getMessage());
-            }
-            wp_send_json_error(['message' => 'An error occurred while saving settings.', 'error' => $e->getMessage()]);
         }
+
+        return $failedSettings;
     }
 }

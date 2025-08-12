@@ -14,17 +14,17 @@ class WMSW_EncryptionHelper
      * Encryption method to use
      */
     const ENCRYPTION_METHOD = 'AES-256-CBC';
-    
+
     /**
      * Salt prefix for key derivation
      */
     const SALT_PREFIX = 'wmsw_encrypt_';
-    
+
     /**
      * Get the encryption key
-     * 
+     *
      * Uses WordPress AUTH_KEY or generates a secure key if not available
-     * 
+     *
      * @return string The encryption key
      */
     private static function get_encryption_key()
@@ -33,7 +33,7 @@ class WMSW_EncryptionHelper
         if (defined('AUTH_KEY') && !empty(AUTH_KEY) && AUTH_KEY !== 'put your unique phrase here') {
             return hash('sha256', AUTH_KEY . self::SALT_PREFIX);
         }
-        
+
         // Fallback: get or generate a plugin-specific key
         $stored_key = get_option('wmsw_encryption_key');
         if (empty($stored_key)) {
@@ -41,10 +41,10 @@ class WMSW_EncryptionHelper
             $stored_key = wp_generate_password(64, true, true);
             update_option('wmsw_encryption_key', $stored_key, false); // Don't autoload
         }
-        
+
         return hash('sha256', $stored_key . self::SALT_PREFIX);
     }
-    
+
     /**
      * Encrypt sensitive data
      * 
@@ -56,39 +56,47 @@ class WMSW_EncryptionHelper
         if (empty($data)) {
             return $data;
         }
-        
+
         // Check if OpenSSL is available
         if (!function_exists('openssl_encrypt')) {
-            error_log('SWI Encryption: OpenSSL not available, storing data unencrypted');
+            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                $logger->warning('SWI Encryption: OpenSSL not available, storing data unencrypted');
+            }
             return $data;
         }
-        
+
         try {
             $key = self::get_encryption_key();
-            
+
             // Generate a random IV
             $iv_length = openssl_cipher_iv_length(self::ENCRYPTION_METHOD);
             $iv = openssl_random_pseudo_bytes($iv_length);
-            
+
             // Encrypt the data
             $encrypted = openssl_encrypt($data, self::ENCRYPTION_METHOD, $key, 0, $iv);
-            
+
             if ($encrypted === false) {
-                error_log('SWI Encryption: Failed to encrypt data');
+                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                    $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                    $logger->error('SWI Encryption: Failed to encrypt data');
+                }
                 return false;
             }
-            
+
             // Combine IV and encrypted data, then base64 encode
             $result = base64_encode($iv . $encrypted);
-            
+
             return $result;
-            
         } catch (Exception $e) {
-            error_log('SWI Encryption Error: ' . $e->getMessage());
+            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                $logger->error('SWI Encryption Error: ' . $e->getMessage());
+            }
             return false;
         }
     }
-    
+
     /**
      * Decrypt sensitive data
      * 
@@ -100,50 +108,57 @@ class WMSW_EncryptionHelper
         if (empty($encrypted_data)) {
             return $encrypted_data;
         }
-        
+
         // Check if OpenSSL is available
         if (!function_exists('openssl_decrypt')) {
-            error_log('SWI Decryption: OpenSSL not available, returning data as-is');
+            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                $logger->warning('SWI Decryption: OpenSSL not available, returning data as-is');
+            }
             return $encrypted_data;
         }
-        
+
         // Check if data looks encrypted (base64 encoded)
         if (!self::is_encrypted($encrypted_data)) {
             // Data doesn't appear to be encrypted, return as-is for backward compatibility
             return $encrypted_data;
         }
-        
+
         try {
             $key = self::get_encryption_key();
-            
+
             // Decode from base64
             $data = base64_decode($encrypted_data);
             if ($data === false) {
-                error_log('SWI Decryption: Failed to decode base64 data');
+                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                    $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                    $logger->error('SWI Decryption: Failed to decode base64 data');
+                }
                 return false;
             }
-            
+
             // Extract IV and encrypted data
             $iv_length = openssl_cipher_iv_length(self::ENCRYPTION_METHOD);
             $iv = substr($data, 0, $iv_length);
             $encrypted = substr($data, $iv_length);
-            
+
             // Decrypt the data
             $decrypted = openssl_decrypt($encrypted, self::ENCRYPTION_METHOD, $key, 0, $iv);
-            
+
             if ($decrypted === false) {
-                error_log('SWI Decryption: Failed to decrypt data');
+                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
+                    $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                    $logger->error('SWI Decryption: Failed to decrypt data');
+                }
                 return false;
             }
-            
+
             return $decrypted;
-            
         } catch (Exception $e) {
-            error_log('SWI Decryption Error: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Check if data appears to be encrypted by this class
      * 
@@ -155,17 +170,17 @@ class WMSW_EncryptionHelper
         if (empty($data)) {
             return false;
         }
-        
+
         // Check if it's valid base64 and has minimum length for IV + some encrypted data
         $decoded = base64_decode($data, true);
         if ($decoded === false) {
             return false;
         }
-        
+
         $iv_length = openssl_cipher_iv_length(self::ENCRYPTION_METHOD);
         return strlen($decoded) > $iv_length;
     }
-    
+
     /**
      * Securely hash a value for comparison (e.g., for duplicate checking)
      * 
@@ -177,10 +192,10 @@ class WMSW_EncryptionHelper
         if (empty($value)) {
             return '';
         }
-        
+
         return hash_hmac('sha256', $value, self::get_encryption_key());
     }
-    
+
     /**
      * Migrate existing plaintext access tokens to encrypted format
      * 
@@ -191,26 +206,26 @@ class WMSW_EncryptionHelper
     public static function migrate_existing_tokens()
     {
         global $wpdb;
-        
+
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
         $migrated = 0;
         $failed = 0;
-        
+
         try {
             // Get all stores with potentially unencrypted tokens
             $stores = $wpdb->get_results(
-                "SELECT id, access_token FROM $table WHERE access_token IS NOT NULL AND access_token != ''",
+                "SELECT id, access_token FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE access_token IS NOT NULL AND access_token != ''",
                 ARRAY_A
             );
-            
+
             foreach ($stores as $store) {
                 $token = $store['access_token'];
-                
+
                 // Skip if already encrypted
                 if (self::is_encrypted($token)) {
                     continue;
                 }
-                
+
                 // Encrypt the token
                 $encrypted_token = self::encrypt($token);
                 if ($encrypted_token !== false && $encrypted_token !== $token) {
@@ -222,21 +237,17 @@ class WMSW_EncryptionHelper
                         ['%s'],
                         ['%d']
                     );
-                    
+
                     if ($result !== false) {
                         $migrated++;
                     } else {
                         $failed++;
-                        error_log("SWI Encryption: Failed to update encrypted token for store ID {$store['id']}");
                     }
                 } else {
                     $failed++;
-                    error_log("SWI Encryption: Failed to encrypt token for store ID {$store['id']}");
                 }
             }
-            
         } catch (Exception $e) {
-            error_log('SWI Encryption Migration Error: ' . $e->getMessage());
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -244,7 +255,7 @@ class WMSW_EncryptionHelper
                 'failed' => $failed
             ];
         }
-        
+
         return [
             'success' => true,
             'migrated' => $migrated,
@@ -256,7 +267,7 @@ class WMSW_EncryptionHelper
             )
         ];
     }
-    
+
     /**
      * Validate that encryption/decryption is working properly
      * 
@@ -265,14 +276,14 @@ class WMSW_EncryptionHelper
     public static function test_encryption()
     {
         $test_data = 'test_access_token_' . wp_generate_password(32, false);
-        
+
         $encrypted = self::encrypt($test_data);
         if ($encrypted === false || $encrypted === $test_data) {
             return false;
         }
-        
+
         $decrypted = self::decrypt($encrypted);
-        
+
         return $decrypted === $test_data;
     }
 }

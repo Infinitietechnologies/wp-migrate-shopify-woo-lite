@@ -56,8 +56,10 @@ class WMSW_ProductHandler
      */
     public function previewProducts()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate store ID
         if (empty($_POST['store_id'])) {
@@ -67,7 +69,7 @@ class WMSW_ProductHandler
             return;
         }
 
-        $store_id = intval($_POST['store_id']);
+        $store_id = intval(sanitize_text_field(wp_unslash($_POST['store_id'])));
 
         $store_details = new WMSW_ShopifyStore();
         $store =  $store_details->find($store_id);
@@ -79,7 +81,7 @@ class WMSW_ProductHandler
             ]);
             return;
         }        // Get options from request
-        $options = isset($_POST['options']) ? array_map('sanitize_text_field', $_POST['options']) : [];
+        $options = isset($_POST['options']) ? array_map('sanitize_text_field', sanitize_text_field(wp_unslash($_POST['options']))) : [];
 
         // Set preview limit
         $options['limit'] = isset($options['preview_limit']) ? absint($options['preview_limit']) : 10;
@@ -87,8 +89,7 @@ class WMSW_ProductHandler
 
         // Get status filter if available (active, archived, draft)
         if (isset($_POST['options']['status'])) {
-            $options['status'] = sanitize_text_field($_POST['options']['status']);
-            $this->logger->debug('Applied status filter: ' . $options['status']);
+            $options['status'] = sanitize_text_field(wp_unslash($_POST['options']['status']));
         }
 
         // Log all filter options for debugging
@@ -191,7 +192,7 @@ class WMSW_ProductHandler
         $this->logger->debug('Shopify API returned ' . $product_count . ' products');
 
         if (isset($response['errors'])) {
-            $this->logger->error('Error retrieving products: ' . print_r($response['errors'], true));
+            $this->logger->error('Error retrieving products: ' . json_encode($response['errors']));
             return [];
         }
 
@@ -889,8 +890,10 @@ class WMSW_ProductHandler
         }
 
 
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate store ID
         if (empty($_POST['store_id'])) {
@@ -939,7 +942,7 @@ class WMSW_ProductHandler
         $product_settings = [];
         foreach ($product_settings_keys as $key) {
             if (isset($_POST[$key])) {
-                $product_settings[$key] = $_POST[$key];
+                $product_settings[$key] = sanitize_text_field(wp_unslash($_POST[$key]));
             }
         }
 
@@ -960,7 +963,7 @@ class WMSW_ProductHandler
         $filters = [];
         foreach ($advanced_filter_keys as $key) {
             if (isset($_POST['options'][$key])) {
-                $filters[$key] = $_POST['options'][$key];
+                $filters[$key] = sanitize_text_field(wp_unslash($_POST['options'][$key]));
             }
         }
 
@@ -970,14 +973,14 @@ class WMSW_ProductHandler
         // Prevent multiple in_progress imports for the same store
         global $wpdb;
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
-        
+
         // First, check for stuck imports (older than 1 hour) and mark them as failed
         $stuck_imports = $wpdb->get_results($wpdb->prepare(
-            "SELECT id FROM {$table_name} WHERE store_id = %d AND status = 'in_progress' AND created_at < %s",
+            "SELECT id FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND status = 'in_progress' AND created_at < %s",
             $store_id,
             gmdate('Y-m-d H:i:s', strtotime('-1 hour'))
         ));
-        
+
         if ($stuck_imports) {
             foreach ($stuck_imports as $stuck_import) {
                 $wpdb->update(
@@ -994,10 +997,10 @@ class WMSW_ProductHandler
                 $this->logger->info('Marked stuck import as failed: ' . $stuck_import->id);
             }
         }
-        
+
         // Now check for any remaining in-progress imports
         $existing_import_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$table_name} WHERE store_id = %d AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
+            "SELECT id FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
             $store_id
         ));
         if ($existing_import_id) {
@@ -1010,7 +1013,7 @@ class WMSW_ProductHandler
 
         // Clean up any stale pagination cursors
         WMSW_PaginationHelper::deleteCursor('products');
-        
+
         // Create import session only if no existing import is running
         $import_id = $this->createImportSession($store_id, $options);
 
@@ -1343,11 +1346,13 @@ class WMSW_ProductHandler
      * Handles AJAX request for checking the progress of an ongoing import
      */    public function getImportProgress()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Log all $_POST data for debugging (only in debug mode)
-        $this->logger->debugLog('POST data in getImportProgress: ' . print_r($_POST, true));
+        $this->logger->debugLog('POST data in getImportProgress: ' . json_encode($_POST));
 
         // Validate import ID - check both import_id and task_id
         $import_id = 0;
@@ -1400,12 +1405,14 @@ class WMSW_ProductHandler
      */
     public function checkActiveImports()
     {
-        // Verify security
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Get store ID
         $store_id = isset($_POST['store_id']) ? intval($_POST['store_id']) : 0;
-        
+
         if (!$store_id) {
             wp_send_json_error([
                 'message' => __('No store specified', 'wp-migrate-shopify-woo')
@@ -1415,12 +1422,12 @@ class WMSW_ProductHandler
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
-        
+
         // Get active import for this store
         $active_import = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$table_name} WHERE store_id = %d AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
+            "SELECT * FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
             $store_id
-        ), ARRAY_A);
+        ), \ARRAY_A);
 
         if ($active_import) {
             // Calculate percentage
@@ -1459,10 +1466,10 @@ class WMSW_ProductHandler
 
         $result = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT id, status, items_total, items_processed, updated_at FROM {$table_name} WHERE id = %d",
+                "SELECT id, status, items_total, items_processed, updated_at FROM {$wpdb->esc_sql($table_name)} WHERE id = %d",
                 $import_id
             ),
-            ARRAY_A
+            \ARRAY_A
         );
 
         return $result ? $result : false;
@@ -1587,7 +1594,7 @@ class WMSW_ProductHandler
                 // Additional safety check: prevent scheduling if same cursor is being used
                 $current_cursor = WMSW_PaginationHelper::getCursor('products');
                 $next_cursor = $results['next_cursor'] ?? null;
-                
+
                 if ($current_cursor !== $next_cursor && !empty($next_cursor)) {
                     \wp_schedule_single_event(time() + 10, 'wmsw_process_product_import', [$import_id, $store_id, $options]);
                     $this->logger->info('Scheduled next product import batch via cron.', [
@@ -1602,7 +1609,7 @@ class WMSW_ProductHandler
                         'current_cursor' => $current_cursor,
                         'next_cursor' => $next_cursor
                     ]);
-                    
+
                     // Update import status to completed since we're not scheduling more batches
                     $this->updateImportSession($import_id, [
                         'status' => 'completed',
@@ -1638,17 +1645,6 @@ class WMSW_ProductHandler
      */
     private function getBacktraceImportId()
     {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
-
-        foreach ($backtrace as $call) {
-            if (isset($call['function']) && $call['function'] === 'processProductImport') {
-                if (isset($call['args']) && !empty($call['args'])) {
-                    return $call['args'][0];
-                }
-                return 'No args in processProductImport';
-            }
-        }
-
         return 'processProductImport not found in backtrace';
     }
 
@@ -1663,8 +1659,7 @@ class WMSW_ProductHandler
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
 
         // Check if there's an in-progress import
-        $table_name = esc_sql($wpdb->prefix . WMSW_TASKS_TABLE);
-        $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$table_name}` WHERE status = %s", 'in_progress'));
+        $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->esc_sql($table_name)} WHERE status = %s", 'in_progress'));
 
         return !empty($count) && intval($count) > 0;
     }
@@ -1683,7 +1678,7 @@ class WMSW_ProductHandler
         // Check if there's an in-progress import (excluding current ID)
         $count = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table_name} WHERE status = 'in_progress' AND id != %d",
+                "SELECT COUNT(*) FROM {$wpdb->esc_sql($table_name)} WHERE status = 'in_progress' AND id != %d",
                 $import_id
             )
         );

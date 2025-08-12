@@ -11,21 +11,22 @@ if (!defined('ABSPATH')) {
 
 // Load security helper
 use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
+use ShopifyWooImporter\Models\WMSW_ShopifyStore;
 
 // Check user permissions using security helper
 WMSW_SecurityHelper::verifyAdminPage();
 
 // Handle actions
-$action = sanitize_text_field($_GET['action'] ?? '');
-$store_id = isset($_GET['store_id']) ? absint($_GET['store_id']) : 0;
+$action = sanitize_text_field(wp_unslash($_GET['action'] ?? ''));
+$store_id = isset($_GET['store_id']) ? absint(wp_unslash($_GET['store_id'])) : 0;
 
 // Get stores data
 global $wpdb;
 $stores_table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
 
 if ($action === 'delete' && $store_id) {    // Handle store deletion
-    if (wp_verify_nonce(sanitize_text_field($_GET['_wpnonce'] ?? ''), 'delete_store_' . $store_id)) {
-        $wpdb->delete($stores_table, ['id' => $store_id], ['%d']);
+    if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'] ?? '')), 'delete_store_' . $store_id)) {
+        WMSW_ShopifyStore::find($store_id)->delete();
 
         // Set a transient to display notification on the next page load
         set_transient('wmsw_store_deleted', true, 30);        // Redirect to the stores page without the action parameters
@@ -34,11 +35,11 @@ if ($action === 'delete' && $store_id) {    // Handle store deletion
     }
 }
 
-$total_stores = $wpdb->get_var("SELECT COUNT(*) FROM `{$stores_table}`");
+$total_stores = WMSW_ShopifyStore::get_all_stores_count(1);
+
+$stores = WMSW_ShopifyStore::get_all_active_stores(1);
 
 
-$stores_table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
-$stores = $wpdb->get_results("SELECT * FROM `{$stores_table}` ORDER BY created_at DESC");
 
 // Include notification component
 require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
@@ -66,7 +67,7 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
             // Handle form display for add/edit
             $store = null;
             if ($action === 'edit' && $store_id) {
-                $store = $wpdb->get_row($wpdb->prepare("SELECT * FROM $stores_table WHERE id = %d", $store_id));
+                $store = WMSW_ShopifyStore::find($store_id);
             }
             ?>
 
@@ -98,7 +99,7 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                         <?php wp_nonce_field('swi-admin-nonce', 'nonce'); ?>
                         <input type="hidden" name="action" value="wmsw_save_store">
                         <?php if ($store): ?>
-                            <input type="hidden" name="store_id" value="<?php echo esc_attr($store->id); ?>">
+                            <input type="hidden" name="store_id" value="<?php echo esc_attr($store->get_id()); ?>">
                         <?php endif; ?>
 
                         <div class="swi-form-row">
@@ -107,7 +108,7 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                                     <?php esc_html_e('Store Name', 'wp-migrate-shopify-woo'); ?> <span class="text-error">*</span>
                                 </label>
                                 <input type="text" name="store_name" id="store_name" class="swi-form-input"
-                                    value="<?php echo $store ? esc_attr($store->store_name) : ''; ?>" required>
+                                    value="<?php echo $store ? esc_attr($store->get_store_name()) : ''; ?>" required>
                                 <p class="swi-form-help"><?php esc_html_e('A friendly name to identify this store.', 'wp-migrate-shopify-woo'); ?></p>
                             </div>
 
@@ -116,7 +117,7 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                                     <?php esc_html_e('Shop Domain', 'wp-migrate-shopify-woo'); ?> <span class="text-error">*</span>
                                 </label>
                                 <input type="text" name="shop_domain" id="shop_domain" class="swi-form-input"
-                                    value="<?php echo $store ? esc_attr($store->shop_domain) : ''; ?>"
+                                    value="<?php echo $store ? esc_attr($store->get_shop_domain()) : ''; ?>"
                                     placeholder="yourstore.myshopify.com" required>
                                 <p class="swi-form-help"><?php esc_html_e('Your Shopify store domain (without https://).', 'wp-migrate-shopify-woo'); ?></p>
                             </div>
@@ -127,7 +128,7 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                                     <?php esc_html_e('Access Token', 'wp-migrate-shopify-woo'); ?> <span class="text-error">*</span>
                                 </label>
                                 <input type="password" name="access_token" id="access_token" class="swi-form-input"
-                                    value="<?php echo $store ? esc_attr($store->access_token) : ''; ?>" required>
+                                    value="<?php echo $store ? esc_attr($store->get_access_token()) : ''; ?>" required>
                                 <p class="swi-form-help"><?php esc_html_e('Private app access token from your Shopify store.', 'wp-migrate-shopify-woo'); ?></p>
                             </div>
 
@@ -137,7 +138,7 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                                 </label>
 
                                 <input type="text" name="api_version" id="api_version" class="swi-form-input"
-                                    value="<?php echo $store ? esc_attr($store->api_version) : ''; ?>" required>
+                                    value="<?php echo $store ? esc_attr($store->get_api_version()) : ''; ?>" required>
                                 <p class="swi-form-help">
                                     <?php esc_html_e('Select the Shopify API version to use. Newer versions may have more features but older versions provide better compatibility.', 'wp-migrate-shopify-woo'); ?>
                                     <a href="https://shopify.dev/docs/api/release-notes" target="_blank" rel="noopener"><?php esc_html_e('View API Release Notes', 'wp-migrate-shopify-woo'); ?></a>
@@ -148,14 +149,14 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                             <div class="swi-form-group">
                                 <label class="swi-form-label">
                                     <input type="checkbox" name="is_active" value="1"
-                                        <?php echo ($store && $store->is_active) ? 'checked' : ''; ?>>
+                                        <?php echo ($store && $store->get_is_active()) ? 'checked' : ''; ?>>
                                     <?php esc_html_e('Active Store', 'wp-migrate-shopify-woo'); ?>
                                 </label>
                                 <p class="swi-form-help"><?php esc_html_e('Enable this store for imports and synchronization.', 'wp-migrate-shopify-woo'); ?></p>
                             </div>
                             <div class="swi-form-group">
                                 <label class="swi-form-label">
-                                    <input type="checkbox" name="is_default" value="1" <?php echo ($store && $store->is_default) ? 'checked' : ''; ?>>
+                                    <input type="checkbox" name="is_default" value="1" <?php echo ($store && $store->get_is_default()) ? 'checked' : ''; ?>>
                                     <?php esc_html_e('Default Store', 'wp-migrate-shopify-woo'); ?>
                                 </label>
                                 <p class="swi-form-help"><?php esc_html_e('Set as the default Shopify store for this site. Only one store can be default at a time.', 'wp-migrate-shopify-woo'); ?></p>
@@ -221,71 +222,71 @@ require_once WMSW_PLUGIN_DIR . 'backend/partials/components/notification.php';
                                 <div class="swi-card-header">
                                     <div class="swi-flex swi-justify-between swi-items-center w-100">
                                         <div class="swi-flex swi-items-center">
-                                            <h3 class="swi-card-title"><?php echo esc_html($store->store_name); ?></h3>
-                                            <?php if ($store->is_default): ?>
+                                            <h3 class="swi-card-title"><?php echo esc_html($store['store_name']); ?></h3>
+                                            <?php if ($store['is_default']): ?>
                                                 <span class="swi-default-badge swi-ml-2" title="<?php esc_attr_e('Default Store', 'wp-migrate-shopify-woo'); ?>">
                                                     <span class="dashicons dashicons-star-filled swi-default-star"></span>
                                                 </span>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="swi-connection-status <?php echo $store->is_active ? 'swi-connection-connected' : 'swi-connection-disconnected'; ?>">
-                                            <span class="dashicons dashicons-<?php echo $store->is_active ? 'yes-alt' : 'dismiss'; ?>"></span>
-                                            <?php echo $store->is_active ? esc_html__('Active', 'wp-migrate-shopify-woo') : esc_html__('Inactive', 'wp-migrate-shopify-woo'); ?>
+                                        <div class="swi-connection-status <?php echo $store['is_active'] ? 'swi-connection-connected' : 'swi-connection-disconnected'; ?>">
+                                            <span class="dashicons dashicons-<?php echo $store['is_active'] ? 'yes-alt' : 'dismiss'; ?>"></span>
+                                            <?php echo $store['is_active'] ? esc_html__('Active', 'wp-migrate-shopify-woo') : esc_html__('Inactive', 'wp-migrate-shopify-woo'); ?>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="swi-card-body">
                                     <div class="swi-mb-4">
-                                        <p><strong><?php esc_html_e('Domain:', 'wp-migrate-shopify-woo'); ?></strong> <?php echo esc_html($store->shop_domain); ?></p>
-                                        <p><strong><?php esc_html_e('API Version:', 'wp-migrate-shopify-woo'); ?></strong> <?php echo esc_html($store->api_version ?? '2023-10'); ?></p>
+                                        <p><strong><?php esc_html_e('Domain:', 'wp-migrate-shopify-woo'); ?></strong> <?php echo esc_html($store['shop_domain']); ?></p>
+                                        <p><strong><?php esc_html_e('API Version:', 'wp-migrate-shopify-woo'); ?></strong> <?php echo esc_html($store['api_version'] ?? '2023-10'); ?></p>
                                         <p><strong><?php esc_html_e('Last Sync:', 'wp-migrate-shopify-woo'); ?></strong>
-                                            <?php echo $store->last_sync ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($store->last_sync))) : esc_html__('Never', 'wp-migrate-shopify-woo'); ?>
+                                            <?php echo $store['last_sync'] ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($store['last_sync']))) : esc_html__('Never', 'wp-migrate-shopify-woo'); ?>
                                         </p>
                                         <p><strong><?php esc_html_e('Connected:', 'wp-migrate-shopify-woo'); ?></strong>
-                                            <?php echo esc_html(date_i18n(get_option('date_format'), strtotime($store->created_at))); ?>
+                                            <?php echo esc_html(date_i18n(get_option('date_format'), strtotime($store['created_at']))); ?>
                                         </p>
                                     </div>
                                 </div>
                                 <div class="swi-card-footer">
                                     <div class="swi-table-actions">
-                                        <a href="<?php echo esc_url(admin_url('admin.php?page=wp-migrate-shopify-woo-stores&action=edit&store_id=' . $store->id)); ?>" class="swi-btn swi-btn-sm swi-btn-secondary">
+                                        <a href="<?php echo esc_url(admin_url('admin.php?page=wp-migrate-shopify-woo-stores&action=edit&store_id=' . $store['id'])); ?>" class="swi-btn swi-btn-sm swi-btn-secondary">
                                             <span class="dashicons dashicons-edit"></span>
                                             <?php esc_html_e('Edit', 'wp-migrate-shopify-woo'); ?>
                                         </a>
 
                                         <button type="button" class="swi-btn swi-btn-sm swi-btn-secondary swi-test-connection"
-                                            data-store-id="<?php echo esc_attr($store->id); ?>">
+                                            data-store-id="<?php echo esc_attr($store['id']); ?>">
                                             <span class="dashicons dashicons-admin-network"></span>
                                             <?php esc_html_e('Test', 'wp-migrate-shopify-woo'); ?>
                                         </button>
 
-                                        <?php if (!$store->is_default): ?>
+                                        <?php if (!$store['is_default']): ?>
                                             <button type="button" class="swi-btn swi-btn-sm swi-btn-info swi-set-default"
-                                                data-store-id="<?php echo esc_attr($store->id); ?>">
+                                                data-store-id="<?php echo esc_attr($store['id']); ?>">
                                                 <span class="dashicons dashicons-star-filled"></span>
                                                 <?php esc_html_e('Set Default', 'wp-migrate-shopify-woo'); ?>
                                             </button>
                                         <?php endif; ?>
 
-                                        <?php if ($store->is_active): ?>
-                                            <button href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-migrate-shopify-woo-stores&action=deactivate&store_id=' . $store->id), 'deactivate_store_' . $store->id)); ?>" class="swi-btn swi-btn-sm swi-btn-warning deactivate-store">
+                                        <?php if ($store['is_active']): ?>
+                                            <button href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-migrate-shopify-woo-stores&action=deactivate&store_id=' . $store['id']), 'deactivate_store_' . $store['id'])); ?>" class="swi-btn swi-btn-sm swi-btn-warning deactivate-store">
                                                 <span class="dashicons dashicons-controls-pause"></span>
                                                 <?php esc_html_e('Deactivate', 'wp-migrate-shopify-woo'); ?>
                                             </button>
                                         <?php else: ?>
-                                            <button href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-migrate-shopify-woo-stores&action=deactivate&store_id=' . $store->id), 'deactivate_store_' . $store->id)); ?>" class="swi-btn swi-btn-sm swi-btn-success deactivate-store">
+                                            <button href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-migrate-shopify-woo-stores&action=deactivate&store_id=' . $store['id']), 'deactivate_store_' . $store['id'])); ?>" class="swi-btn swi-btn-sm swi-btn-success deactivate-store">
                                                 <span class="dashicons dashicons-controls-play"></span>
                                                 <?php esc_html_e('Activate', 'wp-migrate-shopify-woo'); ?>
                                             </button>
                                         <?php endif; ?> <button type="button"
-                                            data-store-id="<?php echo esc_attr($store->id); ?>"
+                                            data-store-id="<?php echo esc_attr($store['id']); ?>"
                                             class="swi-btn swi-btn-sm swi-btn-danger delete-store">
                                             <span class="dashicons dashicons-trash"></span>
                                             <?php esc_html_e('Delete', 'wp-migrate-shopify-woo'); ?>
                                         </button>
 
                                         <button type="button"
-                                            data-store-id="<?php echo esc_attr($store->id); ?>"
+                                            data-store-id="<?php echo esc_attr($store['id']); ?>"
                                             class="swi-btn swi-btn-sm swi-btn-secondary swi-copy-store">
                                             <span class="dashicons dashicons-admin-page"></span>
                                             <?php esc_html_e('Copy', 'wp-migrate-shopify-woo'); ?>

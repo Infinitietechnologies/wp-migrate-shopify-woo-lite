@@ -63,8 +63,10 @@ class WMSW_StoreHandler
      */
     public function saveStore()
     {
-        // Check nonce and permissions in one call
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Validate required fields using enhanced security helper
         $required_fields = ['store_name', 'shop_domain', 'access_token', 'api_version'];
@@ -181,8 +183,10 @@ class WMSW_StoreHandler
      */
     public function deleteStore()
     {
-        // Check nonce and permissions in one call
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Get sanitized store ID using enhanced security helper
         $store_id = WMSW_SecurityHelper::sanitizeStoreId();
@@ -222,8 +226,10 @@ class WMSW_StoreHandler
      */
     public function setDefaultStore()
     {
-        // Check nonce and permissions
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         $store_id = absint($_POST['store_id'] ?? 0);
 
@@ -237,8 +243,7 @@ class WMSW_StoreHandler
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
 
         // Get previous default store for logging
-        $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
-        $previous_default = $wpdb->get_var($wpdb->prepare("SELECT id FROM `{$table}` WHERE is_default = %d", 1));
+        $previous_default = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->esc_sql($table)} WHERE is_default = %d", 1));
 
         // First, remove default status from all stores
         $wpdb->update(
@@ -348,8 +353,12 @@ class WMSW_StoreHandler
      */
     public function toggleStatusStore()
     {
-        // Check nonce and permissions in one call
-        WMSW_SecurityHelper::verifyAdminRequest('nonce', 'swi-admin-nonce', 'manage_woocommerce');
+
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
+
 
         $store_id_raw = absint($_POST['store_id'] ?? 0);
         $store_id     = $store_id_raw;
@@ -404,8 +413,10 @@ class WMSW_StoreHandler
      */
     public function testConnectionWithStore()
     {
-        // Check nonce and permissions in one call
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         // Sanitize and get store ID
         $store_id_raw = absint($_POST['store_id'] ?? 0);
@@ -486,8 +497,10 @@ class WMSW_StoreHandler
      */
     public function copyStore()
     {
-        // Check nonce and permissions
-        WMSW_SecurityHelper::verifyAdminRequest();
+        // Verify nonce
+        if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+        }
 
         $store_id = absint($_POST['store_id'] ?? 0);
 

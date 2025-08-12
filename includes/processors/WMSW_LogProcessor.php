@@ -118,7 +118,9 @@ class WMSW_LogProcessor
         $table = $wpdb->prefix . (defined('WMSW_LOGS_TABLE') ? WMSW_LOGS_TABLE : 'wmsw_logs');
         $date = gmdate('Y-m-d H:i:s', strtotime('-' . intval($days) . ' days'));
         // Never delete logs with 'never_delete' in context
-        $result = $wpdb->query($wpdb->prepare("DELETE FROM $table WHERE created_at < %s AND (context NOT LIKE %s OR context IS NULL)", $date, '%never_delete%'));
+        // Use esc_sql for table names since %i is only supported in WP 6.2+
+        $escaped_table = esc_sql($table);
+        $result = $wpdb->query($wpdb->prepare("DELETE FROM `{$escaped_table}` WHERE created_at < %s AND (context NOT LIKE %s OR context IS NULL)", $date, '%never_delete%'));
         // Add a special log entry that should never be cleared
         $user_id = \get_current_user_id();
         $user_data = \get_userdata($user_id);
