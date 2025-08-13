@@ -41,7 +41,9 @@ function wmsw_uninstall_plugin()
             // This is the standard approach used in WordPress plugins
             // Use esc_sql for table names since %i is only supported in WP 6.2+
             $escaped_table = esc_sql($table);
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
             $result = $wpdb->query("DROP TABLE IF EXISTS " . esc_sql($table));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
             if ($result === false) {
                 // Log error will be here
             }

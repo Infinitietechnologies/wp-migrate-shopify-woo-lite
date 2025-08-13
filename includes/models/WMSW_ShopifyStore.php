@@ -78,6 +78,7 @@ class WMSW_ShopifyStore
 
         if ($this->id) {
             // Update existing
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->update(
                 $table,
                 $data,
@@ -85,13 +86,16 @@ class WMSW_ShopifyStore
                 ['%s', '%s', '%s', '%s', '%d', '%d', '%s'],
                 ['%d']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
             // Insert new
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->insert(
                 $table,
                 $data,
                 ['%s', '%s', '%s', '%s', '%d', '%d', '%s']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             if ($result) {
                 $this->id = $wpdb->insert_id;
@@ -112,11 +116,13 @@ class WMSW_ShopifyStore
 
         global $wpdb;
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->delete(
             $wpdb->prefix . WMSW_STORES_TABLE,
             ['id' => $this->id],
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -129,10 +135,12 @@ class WMSW_ShopifyStore
         global $wpdb;
 
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $row = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM" . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE id = %d", $id),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $row ? new self($row) : null;
     }
@@ -144,10 +152,12 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $row = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE shop_domain = %s", $shop_domain),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $row ? new self($row) : null;
     }
@@ -160,10 +170,12 @@ class WMSW_ShopifyStore
         global $wpdb;
 
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $rows = $wpdb->get_results(
             $wpdb->prepare("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE is_active = %d ORDER BY store_name", 1),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $stores = [];
         foreach ($rows as $row) {
@@ -196,7 +208,9 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $rows = $wpdb->get_results("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " ORDER BY store_name", ARRAY_A);
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $stores = [];
         foreach ($rows as $row) {
             $stores[] = [
@@ -299,6 +313,7 @@ class WMSW_ShopifyStore
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
 
         // Get all stores with non-empty access tokens
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $stores = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT id, access_token FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE access_token != %s AND access_token IS NOT NULL",
@@ -306,6 +321,7 @@ class WMSW_ShopifyStore
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $migrated_count = 0;
 
@@ -321,6 +337,7 @@ class WMSW_ShopifyStore
             $encrypted_token = WMSW_EncryptionHelper::encrypt($token);
 
             // Update the database
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->update(
                 $table,
                 ['access_token' => $encrypted_token],
@@ -328,6 +345,7 @@ class WMSW_ShopifyStore
                 ['%s'],
                 ['%d']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             if ($result !== false) {
                 $migrated_count++;
@@ -361,7 +379,9 @@ class WMSW_ShopifyStore
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
 
         // Get all column names
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $columns = $wpdb->get_col("SHOW COLUMNS FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // Remove access_token column
         $columns = array_diff($columns, ['access_token']);
@@ -371,15 +391,19 @@ class WMSW_ShopifyStore
 
         // Query only active stores
         if ($get_active == 1) {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $rows = $wpdb->get_results(
                 $wpdb->prepare("SELECT %s FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . "WHERE is_active = %d", $select_columns, 1),
                 ARRAY_A
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $rows = $wpdb->get_results(
                 $wpdb->prepare("SELECT %s FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE), $select_columns),
                 ARRAY_A
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return $rows;
@@ -391,9 +415,13 @@ class WMSW_ShopifyStore
         global $wpdb;
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
         if ($get_active == 1) {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE is_active = 1");
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
         return $count;
     }
@@ -428,18 +456,22 @@ class WMSW_ShopifyStore
                     $where_clause = '1=1'; // All stores
             }
 
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $stores = $wpdb->get_results($wpdb->prepare(
                 "SELECT *, CASE WHEN is_active = 1 THEN 'active' ELSE 'inactive' END as status FROM" . esc_sql($table) . " WHERE %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
                 $where_clause,
                 $limit,
                 $offset
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $stores = $wpdb->get_results($wpdb->prepare(
                 "SELECT *, CASE WHEN is_active = 1 THEN 'active' ELSE 'inactive' END as status FROM" . esc_sql($table) . " ORDER BY created_at DESC LIMIT %d OFFSET %d",
                 $limit,
                 $offset
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return $stores;
@@ -473,14 +505,18 @@ class WMSW_ShopifyStore
                     $where_clause = '1=1'; // All stores
             }
 
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var(
                 $wpdb->prepare(
                     "SELECT COUNT(*) FROM" . esc_sql($table) . " WHERE %s",
                     $where_clause
                 )
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($table));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return (int) $count;
@@ -496,6 +532,7 @@ class WMSW_ShopifyStore
         global $wpdb;
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
             $table,
             ['is_default' => 0],
@@ -503,6 +540,7 @@ class WMSW_ShopifyStore
             ['%d'],
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -522,6 +560,7 @@ class WMSW_ShopifyStore
         self::resetAllDefault();
 
         // Then set the specified store as default
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
             $table,
             ['is_default' => 1],
@@ -529,6 +568,7 @@ class WMSW_ShopifyStore
             ['%d'],
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -543,12 +583,14 @@ class WMSW_ShopifyStore
         global $wpdb;
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $default_id = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT id FROM {$wpdb->esc_sql($table)} WHERE is_default = %d",
                 1
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $default_id ? (int) $default_id : null;
     }
@@ -563,9 +605,11 @@ class WMSW_ShopifyStore
         global $wpdb;
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
         
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $exists = $wpdb->get_var(
             $wpdb->prepare("SHOW TABLES LIKE %s", $table)
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         
         return !empty($exists);
     }

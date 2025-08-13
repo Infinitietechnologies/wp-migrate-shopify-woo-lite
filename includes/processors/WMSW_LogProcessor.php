@@ -13,6 +13,7 @@ class WMSW_LogProcessor
     {
         global $wpdb;
         $table = $wpdb->prefix . (defined('WMSW_LOGS_TABLE') ? WMSW_LOGS_TABLE : 'wmsw_logs');
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->insert($table, [
             'level' => $level,
             'message' => $message,
@@ -20,6 +21,7 @@ class WMSW_LogProcessor
             'task_id' => $task_id,
             'created_at' => current_time('mysql', 1)
         ]);
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
         return $wpdb->insert_id;
     }
 
@@ -85,7 +87,9 @@ class WMSW_LogProcessor
         $where_sql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         // Get total count for pagination
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $total = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM" . esc_sql($table) . "%s %s", $where_sql, $params));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // Pagination
         $per_page = isset($args['per_page']) ? intval($args['per_page']) : 20;
@@ -95,8 +99,10 @@ class WMSW_LogProcessor
         // Build main query with pagination
         $all_params = array_merge($params, [$per_page, $offset]);
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results($wpdb->prepare("SELECT * FROM" . esc_sql($table) . "
          %s ORDER BY created_at DESC LIMIT %d OFFSET %d", $where_sql, $per_page, $offset));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // Calculate total pages
         $total_pages = ceil($total / $per_page);
@@ -122,12 +128,15 @@ class WMSW_LogProcessor
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->query($wpdb->prepare("DELETE FROM " . esc_sql($table) . " WHERE created_at < %s AND (context NOT LIKE %s OR context IS NULL)", $date, '%never_delete%'));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         // Add a special log entry that should never be cleared
         $user_id = \get_current_user_id();
         $user_data = \get_userdata($user_id);
         $user_name = $user_data ? $user_data->display_name : 'System';
         $never_delete_message = 'Logs cleared by ' . $user_name . ' at ' . gmdate('Y-m-d H:i:s');
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->insert($table, [
             'level' => 'info',
             'message' => $never_delete_message,
@@ -138,6 +147,7 @@ class WMSW_LogProcessor
             ]),
             'created_at' => current_time('mysql', 1)
         ]);
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
         return $result;
     }
 

@@ -1,6 +1,6 @@
 === WP Migrate & Import Shopify to WooCommerce ===
 Contributors: infinitietech
-Tags: shopify, woocommerce, migration, import, ecommerce
+Tags: shopify, WooCommerce, migration, import, ecommerce
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.4

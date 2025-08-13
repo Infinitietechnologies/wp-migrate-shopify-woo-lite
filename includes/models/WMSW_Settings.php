@@ -65,7 +65,9 @@ class WMSW_Settings
                         $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
                         $logger->debug("[WMSW_Settings::save] Updating existing record ID: " . $this->id);
                     }
+                    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     $result = $wpdb->update($table, $data, ['id' => $this->id]);
+                    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     if ($result === false) {
                         if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
                             $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
@@ -75,7 +77,9 @@ class WMSW_Settings
                     }
                 } else {
                     $data['created_at'] = current_time('mysql');
+                    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     $result = $wpdb->insert($table, $data);
+                    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     if ($result === false) {
                         return false;
                     }
@@ -98,7 +102,9 @@ class WMSW_Settings
             $where .= ' AND store_id = %d';
             $params[] = $storeId;
         }
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE) . " WHERE %s ORDER BY updated_at DESC LIMIT 1", $where), 'ARRAY_A');
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         if ($row) {
             $row['setting_value'] = self::maybeUnserialize($row['setting_value']);
             return new self($row);
@@ -165,7 +171,9 @@ class WMSW_Settings
         } elseif ($storeId) {
             $where['store_id'] = $storeId;
         }
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return $wpdb->delete($table, $where) !== false;
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     }
 
     // Getters

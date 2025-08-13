@@ -144,6 +144,7 @@ class WMSW_Logger
 
         // Note: WordPress doesn't provide a built-in method for inserting into custom tables
         // This is the standard approach used in WordPress plugins for custom table operations
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $result = $wpdb->insert(
             $table_name,
             [
@@ -161,6 +162,7 @@ class WMSW_Logger
                 '%s'   // created_at
             ]
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         // Check for DB errors and clear cache if successful
         if ($result) {

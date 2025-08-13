@@ -91,21 +91,24 @@ class WMSW_Task
 
         if ($this->id) {
             // Update existing
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->update(
-                $escaped_table,
+                $table,
                 $data,
                 ['id' => $this->id],
-                ['%d', '%s', '%s', '%s', '%s', '%s', '%s'],
+                ['%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'],
                 ['%d']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
             // Insert new
-            $data['created_at'] = current_time('mysql');
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->insert(
-                $escaped_table,
+                $table,
                 $data,
-                ['%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s']
+                ['%d', '%s', '%s', '%s', '%d', '%d', '%s', '%s']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             if ($result) {
                 $this->id = $wpdb->insert_id;
@@ -125,16 +128,13 @@ class WMSW_Task
         }
 
         global $wpdb;
-        $table = self::get_table_name();
-
-        // Use $wpdb->esc_sql for table names since %i is only supported in WP 6.2+
-        $escaped_table = $wpdb->esc_sql($table);
-
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->delete(
-            $escaped_table,
+            self::get_table_name(),
             ['id' => $this->id],
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -150,10 +150,12 @@ class WMSW_Task
         // Use $wpdb->esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = $wpdb->esc_sql($table);
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM " . esc_sql($table) . " WHERE id = %d", $id),
+            $wpdb->prepare("SELECT * FROM {$wpdb->esc_sql($table)} WHERE id = %d", $id),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $row ? new self($row) : null;
     }
@@ -232,6 +234,7 @@ class WMSW_Task
                 $order_limit_clause .= " LIMIT {$limit}";
             }
 
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $tasks = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT * FROM" . esc_sql($table) . "%s %s %s",
@@ -241,6 +244,7 @@ class WMSW_Task
                 ),
                 \ARRAY_A
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         // Convert to model instances
@@ -262,6 +266,7 @@ class WMSW_Task
 
         // Use $wpdb->esc_sql for table names since %i is only supported in WP 6.2+
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $tasks = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM " . esc_sql($table) . "
@@ -273,6 +278,7 @@ class WMSW_Task
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($tasks as $task) {
@@ -324,6 +330,7 @@ class WMSW_Task
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $tasks = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM" . esc_sql($table) . "
@@ -335,6 +342,7 @@ class WMSW_Task
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($tasks as $task) {
@@ -379,6 +387,7 @@ class WMSW_Task
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
             $escaped_table,
             ['status' => $status],
@@ -386,6 +395,7 @@ class WMSW_Task
             ['%s'],
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -413,6 +423,7 @@ class WMSW_Task
             return false;
         }
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
             $escaped_table,
             $data,
@@ -420,6 +431,7 @@ class WMSW_Task
             array_fill(0, count($data), '%s'),
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -567,12 +579,16 @@ class WMSW_Task
         $escaped_table = esc_sql($table);
 
         if ($status) {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM " . esc_sql($table) . " WHERE status = %s",
                 $status
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var("SELECT COUNT(*) FROM" . esc_sql($table));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return (int) $count;
@@ -590,16 +606,20 @@ class WMSW_Task
         $escaped_table = esc_sql($table);
 
         if ($status) {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM " . esc_sql($table) . " WHERE store_id = %d AND status = %s",
                 $store_id,
                 $status
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM " . esc_sql($table) . " WHERE store_id = %d",
                 $store_id
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return (int) $count;
@@ -626,12 +646,16 @@ class WMSW_Task
         ];
 
         // Get total count
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $stats['total'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($table));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // Get counts by status
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $status_counts = $wpdb->get_results(
             "SELECT status, COUNT(*) as count FROM " . esc_sql($table) . " GROUP BY status"
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         foreach ($status_counts as $status_count) {
             if (isset($stats[$status_count->status])) {
@@ -656,6 +680,7 @@ class WMSW_Task
         $cutoff_date = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
         $status_list = "'" . implode("','", array_map('esc_sql', $statuses)) . "'";
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM " . esc_sql($table) . " WHERE status IN %s AND created_at < %s",
@@ -663,6 +688,7 @@ class WMSW_Task
                 $cutoff_date
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false ? (int) $result : false;
     }

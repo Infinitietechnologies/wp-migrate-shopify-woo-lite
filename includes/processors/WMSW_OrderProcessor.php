@@ -594,27 +594,33 @@ class WMSW_OrderProcessor
         global $wpdb;
 
         // Try to find by the provided ID format first
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $order_id = $wpdb->get_var($wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_shopify_order_id' AND meta_value = %s",
             $shopify_order_id
         ));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // If not found and this is a numeric ID, also try the GraphQL format
         if (!$order_id && is_numeric($shopify_order_id)) {
             $graphql_id = "gid://shopify/Order/" . $shopify_order_id;
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $order_id = $wpdb->get_var($wpdb->prepare(
                 "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_shopify_order_id' AND meta_value = %s",
                 $graphql_id
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         // If not found and this is a GraphQL ID, also try the numeric format
         if (!$order_id && strpos($shopify_order_id, 'gid://shopify/Order/') === 0) {
             $numeric_id = str_replace('gid://shopify/Order/', '', $shopify_order_id);
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $order_id = $wpdb->get_var($wpdb->prepare(
                 "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_shopify_order_id' AND meta_value = %s",
                 $numeric_id
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return $order_id ? wc_get_order($order_id) : false;
@@ -772,10 +778,12 @@ class WMSW_OrderProcessor
 
         // First try to find by variant ID if available
         if ($variant_id) {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $post_id = $wpdb->get_var($wpdb->prepare(
                 "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_shopify_variant_id' AND meta_value = %s",
                 $variant_id
             ));
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             if ($post_id) {
                 return wc_get_product($post_id);
@@ -783,10 +791,12 @@ class WMSW_OrderProcessor
         }
 
         // Try to find by product ID
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $post_id = $wpdb->get_var($wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_shopify_product_id' AND meta_value = %s",
             $product_id
         ));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $post_id ? wc_get_product($post_id) : false;
     }

@@ -213,10 +213,12 @@ class WMSW_EncryptionHelper
 
         try {
             // Get all stores with potentially unencrypted tokens
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $stores = $wpdb->get_results(
                 "SELECT id, access_token FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE access_token IS NOT NULL AND access_token != ''",
                 ARRAY_A
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             foreach ($stores as $store) {
                 $token = $store['access_token'];
@@ -230,6 +232,7 @@ class WMSW_EncryptionHelper
                 $encrypted_token = self::encrypt($token);
                 if ($encrypted_token !== false && $encrypted_token !== $token) {
                     // Update the database with encrypted token
+                    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     $result = $wpdb->update(
                         $table,
                         ['access_token' => $encrypted_token],
@@ -237,6 +240,7 @@ class WMSW_EncryptionHelper
                         ['%s'],
                         ['%d']
                     );
+                    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
                     if ($result !== false) {
                         $migrated++;

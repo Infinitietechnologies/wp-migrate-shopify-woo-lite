@@ -119,6 +119,7 @@ class WMSW_ImportLog
 
         if ($this->id) {
             // Update existing
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->update(
                 $table,
                 $data,
@@ -126,13 +127,16 @@ class WMSW_ImportLog
                 ['%d', '%s', '%s', '%s', '%d'],
                 ['%d']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
             // Insert new
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $result = $wpdb->insert(
                 $table,
                 $data,
                 ['%d', '%s', '%s', '%s', '%d']
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             if ($result) {
                 $this->id = $wpdb->insert_id;
@@ -164,11 +168,13 @@ class WMSW_ImportLog
             'updated_at' => \current_time('mysql')
         ];
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->insert(
             $table,
             $data,
             ['%d', '%s', '%s', '%s', '%s', '%s']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         if ($result) {
             return self::find($wpdb->insert_id);
@@ -205,6 +211,7 @@ class WMSW_ImportLog
             }
         }
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
             $table,
             $data,
@@ -212,6 +219,7 @@ class WMSW_ImportLog
             $formats,
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // Update the model properties if successful
         if ($result !== false) {
@@ -313,6 +321,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $row = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE store_id = %d AND import_type = %s AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
@@ -321,6 +330,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         return $row ? new self($row) : null;
     }
@@ -336,12 +346,14 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$wpdb->esc_sql($table)} WHERE status = 'in_progress' AND id != %d",
                 $exclude_import_id
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         return intval($count);
     }
@@ -356,11 +368,13 @@ class WMSW_ImportLog
         }
 
         global $wpdb;
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $result = $wpdb->delete(
             self::get_table_name(),
             ['id' => $this->id],
             ['%d']
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         return $result !== false;
     }
@@ -373,10 +387,12 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $row = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM {$wpdb->esc_sql($table)} WHERE id = %d", $id),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         return $row ? new self($row) : null;
     }
@@ -437,6 +453,7 @@ class WMSW_ImportLog
         $offset = ($page - 1) * $per_page;
 
         // Get logs with pagination
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT l.*, t.task_type, s.store_name
@@ -451,6 +468,7 @@ class WMSW_ImportLog
                 $offset
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $logs;
     }
@@ -510,6 +528,7 @@ class WMSW_ImportLog
         // Get total count
         if ($where_values) {
 
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $total_items = $wpdb->get_var(
                 $wpdb->prepare(
                     "SELECT COUNT(*) FROM " . esc_sql($logs_table) . " l
@@ -519,12 +538,15 @@ class WMSW_ImportLog
                     $where_values
                 )
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $total_items = $wpdb->get_var(
                 "SELECT COUNT(*) FROM" . esc_sql($logs_table) . " l
                  LEFT JOIN" . esc_sql($tasks_table) . " t ON l.task_id = t.id
                  LEFT JOIN" . esc_sql($stores_table) . " s ON t.store_id = s.id"
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         }
 
         return (int) $total_items;
@@ -538,6 +560,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE task_id = %d ORDER BY created_at DESC",
@@ -545,6 +568,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($logs as $log) {
@@ -562,6 +586,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE level = %s ORDER BY created_at DESC LIMIT %d",
@@ -570,6 +595,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($logs as $log) {
@@ -588,6 +614,7 @@ class WMSW_ImportLog
         $logs_table = self::get_table_name();
         $tasks_table = self::get_tasks_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT l.* FROM {$wpdb->esc_sql($logs_table)} l
@@ -600,6 +627,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($logs as $log) {
@@ -626,12 +654,16 @@ class WMSW_ImportLog
         ];
 
         // Get total count
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $stats['total'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM" . esc_sql($table));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         // Get counts by level
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $level_counts = $wpdb->get_results(
             "SELECT level, COUNT(*) as count FROM" . esc_sql($table) . "GROUP BY level"
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         foreach ($level_counts as $level_count) {
             if (isset($stats[$level_count->level])) {
@@ -650,12 +682,14 @@ class WMSW_ImportLog
         global $wpdb;
         $stores_table = self::get_stores_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM" . esc_sql($stores_table) . " WHERE is_active = %d ORDER BY store_name",
                 1
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     }
 
     /**
@@ -666,9 +700,11 @@ class WMSW_ImportLog
         global $wpdb;
         $tasks_table = self::get_tasks_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return $wpdb->get_results(
             "SELECT DISTINCT task_type FROM " . esc_sql($tasks_table) . " WHERE task_type IS NOT NULL ORDER BY task_type"
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     }
 
     /**
@@ -679,12 +715,14 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM {$wpdb->esc_sql($table)} WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
                 $days
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $result !== false;
     }
@@ -736,6 +774,7 @@ class WMSW_ImportLog
 
         if ($options['dry_run']) {
             // Use proper $wpdb->prepare() pattern
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $total_affected = $wpdb->get_var(
                 $wpdb->prepare(
                     "SELECT COUNT(*) FROM" .
@@ -745,6 +784,7 @@ class WMSW_ImportLog
                     $where_values
                 )
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             return [
                 'success' => true,
@@ -756,6 +796,7 @@ class WMSW_ImportLog
         }
 
         // Perform the actual deletion
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM" . esc_sql($table) . "%s %s",
@@ -763,6 +804,7 @@ class WMSW_ImportLog
                 $where_values
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         if ($result === false) {
             return [
@@ -852,6 +894,7 @@ class WMSW_ImportLog
         $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
         // Get all logs for export
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT l.*, t.task_type, s.store_name
@@ -864,6 +907,7 @@ class WMSW_ImportLog
                 ...$where_values
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $logs;
     }
@@ -931,6 +975,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE DATE(created_at) BETWEEN %s AND %s ORDER BY created_at DESC LIMIT %d",
@@ -940,6 +985,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($logs as $log) {
@@ -989,9 +1035,11 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return (int) $wpdb->get_var(
             $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->esc_sql($table)} WHERE level = %s", $level)
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     }
 
     /**
@@ -1003,6 +1051,7 @@ class WMSW_ImportLog
         $logs_table = self::get_table_name();
         $tasks_table = self::get_tasks_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return (int) $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$wpdb->esc_sql($logs_table)} l
@@ -1011,6 +1060,7 @@ class WMSW_ImportLog
                 $store_id
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     }
 
     /**
@@ -1022,6 +1072,7 @@ class WMSW_ImportLog
         $logs_table = self::get_table_name();
         $tasks_table = self::get_tasks_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return (int) $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$wpdb->esc_sql($logs_table)} l
@@ -1030,6 +1081,7 @@ class WMSW_ImportLog
                 $task_type
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     }
 
     /**
@@ -1040,6 +1092,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE message LIKE %s ORDER BY created_at DESC LIMIT %d",
@@ -1048,6 +1101,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($logs as $log) {
@@ -1065,6 +1119,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY) ORDER BY created_at DESC LIMIT %d",
@@ -1073,6 +1128,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $result = [];
         foreach ($logs as $log) {
@@ -1168,6 +1224,7 @@ class WMSW_ImportLog
 
         $cutoff_time = gmdate('Y-m-d H:i:s', strtotime($time_limit));
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE store_id = %d AND import_type = %s AND status = 'in_progress' AND created_at < %s",
@@ -1176,6 +1233,7 @@ class WMSW_ImportLog
                 $cutoff_time
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         $stuck_imports = [];
         if ($results) {

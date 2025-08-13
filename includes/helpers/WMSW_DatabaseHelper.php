@@ -4,310 +4,11 @@ namespace ShopifyWooImporter\Helpers;
 
 /**
  * Database Helper for WMSW Plugin
- * 
+ *
  * Handles database operations for custom plugin tables with proper caching
  */
 class WMSW_DatabaseHelper
 {
-
-    /**
-     * Ensure all tables have the correct structure
-     * This method is called during activation to fix any structural issues
-     */
-    public static function ensure_all_table_structures()
-    {
-        global $wpdb;
-
-        // Ensure logs table structure
-        self::ensure_logs_table_structure();
-
-        // Ensure settings table structure
-        self::ensure_settings_table_structure();
-
-        // Ensure stores table structure
-        self::ensure_stores_table_structure();
-
-        // Ensure mappings table structure
-        self::ensure_mappings_table_structure();
-
-        // Ensure tasks table structure
-        self::ensure_tasks_table_structure();
-
-        // Ensure store logs table structure
-        self::ensure_store_logs_table_structure();
-
-        // Ensure imports table structure
-        self::ensure_imports_table_structure();
-    }
-
-    /**
-     * Add the context column to the logs table if it doesn't exist
-     */
-    public static function ensure_logs_table_structure()
-    {
-        global $wpdb;
-        $logs_table = $wpdb->prefix . WMSW_LOGS_TABLE;
-
-        // Check if table exists first
-        if (!self::table_exists($logs_table)) {
-            return; // Let the activation handler create it
-        }
-
-        // Get existing columns - use esc_sql for table name in DESCRIBE
-        $escaped_table = \esc_sql($wpdb->prefix . WMSW_LOGS_TABLE);
-        $columns = $wpdb->get_results("DESCRIBE `{esc_sql($wpdb->prefix . WMSW_LOGS_TABLE)}`");
-        $existing_columns = [];
-
-        foreach ($columns as $column) {
-            $existing_columns[$column->Field] = $column;
-        }
-
-        // Define required columns with their definitions
-        $required_columns = [
-            'context' => 'longtext DEFAULT NULL',
-            'task_id' => 'bigint(20) DEFAULT NULL',
-            'level' => 'varchar(50) NOT NULL',
-            'message' => 'longtext NOT NULL',
-            'created_at' => 'datetime NOT NULL',
-            'items_skipped' => 'int(11) NOT NULL DEFAULT 0'
-        ];
-
-        // Add missing columns
-        foreach ($required_columns as $column_name => $definition) {
-            if (!isset($existing_columns[$column_name])) {
-                // Use esc_sql for table and column names since %i is only supported in WP 6.2+
-                $escaped_column = \esc_sql($column_name);
-                $wpdb->query("ALTER TABLE " . esc_sql($wpdb->prefix . WMSW_LOGS_TABLE) . "ADD COLUMN" .
-                    esc_sql($column_name) . esc_sql($definition));
-            }
-        }
-
-        // Handle column renames if needed
-        if (isset($existing_columns['import_id']) && !isset($existing_columns['task_id'])) {
-            $wpdb->query("ALTER TABLE `{esc_sql($wpdb->prefix . WMSW_LOGS_TABLE)}` CHANGE import_id task_id bigint(20) NOT NULL");
-        }
-
-        if (isset($existing_columns['log_level']) && !isset($existing_columns['level'])) {
-            $wpdb->query("ALTER TABLE `{esc_sql($wpdb->prefix . WMSW_LOGS_TABLE)}` CHANGE log_level level varchar(50) NOT NULL");
-        }
-    }
-
-    /**
-     * Ensure settings table structure
-     */
-    public static function ensure_settings_table_structure()
-    {
-        global $wpdb;
-        $settings_table = $wpdb->prefix . WMSW_SETTINGS_TABLE;
-
-        if (!self::table_exists($settings_table)) {
-            return;
-        }
-
-        // Check for duplicate keys and remove them - use esc_sql for table name in SHOW INDEX
-        $escaped_table = \esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE);
-        $indexes = $wpdb->get_results("SHOW INDEX FROM `{esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE)}`");
-        $setting_key_indexes = [];
-
-        foreach ($indexes as $index) {
-            if ($index->Column_name === 'setting_key') {
-                $setting_key_indexes[] = $index;
-            }
-        }
-
-        // If there are multiple setting_key indexes, remove the duplicate
-        if (count($setting_key_indexes) > 1) {
-            // Keep the unique constraint, remove the simple key
-            foreach ($setting_key_indexes as $index) {
-                if ($index->Key_name !== 'unique_setting') {
-                    $wpdb->query("ALTER TABLE " . esc_sql($wpdb->prefix . WMSW_SETTINGS_TABLE) . " DROP INDEX " . esc_sql($index->Key_name));
-                }
-            }
-        }
-    }
-
-    /**
-     * Ensure stores table structure
-     */
-    public static function ensure_stores_table_structure()
-    {
-        global $wpdb;
-        $stores_table = $wpdb->prefix . WMSW_STORES_TABLE;
-
-        if (!self::table_exists($stores_table)) {
-            return;
-        }
-
-        // Add any missing columns for stores table
-        $required_columns = [
-            'api_version' => 'varchar(20) NOT NULL DEFAULT "2024-04"',
-            'is_default' => 'tinyint(1) NOT NULL DEFAULT 0'
-        ];
-
-        foreach ($required_columns as $column_name => $definition) {
-            self::add_column_if_not_exists($stores_table, $column_name, $definition);
-        }
-    }
-
-    /**
-     * Ensure mappings table structure
-     */
-    public static function ensure_mappings_table_structure()
-    {
-        global $wpdb;
-        $mappings_table = $wpdb->prefix . WMSW_MAPPINGS_TABLE;
-
-        if (!self::table_exists($mappings_table)) {
-            return;
-        }
-
-        // Add any missing columns for mappings table
-        $required_columns = [
-            'last_imported' => 'datetime NOT NULL'
-        ];
-
-        foreach ($required_columns as $column_name => $definition) {
-            self::add_column_if_not_exists($mappings_table, $column_name, $definition);
-        }
-    }
-
-    /**
-     * Ensure tasks table structure
-     */
-    public static function ensure_tasks_table_structure()
-    {
-        global $wpdb;
-        $tasks_table = $wpdb->prefix . WMSW_TASKS_TABLE;
-
-        if (!self::table_exists($tasks_table)) {
-            return;
-        }
-
-        // Add any missing columns for tasks table
-        $required_columns = [
-            'status' => 'varchar(20) NOT NULL DEFAULT "active"',
-            'options' => 'longtext DEFAULT NULL'
-        ];
-
-        foreach ($required_columns as $column_name => $definition) {
-            self::add_column_if_not_exists($tasks_table, $column_name, $definition);
-        }
-    }
-
-    /**
-     * Ensure store logs table structure
-     */
-    public static function ensure_store_logs_table_structure()
-    {
-        global $wpdb;
-        $store_logs_table = $wpdb->prefix . WMSW_STORE_LOGS_TABLE;
-
-        if (!self::table_exists($store_logs_table)) {
-            return;
-        }
-
-        // Add any missing columns for store logs table
-        $required_columns = [
-            'action_details' => 'longtext DEFAULT NULL'
-        ];
-
-        foreach ($required_columns as $column_name => $definition) {
-            self::add_column_if_not_exists($store_logs_table, $column_name, $definition);
-        }
-    }
-
-    /**
-     * Ensure imports table structure
-     */
-    public static function ensure_imports_table_structure()
-    {
-        global $wpdb;
-        $imports_table = $wpdb->prefix . WMSW_IMPORTS_TABLE;
-
-        if (!self::table_exists($imports_table)) {
-            return;
-        }
-
-        // Add any missing columns for imports table
-        $required_columns = [
-            'progress_percentage' => 'decimal(5,2) NOT NULL DEFAULT 0.00',
-            'current_batch' => 'int(11) NOT NULL DEFAULT 0',
-            'batch_size' => 'int(11) NOT NULL DEFAULT 10',
-            'filters' => 'longtext DEFAULT NULL',
-            'options' => 'longtext DEFAULT NULL',
-            'error_log' => 'longtext DEFAULT NULL'
-        ];
-
-        foreach ($required_columns as $column_name => $definition) {
-            self::add_column_if_not_exists($imports_table, $column_name, $definition);
-        }
-    }
-
-    /**
-     * Check if a column exists in a table
-     */
-    public static function column_exists($table_name, $column_name)
-    {
-        global $wpdb;
-
-        // Use esc_sql for table name since SHOW COLUMNS doesn't support placeholders
-        $escaped_table = \esc_sql($table_name);
-        $result = $wpdb->get_results($wpdb->prepare(
-            "SHOW COLUMNS FROM " . esc_sql($table_name) . "LIKE %s",
-            $column_name
-        ));
-
-        return !empty($result);
-    }
-
-    /**
-     * Check if a table exists
-     */
-    public static function table_exists($table_name)
-    {
-        global $wpdb;
-
-        // Use esc_sql for table name since SHOW TABLES doesn't support placeholders
-        $escaped_table = \esc_sql($table_name);
-        $result = $wpdb->get_var("SHOW TABLES LIKE " . esc_sql($table_name));
-        return $result === $table_name;
-    }
-
-    /**
-     * Add a column if it doesn't exist
-     */
-    public static function add_column_if_not_exists($table_name, $column_name, $definition)
-    {
-        global $wpdb;
-
-        if (!self::column_exists($table_name, $column_name)) {
-            // Use esc_sql for table and column names since ALTER TABLE doesn't support placeholders
-            $wpdb->query("ALTER TABLE " . esc_sql($table_name) . " ADD COLUMN " . esc_sql($column_name) . " " . esc_sql($definition));
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Rename a column if it exists and the new name doesn't
-     */
-    public static function rename_column_if_exists($table_name, $old_name, $new_name, $definition)
-    {
-        global $wpdb;
-
-        if (self::column_exists($table_name, $old_name) && !self::column_exists($table_name, $new_name)) {
-            // Use esc_sql for table and column names since ALTER TABLE doesn't support placeholders
-            $escaped_table = \esc_sql($table_name);
-            $escaped_old_name = \esc_sql($old_name);
-            $escaped_new_name = \esc_sql($new_name);
-            $wpdb->query("ALTER TABLE " . esc_sql($table_name) . " CHANGE " . esc_sql($old_name) . " " . esc_sql($new_name) . " " . esc_sql($definition));
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Cache group for import logs
      */
@@ -342,9 +43,11 @@ class WMSW_DatabaseHelper
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
 
         // Use esc_sql for table name since it's a constant table name
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $import_log = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM " . esc_sql($table_name) . " WHERE id = %d", $import_id)
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         if ($import_log) {
             wp_cache_set($cache_key, $import_log, self::CACHE_GROUP_IMPORT_LOGS, self::CACHE_EXPIRATION);
@@ -365,11 +68,13 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . 'wmsw_import_logs';
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $result = $wpdb->update(
             $table_name,
             $data,
             ['id' => $import_id]
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         if (false !== $result) {
             // Invalidate cache
@@ -399,9 +104,11 @@ class WMSW_DatabaseHelper
 
         // Use esc_sql for table name since it's a constant table name
         $escaped_table = \esc_sql($table_name);
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $import_id = $wpdb->get_var(
             "SELECT id FROM " . esc_sql($table_name) . " WHERE status = 'in_progress' ORDER BY id DESC LIMIT 1"
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         if ($import_id) {
             $import_id = intval($import_id);
@@ -431,12 +138,14 @@ class WMSW_DatabaseHelper
 
         // Use esc_sql for table name since it's a constant table name
         $escaped_table = \esc_sql($table_name);
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $product_id = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT woocommerce_id FROM " . esc_sql($table_name) . " WHERE shopify_id = %s AND object_type = 'product'",
                 $shopify_id
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         if ($product_id) {
             $product_id = intval($product_id);
@@ -466,12 +175,14 @@ class WMSW_DatabaseHelper
 
         // Use esc_sql for table name since it's a constant table name
         $escaped_table = \esc_sql($table_name);
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $shopify_id = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT shopify_id FROM " . esc_sql($table_name) . " WHERE woocommerce_id = %d AND object_type = 'product'",
                 $woocommerce_id
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         if ($shopify_id) {
             wp_cache_set($cache_key, $shopify_id, self::CACHE_GROUP_MAPPINGS, self::CACHE_EXPIRATION);
@@ -501,6 +212,7 @@ class WMSW_DatabaseHelper
 
         // Use esc_sql for table name since it's a constant table name
         $escaped_table = \esc_sql($table_name);
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $exists = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT id FROM " . esc_sql($table_name) . " WHERE shopify_id = %s AND object_type = %s",
@@ -508,6 +220,7 @@ class WMSW_DatabaseHelper
                 $object_type
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         $result = !empty($exists);
         wp_cache_set($cache_key, $result, self::CACHE_GROUP_MAPPINGS, self::CACHE_EXPIRATION);
@@ -533,6 +246,7 @@ class WMSW_DatabaseHelper
 
         if ($existing) {
             // Update existing mapping
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
             $result = $wpdb->update(
                 $table_name,
                 [
@@ -544,8 +258,10 @@ class WMSW_DatabaseHelper
                     'object_type' => 'product'
                 ]
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
         } else {
             // Create new mapping
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
             $result = $wpdb->insert(
                 $table_name,
                 [
@@ -556,6 +272,7 @@ class WMSW_DatabaseHelper
                     'last_imported' => gmdate('Y-m-d H:i:s')
                 ]
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
         }
 
         if (false !== $result) {
@@ -592,6 +309,7 @@ class WMSW_DatabaseHelper
 
         if ($existing) {
             // Update existing mapping
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
             $result = $wpdb->update(
                 $table_name,
                 [
@@ -603,8 +321,10 @@ class WMSW_DatabaseHelper
                     'object_type' => 'category'
                 ]
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
         } else {
             // Create new mapping
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
             $result = $wpdb->insert(
                 $table_name,
                 [
@@ -615,6 +335,7 @@ class WMSW_DatabaseHelper
                     'last_imported' => gmdate('Y-m-d H:i:s')
                 ]
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
         }
 
         if (false !== $result) {
@@ -637,7 +358,9 @@ class WMSW_DatabaseHelper
         global $wpdb;
         $table_name = $wpdb->prefix . WMSW_MAPPINGS_TABLE;
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->delete($table_name, $where_conditions);
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         if (false !== $result) {
             // Invalidate all mapping caches since we don't know which specific ones
@@ -645,14 +368,5 @@ class WMSW_DatabaseHelper
         }
 
         return false !== $result;
-    }
-
-    /**
-     * Clear all caches for this plugin
-     */
-    public static function clear_all_caches()
-    {
-        wp_cache_flush_group(self::CACHE_GROUP_IMPORT_LOGS);
-        wp_cache_flush_group(self::CACHE_GROUP_MAPPINGS);
     }
 }

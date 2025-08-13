@@ -34,6 +34,7 @@ class WMSW_StoreLogger
         $table = $wpdb->prefix . WMSW_STORE_LOGS_TABLE;
         $user_id = \get_current_user_id();
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         $result = $wpdb->insert(
             $table,
             [
@@ -51,6 +52,7 @@ class WMSW_StoreLogger
                 '%s'
             ]
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
         if ($result !== false) {
             // Clear cache for this store's logs
@@ -83,6 +85,7 @@ class WMSW_StoreLogger
 
         $table = $wpdb->prefix . WMSW_STORE_LOGS_TABLE;
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT l.*, u.display_name as user_name 
              FROM " . esc_sql($table) . " l
@@ -94,6 +97,7 @@ class WMSW_StoreLogger
             $limit,
             $offset
         ));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $results ? $results : [];
 
         // Cache the results for 5 minutes
@@ -124,6 +128,7 @@ class WMSW_StoreLogger
         $table = $wpdb->prefix . WMSW_STORE_LOGS_TABLE;
 
         $stores_table = $wpdb->prefix . WMSW_STORES_TABLE;
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT l.*, u.display_name as user_name, s.store_name 
              FROM " . esc_sql($table) . " l
@@ -134,6 +139,7 @@ class WMSW_StoreLogger
             $limit,
             $offset
         ));
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $results ? $results : [];
 
         // Cache the results for 5 minutes
