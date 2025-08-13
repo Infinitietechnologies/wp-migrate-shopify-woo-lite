@@ -276,7 +276,6 @@ class WMSW_CustomerProcessor
 
             $response = $this->shopify_client->query($gql['query']);
             if (isset($response['errors'])) {
-                $this->logger->error('Error retrieving customers: ' . print_r($response['errors'], true));
                 return ['customers' => [], 'pageInfo' => []];
             }
             

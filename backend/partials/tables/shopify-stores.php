@@ -11,6 +11,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Include the model
+use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+
 // Verify nonce for security
 $nonce_verified = false;
 if (isset($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'wmsw_stores_filter')) {
@@ -27,36 +30,11 @@ if ($nonce_verified || !isset($_GET['_wpnonce'])) {
 }
 
 $per_page = 20;
-
-// Get stores data
-global $wpdb;
-
 $offset = ($current_page - 1) * $per_page;
 
-// Build the main query with conditional WHERE clause
-if (!empty($filter_status)) {
-    $stores = $wpdb->get_results($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}wmsw_shopify_stores WHERE status = %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
-        $filter_status,
-        $per_page,
-        $offset
-    ));
-    
-    // Get total count
-    $total_stores = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$wpdb->prefix}wmsw_shopify_stores WHERE status = %s",
-        $filter_status
-    ));
-} else {
-    $stores = $wpdb->get_results($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}wmsw_shopify_stores ORDER BY created_at DESC LIMIT %d OFFSET %d",
-        $per_page,
-        $offset
-    ));
-    
-    // Get total count
-    $total_stores = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}wmsw_shopify_stores");
-}
+// Get stores data using the model methods instead of direct database queries
+$stores = WMSW_ShopifyStore::getStoresPaginated($per_page, $offset, $filter_status);
+$total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
 ?>
 
 <div class="swi-table-container">
@@ -121,7 +99,7 @@ if (!empty($filter_status)) {
                         <td class="column-name">
                             <strong>
                                 <a href="#" class="swi-edit-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                    <?php echo esc_html($store->name); ?>
+                                    <?php echo esc_html($store->store_name); ?>
                                 </a>
                             </strong>
                             <div class="row-actions visible">
@@ -180,16 +158,11 @@ if (!empty($filter_status)) {
                             include WMSW_PLUGIN_DIR . 'backend/partials/components/status-badge.php';
                             echo wp_kses_post(WMSW_status_badge($store->status));
                             ?>
-                            <?php if (!empty($store->last_error)) : ?>
-                                <div class="swi-error-message" title="<?php echo esc_attr($store->last_error); ?>">
-                                    <span class="dashicons dashicons-warning text-warning"></span>
-                                </div>
-                            <?php endif; ?>
                         </td>
                         <td class="column-last-sync">
                             <?php
-                            if (!empty($store->last_sync_at)) {
-                                echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($store->last_sync_at)));
+                            if (!empty($store->last_sync)) {
+                                echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($store->last_sync)));
                             } else {
                                 echo '<span class="swi-never-synced">';
                                 esc_html_e('Never', 'wp-migrate-shopify-woo');
@@ -200,9 +173,9 @@ if (!empty($filter_status)) {
                         <td class="column-products">
                             <span class="swi-product-count">
                                 <?php
-                                $product_count = $store->total_products ?? 0;
-                                // translators: %d is the number of products
-                                echo esc_html(sprintf(_n('%d product', '%d products', $product_count, 'wp-migrate-shopify-woo'), $product_count));
+                                // Product count would need to be calculated from imported products
+                                // For now, show placeholder
+                                echo esc_html(__('N/A', 'wp-migrate-shopify-woo'));
                                 ?>
                             </span>
                         </td>

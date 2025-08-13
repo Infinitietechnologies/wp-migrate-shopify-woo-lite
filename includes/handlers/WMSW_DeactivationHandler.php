@@ -2,6 +2,7 @@
 
 namespace ShopifyWooImporter\Handlers;
 
+use ShopifyWooImporter\Services\WMSW_DatabaseService;
 
 /**
  * Plugin Deactivation Handler
@@ -42,14 +43,8 @@ class WMSW_DeactivationHandler
      */
     private function cleanup_temporary_data()
     {
-        // Remove transients
-        global $wpdb;
-
-        $wpdb->query(
-            "DELETE FROM {$wpdb->options} 
-            WHERE option_name LIKE '_transient_WMSW_%' 
-            OR option_name LIKE '_transient_timeout_WMSW_%'"
-        );
+        // Remove transients using database service
+        WMSW_DatabaseService::cleanup_transients('WMSW_');
 
         // Delete any temporary files
         $upload_dir = wp_upload_dir();

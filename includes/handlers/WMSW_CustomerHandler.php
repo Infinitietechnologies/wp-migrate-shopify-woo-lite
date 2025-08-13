@@ -3,6 +3,7 @@
 namespace ShopifyWooImporter\Handlers;
 
 use ShopifyWooImporter\Core\WMSW_ShopifyClient;
+use ShopifyWooImporter\Models\WMSW_ImportLog;
 use ShopifyWooImporter\Models\WMSW_ShopifyStore;
 use ShopifyWooImporter\Processors\WMSW_ProductProcessor;
 use ShopifyWooImporter\Services\WMSW_Logger;
@@ -93,7 +94,7 @@ class WMSW_CustomerHandler
         // Get options from request
         $options = [];
         if (isset($_POST['options']) && is_array($_POST['options'])) {
-            $options = array_map(function($value) {
+            $options = array_map(function ($value) {
                 return sanitize_text_field(wp_unslash($value));
             }, sanitize_text_field(wp_unslash($_POST['options'])));
         }
@@ -468,7 +469,7 @@ class WMSW_CustomerHandler
             $import_data['status']['failed']    += isset($results['failed'])    ? $results['failed']    : 0;
             $import_data['status']['skipped']   += isset($results['skipped'])   ? $results['skipped']   : 0;
             // Ensure all keys exist to avoid undefined array key warnings
-            foreach (['imported','updated','failed','skipped'] as $k) {
+            foreach (['imported', 'updated', 'failed', 'skipped'] as $k) {
                 if (!isset($import_data['status'][$k])) $import_data['status'][$k] = 0;
             }
             $import_data['status']['total'] = $import_data['status']['imported'] + $import_data['status']['updated'] +
@@ -592,7 +593,7 @@ class WMSW_CustomerHandler
 
         // Get store ID
         $store_id = isset($_POST['store_id']) ? intval($_POST['store_id']) : 0;
-        
+
         if (!$store_id) {
             wp_send_json_error([
                 'message' => __('No store specified', 'wp-migrate-shopify-woo')
@@ -600,38 +601,8 @@ class WMSW_CustomerHandler
             return;
         }
 
-        // Check for active imports using transients (similar to how customer imports work)
-        $active_job = null;
-        
-        // Search through transients for active customer import jobs for this store
-        global $wpdb;
-        $transients = $wpdb->get_results(
-            "SELECT option_name, option_value FROM {$wpdb->options} 
-             WHERE option_name LIKE '_transient_WMSW_customer_import_%'"
-        );
-
-        foreach ($transients as $transient) {
-            $job_id = str_replace('_transient_WMSW_customer_import_', '', $transient->option_name);
-            $job_data = maybe_unserialize($transient->option_value);
-            
-            if (is_array($job_data) && 
-                isset($job_data['store_id']) && 
-                $job_data['store_id'] == $store_id &&
-                (!isset($job_data['status']['completed']) || !$job_data['status']['completed'])) {
-                
-                $active_job = [
-                    'job_id' => $job_id,
-                    'percentage' => isset($job_data['status']['percentage']) ? $job_data['status']['percentage'] : 0,
-                    'message' => isset($job_data['status']['last_message']) ? $job_data['status']['last_message'] : 'Processing...',
-                    'imported' => isset($job_data['status']['imported']) ? $job_data['status']['imported'] : 0,
-                    'updated' => isset($job_data['status']['updated']) ? $job_data['status']['updated'] : 0,
-                    'failed' => isset($job_data['status']['failed']) ? $job_data['status']['failed'] : 0,
-                    'skipped' => isset($job_data['status']['skipped']) ? $job_data['status']['skipped'] : 0,
-                    'completed' => false
-                ];
-                break;
-            }
-        }
+        // Check for active imports using the ImportLog model
+        $active_job = WMSW_ImportLog::get_active_customer_import($store_id);
 
         if ($active_job) {
             wp_send_json_success([

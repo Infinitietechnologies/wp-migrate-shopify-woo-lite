@@ -2,6 +2,10 @@
 
 namespace ShopifyWooImporter\Models;
 
+// WordPress functions
+use function current_time;
+use function wp_json_encode;
+
 /**
  * Import Log Model
  * 
@@ -20,6 +24,20 @@ class WMSW_ImportLog
     private $context;
     private $created_at;
     private $items_skipped;
+
+    // Import session specific properties
+    private $store_id;
+    private $import_type;
+    private $status;
+    private $options;
+    private $items_total;
+    private $items_processed;
+    private $items_succeeded;
+    private $items_failed;
+    private $log_data;
+    private $started_at;
+    private $completed_at;
+    private $updated_at;
 
     public function __construct($data = [])
     {
@@ -40,6 +58,20 @@ class WMSW_ImportLog
         $this->context = $data['context'] ?? '';
         $this->created_at = $data['created_at'] ?? null;
         $this->items_skipped = $data['items_skipped'] ?? 0;
+
+        // Import session specific fields
+        $this->store_id = $data['store_id'] ?? null;
+        $this->import_type = $data['import_type'] ?? null;
+        $this->status = $data['status'] ?? null;
+        $this->options = $data['options'] ?? null;
+        $this->items_total = $data['items_total'] ?? null;
+        $this->items_processed = $data['items_processed'] ?? null;
+        $this->items_succeeded = $data['items_succeeded'] ?? null;
+        $this->items_failed = $data['items_failed'] ?? null;
+        $this->log_data = $data['log_data'] ?? null;
+        $this->started_at = $data['started_at'] ?? null;
+        $this->completed_at = $data['completed_at'] ?? null;
+        $this->updated_at = $data['updated_at'] ?? null;
     }
 
     /**
@@ -108,6 +140,210 @@ class WMSW_ImportLog
         }
 
         return $result !== false;
+    }
+
+    /**
+     * Create a new import session
+     * 
+     * @param int $store_id The ID of the Shopify store
+     * @param string $import_type The type of import (products, orders, customers, etc.)
+     * @param array $options Import options
+     * @return WMSW_ImportLog|false The created import session or false on failure
+     */
+    public static function createImportSession($store_id, $import_type, $options = [])
+    {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        $data = [
+            'store_id' => $store_id,
+            'import_type' => $import_type,
+            'status' => 'initializing',
+            'options' => is_array($options) ? \wp_json_encode($options) : $options,
+            'created_at' => \current_time('mysql'),
+            'updated_at' => \current_time('mysql')
+        ];
+
+        $result = $wpdb->insert(
+            $table,
+            $data,
+            ['%d', '%s', '%s', '%s', '%s', '%s']
+        );
+
+        if ($result) {
+            return self::find($wpdb->insert_id);
+        }
+
+        return false;
+    }
+
+    /**
+     * Update import session data
+     * 
+     * @param array $data The data to update
+     * @return bool Success or failure
+     */
+    public function updateImportSession($data)
+    {
+        if (!$this->id) {
+            return false;
+        }
+
+        global $wpdb;
+        $table = self::get_table_name();
+
+        // Always update the updated_at timestamp
+        $data['updated_at'] = \current_time('mysql');
+
+        // Prepare format array based on data types
+        $formats = [];
+        foreach ($data as $key => $value) {
+            if (in_array($key, ['store_id', 'items_total', 'items_processed', 'items_succeeded', 'items_failed', 'items_skipped'])) {
+                $formats[] = '%d';
+            } else {
+                $formats[] = '%s';
+            }
+        }
+
+        $result = $wpdb->update(
+            $table,
+            $data,
+            ['id' => $this->id],
+            $formats,
+            ['%d']
+        );
+
+        // Update the model properties if successful
+        if ($result !== false) {
+            $this->populate(array_merge($this->toArray(), $data));
+        }
+
+        return $result !== false;
+    }
+
+    /**
+     * Convert model to array
+     * 
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'id' => $this->id,
+            'task_id' => $this->task_id,
+            'level' => $this->level,
+            'message' => $this->message,
+            'context' => $this->context,
+            'created_at' => $this->created_at,
+            'items_skipped' => $this->items_skipped,
+            'store_id' => $this->store_id,
+            'import_type' => $this->import_type,
+            'status' => $this->status,
+            'options' => $this->options,
+            'items_total' => $this->items_total,
+            'items_processed' => $this->items_processed,
+            'items_succeeded' => $this->items_succeeded,
+            'items_failed' => $this->items_failed,
+            'log_data' => $this->log_data,
+            'started_at' => $this->started_at,
+            'completed_at' => $this->completed_at,
+            'updated_at' => $this->updated_at
+        ];
+    }
+
+    /**
+     * Get ID
+     * 
+     * @return int|null
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get status
+     * 
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Get message
+     * 
+     * @return string|null
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * Get items total
+     * 
+     * @return int|null
+     */
+    public function getItemsTotal()
+    {
+        return $this->items_total;
+    }
+
+    /**
+     * Get items processed
+     * 
+     * @return int|null
+     */
+    public function getItemsProcessed()
+    {
+        return $this->items_processed;
+    }
+
+    /**
+     * Find active import session for a store and type
+     * 
+     * @param int $store_id Store ID
+     * @param string $import_type Import type
+     * @return WMSW_ImportLog|null
+     */
+    public static function findActiveImportSession($store_id, $import_type)
+    {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->esc_sql($table)} WHERE store_id = %d AND import_type = %s AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
+                $store_id,
+                $import_type
+            ),
+            \ARRAY_A
+        );
+
+        return $row ? new self($row) : null;
+    }
+
+    /**
+     * Count running imports except for the specified import ID
+     * 
+     * @param int $exclude_import_id The import ID to exclude from count
+     * @return int Number of other running imports
+     */
+    public static function countRunningImportsExcept($exclude_import_id)
+    {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->esc_sql($table)} WHERE status = 'in_progress' AND id != %d",
+                $exclude_import_id
+            )
+        );
+
+        return intval($count);
     }
 
     /**
@@ -204,13 +440,15 @@ class WMSW_ImportLog
         $logs = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT l.*, t.task_type, s.store_name
-                 FROM {$wpdb->esc_sql($logs_table)} l
-                 LEFT JOIN {$wpdb->esc_sql($tasks_table)} t ON l.task_id = t.id
-                 LEFT JOIN {$wpdb->esc_sql($stores_table)} s ON t.store_id = s.id
-                 {$where_clause}
-                 ORDER BY l.created_at DESC
-                 LIMIT %d OFFSET %d",
-                array_merge($where_values, [$per_page, $offset])
+                FROM " . esc_sql($logs_table) . " l
+                LEFT JOIN " . esc_sql($tasks_table) . " t ON l.task_id = t.id
+                LEFT JOIN" .  esc_sql($stores_table) . " s ON t.store_id = s.id
+                " . esc_sql($where_clause) . "  %s
+                ORDER BY l.created_at DESC
+                LIMIT %d OFFSET %d",
+                $where_values,
+                $per_page,
+                $offset
             )
         );
 
@@ -271,20 +509,21 @@ class WMSW_ImportLog
 
         // Get total count
         if ($where_values) {
+
             $total_items = $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->esc_sql($logs_table)} l
-                     LEFT JOIN {$wpdb->esc_sql($tasks_table)} t ON l.task_id = t.id
-                     LEFT JOIN {$wpdb->esc_sql($stores_table)} s ON t.store_id = s.id
-                     {$where_clause}",
+                    "SELECT COUNT(*) FROM " . esc_sql($logs_table) . " l
+                     LEFT JOIN " . esc_sql($tasks_table) . " t ON l.task_id = t.id
+                     LEFT JOIN " . esc_sql($stores_table) . " s ON t.store_id = s.id
+                    " . esc_sql($where_clause) . "%s",
                     $where_values
                 )
             );
         } else {
             $total_items = $wpdb->get_var(
-                "SELECT COUNT(*) FROM {$wpdb->esc_sql($logs_table)} l
-                 LEFT JOIN {$wpdb->esc_sql($tasks_table)} t ON l.task_id = t.id
-                 LEFT JOIN {$wpdb->esc_sql($stores_table)} s ON t.store_id = s.id"
+                "SELECT COUNT(*) FROM" . esc_sql($logs_table) . " l
+                 LEFT JOIN" . esc_sql($tasks_table) . " t ON l.task_id = t.id
+                 LEFT JOIN" . esc_sql($stores_table) . " s ON t.store_id = s.id"
             );
         }
 
@@ -387,11 +626,11 @@ class WMSW_ImportLog
         ];
 
         // Get total count
-        $stats['total'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->esc_sql($table)}");
+        $stats['total'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM" . esc_sql($table));
 
         // Get counts by level
         $level_counts = $wpdb->get_results(
-            "SELECT level, COUNT(*) as count FROM {$wpdb->esc_sql($table)} GROUP BY level"
+            "SELECT level, COUNT(*) as count FROM" . esc_sql($table) . "GROUP BY level"
         );
 
         foreach ($level_counts as $level_count) {
@@ -413,7 +652,7 @@ class WMSW_ImportLog
 
         return $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$wpdb->esc_sql($stores_table)} WHERE status = %d ORDER BY store_name",
+                "SELECT * FROM" . esc_sql($stores_table) . " WHERE is_active = %d ORDER BY store_name",
                 1
             )
         );
@@ -428,7 +667,7 @@ class WMSW_ImportLog
         $tasks_table = self::get_tasks_table_name();
 
         return $wpdb->get_results(
-            "SELECT DISTINCT task_type FROM {$wpdb->esc_sql($tasks_table)} WHERE task_type IS NOT NULL ORDER BY task_type"
+            "SELECT DISTINCT task_type FROM " . esc_sql($tasks_table) . " WHERE task_type IS NOT NULL ORDER BY task_type"
         );
     }
 
@@ -497,7 +736,15 @@ class WMSW_ImportLog
 
         if ($options['dry_run']) {
             // Use proper $wpdb->prepare() pattern
-            $total_affected = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$wpdb->esc_sql($table)}` WHERE `{$where_clause}`", ...$where_values));
+            $total_affected = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM" .
+                        esc_sql($table)
+                        . "WHERE %s %s",
+                    $where_clause,
+                    $where_values
+                )
+            );
 
             return [
                 'success' => true,
@@ -511,7 +758,8 @@ class WMSW_ImportLog
         // Perform the actual deletion
         $result = $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM {$wpdb->esc_sql($table)} {$where_clause}",
+                "DELETE FROM" . esc_sql($table) . "%s %s",
+                $where_clause,
                 $where_values
             )
         );
@@ -610,9 +858,10 @@ class WMSW_ImportLog
                  FROM {$wpdb->esc_sql($logs_table)} l
                  LEFT JOIN {$wpdb->esc_sql($tasks_table)} t ON l.task_id = t.id
                  LEFT JOIN {$wpdb->esc_sql($stores_table)} s ON t.store_id = s.id
-                 {$where_clause}
+                 %s %s
                  ORDER BY l.created_at DESC",
-                $where_values
+                $where_clause,
+                ...$where_values
             )
         );
 
@@ -902,5 +1151,50 @@ class WMSW_ImportLog
     public function set_items_skipped($items_skipped)
     {
         $this->items_skipped = $items_skipped;
+    }
+
+    /**
+     * Find stuck imports that are older than the specified time limit
+     * 
+     * @param int $store_id The store ID to check for stuck imports
+     * @param string $import_type The import type ('products', 'orders', 'customers')
+     * @param string $time_limit Time limit string (e.g., '-1 hour', '-30 minutes')
+     * @return array Array of stuck import objects
+     */
+    public static function findStuckImports($store_id, $import_type, $time_limit = '-1 hour')
+    {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        $cutoff_time = gmdate('Y-m-d H:i:s', strtotime($time_limit));
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->esc_sql($table)} WHERE store_id = %d AND import_type = %s AND status = 'in_progress' AND created_at < %s",
+                $store_id,
+                $import_type,
+                $cutoff_time
+            )
+        );
+
+        $stuck_imports = [];
+        if ($results) {
+            foreach ($results as $row) {
+                $stuck_imports[] = new self((array) $row);
+            }
+        }
+
+        return $stuck_imports;
+    }
+
+    /**
+     * Check for active customer imports for a specific store
+     * 
+     * @param int $store_id Store ID to check for active imports
+     * @return array|null Active import job data or null if no active imports
+     */
+    public static function get_active_customer_import($store_id)
+    {
+        return \ShopifyWooImporter\Services\WMSW_DatabaseService::get_active_customer_import($store_id);
     }
 }

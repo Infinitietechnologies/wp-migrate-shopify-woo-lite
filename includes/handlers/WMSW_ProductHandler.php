@@ -4,6 +4,7 @@ namespace ShopifyWooImporter\Handlers;
 
 use ShopifyWooImporter\Core\WMSW_ShopifyClient;
 use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+use ShopifyWooImporter\Models\WMSW_ImportLog;
 use ShopifyWooImporter\Processors\WMSW_ProductProcessor;
 use ShopifyWooImporter\Services\WMSW_Logger;
 use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
@@ -647,6 +648,39 @@ class WMSW_ProductHandler
         return $result;
     }
 
+    private function handleMetaValue()
+    {
+        // Create a cache key
+        $cache_key = 'shopify_handle_product_meta';
+        $results   = wp_cache_get($cache_key);
+
+        if (false === $results) {
+            // Query posts with post_type and post_status conditions
+            $posts = get_posts([
+                'post_type'      => 'product',
+                'post_status'    => ['publish', 'draft'],
+                'fields'         => 'ids',
+                'posts_per_page' => -1,
+            ]);
+
+            $results = [];
+
+            if (! empty($posts)) {
+                foreach ($posts as $post_id) {
+                    $meta_value = get_post_meta($post_id, '_shopify_handle', true);
+                    if ('' !== $meta_value) {
+                        $results[] = (object) ['meta_value' => $meta_value];
+                    }
+                }
+            }
+
+            // Store in cache for 1 hour
+            wp_cache_set($cache_key, $results, '', HOUR_IN_SECONDS);
+        }
+
+        return $results;
+    }
+
     /**
      * Get handles of existing products in WooCommerce
      *
@@ -654,25 +688,9 @@ class WMSW_ProductHandler
      */
     private function getExistingProductHandles()
     {
-        global $wpdb;
         $handles = array();
 
-        // Simple query to get handles without using prepare
-        $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT meta_value FROM {$wpdb->postmeta} 
-                 WHERE meta_key = %s 
-                 AND post_id IN (
-                     SELECT ID FROM {$wpdb->posts} 
-                     WHERE post_type = %s 
-                     AND post_status IN (%s, %s)
-                 )",
-                '_shopify_handle',
-                'product',
-                'publish',
-                'draft'
-            )
-        );
+        $results = $this->handleMetaValue();
 
         if (!empty($results)) {
             foreach ($results as $result) {
@@ -971,42 +989,14 @@ class WMSW_ProductHandler
         $options = array_merge($global_options, $product_settings, $filters);
 
         // Prevent multiple in_progress imports for the same store
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
+        $this->handleStuckImports($store_id);
 
-        // First, check for stuck imports (older than 1 hour) and mark them as failed
-        $stuck_imports = $wpdb->get_results($wpdb->prepare(
-            "SELECT id FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND status = 'in_progress' AND created_at < %s",
-            $store_id,
-            gmdate('Y-m-d H:i:s', strtotime('-1 hour'))
-        ));
-
-        if ($stuck_imports) {
-            foreach ($stuck_imports as $stuck_import) {
-                $wpdb->update(
-                    $table_name,
-                    [
-                        'status' => 'failed',
-                        'message' => 'Import timed out after 1 hour',
-                        'completed_at' => current_time('mysql')
-                    ],
-                    ['id' => $stuck_import->id],
-                    ['%s', '%s', '%s'],
-                    ['%d']
-                );
-                $this->logger->info('Marked stuck import as failed: ' . $stuck_import->id);
-            }
-        }
-
-        // Now check for any remaining in-progress imports
-        $existing_import_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
-            $store_id
-        ));
-        if ($existing_import_id) {
+        // Check for any remaining in-progress imports
+        $active_import = WMSW_ImportLog::findActiveImportSession($store_id, 'products');
+        if ($active_import) {
             wp_send_json_success([
                 'message' => __('An import is already running for this store.', 'wp-migrate-shopify-woo'),
-                'import_id' => $existing_import_id
+                'import_id' => $active_import->getId()
             ]);
             return;
         }
@@ -1043,34 +1033,19 @@ class WMSW_ProductHandler
      */
     private function createImportSession($store_id, $options)
     {
-        global $wpdb;
+        // Create import session using the model
+        $import_session = WMSW_ImportLog::createImportSession($store_id, 'products', $options);
 
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
+        if ($import_session) {
+            $import_id = $import_session->getId();
 
-        $result = $wpdb->insert(
-            $table_name,
-            [
+            $this->logger->debugLog('[WMSW_ProductHandler] Created import session: ' . json_encode([
                 'store_id' => $store_id,
-                'import_type' => 'products',
-                'status' => 'initializing',
-                'options' => json_encode($options),
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql'),
-                'message' => 'Import session created',
-                'level' => 'info'
-            ]
-        );
+                'import_id' => $import_id,
+                'options' => $options
+            ]));
 
-        $import_id = $result ? $wpdb->insert_id : false;
-
-        $this->logger->debugLog('[WMSW_ProductHandler] Created import session: ' . json_encode([
-            'store_id' => $store_id,
-            'import_id' => $import_id,
-            'options' => $options
-        ]));
-
-        // Log the session creation using logger abstraction
-        if ($import_id) {
+            // Log the session creation using logger abstraction
             $this->logger->info('Import session created', [
                 'level' => 'info',
                 'message' => 'Import session created',
@@ -1079,6 +1054,8 @@ class WMSW_ProductHandler
                 'import_type' => 'products',
                 'status' => 'initializing'
             ]);
+
+            return $import_id;
         } else {
             $this->logger->error('Failed to create import session', [
                 'level' => 'error',
@@ -1087,9 +1064,9 @@ class WMSW_ProductHandler
                 'import_type' => 'products',
                 'options' => $options
             ]);
-        }
 
-        return $import_id;
+            return false;
+        }
     }
 
     /**
@@ -1284,11 +1261,18 @@ class WMSW_ProductHandler
      */
     private function updateImportSession($import_id, $data)
     {
-        global $wpdb;
+        // Find the import session
+        $import_session = WMSW_ImportLog::find($import_id);
 
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
+        if (!$import_session) {
+            $this->logger->error('Failed to find import session', [
+                'level' => 'error',
+                'message' => 'Failed to find import session',
+                'import_id' => $import_id
+            ]);
+            return false;
+        }
 
-        $data['updated_at'] = current_time('mysql');
         $log_message = 'Import session updated';
 
         $log_context = [
@@ -1298,15 +1282,11 @@ class WMSW_ProductHandler
         ];
         $this->logger->info("we are here", $log_context);
 
-
-        $result = $wpdb->update(
-            $table_name,
-            $data,
-            ['id' => $import_id]
-        );
+        // Update the import session
+        $result = $import_session->updateImportSession($data);
 
         // Log the session update using logger abstraction
-        if ($result !== false) {
+        if ($result) {
             $log_message = 'Import session updated';
             $log_context = [
                 'level' => 'info',
@@ -1420,28 +1400,23 @@ class WMSW_ProductHandler
             return;
         }
 
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
-
-        // Get active import for this store
-        $active_import = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
-            $store_id
-        ), \ARRAY_A);
+        // Get active import for this store using the model
+        $active_import = WMSW_ImportLog::findActiveImportSession($store_id, 'products');
 
         if ($active_import) {
             // Calculate percentage
             $percentage = 0;
-            if ($active_import['items_total'] > 0) {
-                $percentage = round(($active_import['items_processed'] / $active_import['items_total']) * 100);
+            if ($active_import->getItemsTotal() > 0) {
+                $percentage = round(($active_import->getItemsProcessed() / $active_import->getItemsTotal()) * 100);
             }
 
-            $active_import['percentage'] = $percentage;
-            $active_import['is_complete'] = false;
-            $active_import['import_id'] = $active_import['id'];
+            $active_import_data = $active_import->toArray();
+            $active_import_data['percentage'] = $percentage;
+            $active_import_data['is_complete'] = false;
+            $active_import_data['import_id'] = $active_import->getId();
 
             wp_send_json_success([
-                'active_import' => $active_import,
+                'active_import' => $active_import_data,
                 'message' => __('Active import found', 'wp-migrate-shopify-woo')
             ]);
         } else {
@@ -1460,19 +1435,20 @@ class WMSW_ProductHandler
      */
     private function getImportStatus($import_id)
     {
-        global $wpdb;
+        // Use the model to find the import session
+        $import_session = WMSW_ImportLog::find($import_id);
 
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
+        if ($import_session) {
+            return [
+                'id' => $import_session->getId(),
+                'status' => $import_session->getStatus(),
+                'items_total' => $import_session->getItemsTotal(),
+                'items_processed' => $import_session->getItemsProcessed(),
+                'updated_at' => $import_session->toArray()['updated_at'] ?? null
+            ];
+        }
 
-        $result = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT id, status, items_total, items_processed, updated_at FROM {$wpdb->esc_sql($table_name)} WHERE id = %d",
-                $import_id
-            ),
-            \ARRAY_A
-        );
-
-        return $result ? $result : false;
+        return false;
     }
     /**
      * Process product import
@@ -1649,22 +1625,6 @@ class WMSW_ProductHandler
     }
 
     /**
-     * Check if an import is already running
-     *
-     * @return bool True if an import is running, false otherwise
-     */
-    private function isImportRunning()
-    {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
-
-        // Check if there's an in-progress import
-        $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->esc_sql($table_name)} WHERE status = %s", 'in_progress'));
-
-        return !empty($count) && intval($count) > 0;
-    }
-
-    /**
      * Check if there are any running imports except for the specified one
      *
      * @param int $import_id The current import ID to exclude from check
@@ -1672,19 +1632,10 @@ class WMSW_ProductHandler
      */
     private function getRunningImportsExcept($import_id)
     {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
-
-        // Check if there's an in-progress import (excluding current ID)
-        $count = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->esc_sql($table_name)} WHERE status = 'in_progress' AND id != %d",
-                $import_id
-            )
-        );
-
-        return intval($count);
+        // Use the model method to count running imports excluding the current one
+        return WMSW_ImportLog::countRunningImportsExcept($import_id);
     }
+
     /**
      * Format product status for consistent results
      *
@@ -1724,6 +1675,29 @@ class WMSW_ProductHandler
 
         // Return the original status if it doesn't match expected values
         return $status;
+    }
+
+    /**
+     * Handle stuck imports by marking them as failed
+     * 
+     * @param int $store_id The store ID to check for stuck imports
+     */
+    private function handleStuckImports($store_id)
+    {
+        // Find stuck imports (older than 1 hour) for this store using the model
+        $stuck_imports = WMSW_ImportLog::findStuckImports($store_id, 'products', '-1 hour');
+
+        if ($stuck_imports) {
+            foreach ($stuck_imports as $stuck_import) {
+                // Update the import session to mark as failed
+                $stuck_import->updateImportSession([
+                    'status' => 'failed',
+                    'message' => 'Import timed out after 1 hour',
+                    'completed_at' => \current_time('mysql')
+                ]);
+                $this->logger->info('Marked stuck import as failed: ' . $stuck_import->getId());
+            }
+        }
     }
 }
 

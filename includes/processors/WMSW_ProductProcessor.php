@@ -61,16 +61,16 @@ class WMSW_ProductProcessor
         $batch_count_key = 'wmsw_product_batch_count_' . $tab;
         $batch_count = \get_transient($batch_count_key) ?: 0;
         $max_batches = 1000; // Maximum number of batches to prevent infinite loops
-        
+
         if ($batch_count >= $max_batches) {
             $this->logger->error('Maximum batch limit reached, stopping import to prevent infinite loop', [
                 'batch_count' => $batch_count,
                 'max_batches' => $max_batches
             ]);
-            
+
             // Clean up cursor and batch count
             $this->cleanupBatchTracking($tab);
-            
+
             return [
                 'success' => false,
                 'message' => 'Maximum batch limit reached, import stopped',
@@ -116,7 +116,7 @@ class WMSW_ProductProcessor
             // Additional safety check: ensure cursor is different from current one
             $current_cursor = $cursor;
             $next_cursor = $pageInfo['endCursor'];
-            
+
             if ($current_cursor !== $next_cursor) {
                 WMSW_PaginationHelper::setCursor($tab, $next_cursor);
                 $has_next_page = true;
@@ -442,32 +442,6 @@ class WMSW_ProductProcessor
         if (isset($WMSW_current_import_id) && $WMSW_current_import_id > 0) {
             $this->logger->debug('Found import ID in global variable: ' . $WMSW_current_import_id);
             return $WMSW_current_import_id;
-        }
-
-        // Try to get from debug backtrace
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
-        $this->logger->debug('Looking for import ID in backtrace with ' . count($backtrace) . ' entries');
-
-        foreach ($backtrace as $index => $call) {
-            if (isset($call['function'])) {
-                $this->logger->debug('Checking backtrace entry ' . $index . ' with function: ' . $call['function']);
-
-                if ($call['function'] === 'processProductImport') {
-                    $this->logger->debug('Found processProductImport in backtrace');
-
-                    if (isset($call['args']) && !empty($call['args'])) {
-                        // First argument should be import_id
-                        $import_id = intval($call['args'][0]);
-                        $this->logger->debug('Found import ID in backtrace: ' . $import_id);
-
-                        // Store for future use
-                        $GLOBALS['wmsw_current_import_id'] = $import_id;
-                        return $import_id;
-                    } else {
-                        $this->logger->debug('No arguments found in processProductImport call');
-                    }
-                }
-            }
         }
 
         // As a fallback, try to get the latest import from the database
@@ -947,13 +921,13 @@ class WMSW_ProductProcessor
         }
 
         $category_ids = [];
-        
+
         foreach ($shopify_product['collections'] as $collection) {
             $this->logger->debug('Processing collection: ' . $collection['title']);
-            
+
             // Check if category exists in WooCommerce
             $category_id = $this->get_or_create_category($collection);
-            
+
             if ($category_id) {
                 $category_ids[] = $category_id;
                 $this->logger->debug('Added category ID: ' . $category_id . ' for collection: ' . $collection['title']);
@@ -980,7 +954,7 @@ class WMSW_ProductProcessor
 
         // First check if category exists by handle (slug)
         $existing_term = \get_term_by('slug', $collection['handle'], 'product_cat');
-        
+
         if ($existing_term) {
             $this->logger->debug('Found existing category by slug: ' . $collection['handle'] . ' (ID: ' . $existing_term->term_id . ')');
             return $existing_term->term_id;
@@ -988,7 +962,7 @@ class WMSW_ProductProcessor
 
         // Check if category exists by name
         $existing_term = \get_term_by('name', $collection['title'], 'product_cat');
-        
+
         if ($existing_term) {
             $this->logger->debug('Found existing category by name: ' . $collection['title'] . ' (ID: ' . $existing_term->term_id . ')');
             return $existing_term->term_id;
@@ -996,7 +970,7 @@ class WMSW_ProductProcessor
 
         // Create new category
         $this->logger->debug('Creating new category: ' . $collection['title']);
-        
+
         $category_data = [
             'description' => $collection['description'] ?? '',
             'slug' => $collection['handle']

@@ -11,6 +11,7 @@ use ShopifyWooImporter\Handlers\WMSW_LogHandler;
 use ShopifyWooImporter\Handlers\WMSW_ProductHandler;
 use ShopifyWooImporter\Models\WMSW_ShopifyStore;
 use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
+use ShopifyWooImporter\Models\WMSW_Task;
 
 /**
  * Backend/Admin Area Handler
@@ -908,19 +909,7 @@ class WMSW_Backend
 
         // Log to database
         try {
-            $wpdb->insert(
-                $wpdb->prefix . WMSW_TASKS_TABLE,
-                [
-                    'store_id' => $store_id,
-                    'task_type' => 'import_categories',
-                    'status' => 'completed',
-                    'total_items' => count($imported_categories),
-                    'processed_items' => count($imported_categories),
-                    'data' => json_encode(['categories' => $imported_categories]),
-                    'created_at' => current_time('mysql'),
-                    'updated_at' => current_time('mysql')
-                ]
-            );
+            WMSW_Task::create($store_id, 'import_categories', 'completed', count($imported_categories), count($imported_categories));
         } catch (\Exception $e) {
             // Log the error using WordPress logger if available
             if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {

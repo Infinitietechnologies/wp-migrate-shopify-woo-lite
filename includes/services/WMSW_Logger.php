@@ -50,7 +50,7 @@ class WMSW_Logger
 
         $this->log('debug', $message, $context);
     }
-    
+
     /**
      * Public method to check if debug mode is enabled
      * Useful for other classes to check debug status
@@ -59,7 +59,7 @@ class WMSW_Logger
     {
         return $this->is_debug_enabled();
     }
-    
+
     /**
      * Log debug message to error_log only when debug is enabled
      * For backwards compatibility with existing error_log calls
@@ -69,14 +69,8 @@ class WMSW_Logger
         if (!$this->is_debug_enabled()) {
             return;
         }
-        
-        if (is_array($message) || is_object($message)) {
-            error_log($prefix . ' ' . json_encode($message, JSON_PRETTY_PRINT));
-        } else {
-            error_log($prefix . ' ' . $message);
-        }
     }
-    
+
     /**
      * Static method to check debug mode without instantiating logger
      */
@@ -87,13 +81,13 @@ class WMSW_Logger
         if ($plugin_debug) {
             return true;
         }
-        
+
         // Check plugin settings from options table
         $options = \get_option('wmsw_options', []);
         if (!empty($options['enable_debug_mode'])) {
             return true;
         }
-        
+
         // Fall back to WordPress debug mode
         return (defined('WP_DEBUG') && \WP_DEBUG);
     }
@@ -121,11 +115,6 @@ class WMSW_Logger
 
         // Log to file
         $this->log_to_file($level, $message);
-
-        // Log to WP error log for errors
-        if ($level === 'error') {
-            error_log('[SWI] ' . (is_string($message) ? $message : json_encode($message)));
-        }
     }
 
     /**
@@ -174,9 +163,7 @@ class WMSW_Logger
         );
 
         // Check for DB errors and clear cache if successful
-        if ($result === false) {
-            error_log('[SWI Logger Error] Failed to insert log entry: ' . $wpdb->last_error);
-        } else {
+        if ($result) {
             // Clear any cached log data since we've added a new entry
             \wp_cache_delete('wmsw_logs_recent', 'wmsw_logs');
             \wp_cache_delete('wmsw_logs_count', 'wmsw_logs');
@@ -253,13 +240,13 @@ class WMSW_Logger
         if ($plugin_debug) {
             return true;
         }
-        
+
         // Check plugin settings from options table
         $options = \get_option('wmsw_options', []);
         if (!empty($options['enable_debug_mode'])) {
             return true;
         }
-        
+
         // Fall back to WordPress debug mode
         return (defined('WP_DEBUG') && WP_DEBUG);
     }

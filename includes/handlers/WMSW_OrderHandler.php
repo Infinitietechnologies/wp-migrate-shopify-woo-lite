@@ -4,6 +4,7 @@ namespace ShopifyWooImporter\Handlers;
 
 use ShopifyWooImporter\Core\WMSW_ShopifyClient;
 use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+use ShopifyWooImporter\Models\WMSW_ImportLog;
 use ShopifyWooImporter\Processors\WMSW_OrderProcessor;
 use ShopifyWooImporter\Services\WMSW_Logger;
 use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
@@ -416,26 +417,13 @@ class WMSW_OrderHandler
      */
     private function createOrderImportSession($store_id, $options)
     {
-        global $wpdb;
+        // Create import session using the model
+        $import_session = WMSW_ImportLog::createImportSession($store_id, 'orders', $options);
 
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
-
-        $result = $wpdb->insert(
-            $table_name,
-            [
-                'store_id' => $store_id,
-                'import_type' => 'orders',
-                'status' => 'initializing',
-                'options' => json_encode($options),
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ]
-        );
-
-        $import_id = $result ? $wpdb->insert_id : false;
-
-        // Log the session creation using logger abstraction
-        if ($import_id) {
+        if ($import_session) {
+            $import_id = $import_session->getId();
+            
+            // Log the session creation using logger abstraction
             $this->logger->info('Order import session created', [
                 'level' => 'info',
                 'message' => 'Order import session created',
@@ -445,6 +433,8 @@ class WMSW_OrderHandler
                 'status' => 'initializing',
                 'options' => $options
             ]);
+
+            return $import_id;
         } else {
             $this->logger->error('Failed to create order import session', [
                 'level' => 'error',
@@ -453,9 +443,9 @@ class WMSW_OrderHandler
                 'import_type' => 'orders',
                 'options' => $options
             ]);
-        }
 
-        return $import_id;
+            return false;
+        }
     }
 
     /**
@@ -467,20 +457,23 @@ class WMSW_OrderHandler
      */
     private function updateOrderImportSession($import_id, $data)
     {
-        global $wpdb;
+        // Find the import session
+        $import_session = WMSW_ImportLog::find($import_id);
+        
+        if (!$import_session) {
+            $this->logger->error('Failed to find order import session', [
+                'level' => 'error',
+                'message' => 'Failed to find order import session',
+                'import_id' => $import_id
+            ]);
+            return false;
+        }
 
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
-
-        $data['updated_at'] = current_time('mysql');
-
-        $result = $wpdb->update(
-            $table_name,
-            $data,
-            ['id' => $import_id]
-        );
+        // Update the import session
+        $result = $import_session->updateImportSession($data);
 
         // Log the session update using logger abstraction
-        if ($result !== false) {
+        if ($result) {
             $log_message = 'Order import session updated';
             $log_context = [
                 'level' => 'info',
@@ -535,21 +528,14 @@ class WMSW_OrderHandler
             return;
         }
 
-        // Check for active order imports using the database-based approach (similar to products)
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wmsw_import_logs';
-        
-        // Get active import for this store with type 'orders'
-        $active_import = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->esc_sql($table_name)} WHERE store_id = %d AND import_type = 'orders' AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
-            $store_id
-        ), \ARRAY_A);
+        // Check for active order imports using the model
+        $active_import = WMSW_ImportLog::findActiveImportSession($store_id, 'orders');
 
         if ($active_import) {
             // Calculate percentage
             $percentage = 0;
-            if ($active_import['items_total'] > 0) {
-                $percentage = round(($active_import['items_processed'] / $active_import['items_total']) * 100);
+            if ($active_import->getItemsTotal() > 0) {
+                $percentage = round(($active_import->getItemsProcessed() / $active_import->getItemsTotal()) * 100);
             }
 
             // Also check for transient-based progress (fallback)
@@ -557,13 +543,13 @@ class WMSW_OrderHandler
             $transient_progress = get_transient($progress_key);
             
             $active_job = [
-                'import_id' => $active_import['id'],
+                'import_id' => $active_import->getId(),
                 'progress_key' => $progress_key,
                 'percentage' => $percentage,
-                'message' => $active_import['message'] ?: 'Processing orders...',
-                'current' => $active_import['items_processed'],
-                'total' => $active_import['items_total'],
-                'status' => $active_import['status'],
+                'message' => $active_import->getMessage() ?: 'Processing orders...',
+                'current' => $active_import->getItemsProcessed(),
+                'total' => $active_import->getItemsTotal(),
+                'status' => $active_import->getStatus(),
                 'completed' => false
             ];
 

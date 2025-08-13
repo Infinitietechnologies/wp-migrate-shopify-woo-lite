@@ -101,15 +101,7 @@ class WMSW_StoreHandler
                 // Handle default store logic
                 if ($is_default) {
                     // Reset all other stores to not default
-                    global $wpdb;
-                    $table = $wpdb->prefix . WMSW_STORES_TABLE;
-                    $wpdb->update(
-                        $table,
-                        ['is_default' => 0],
-                        ['is_default' => 1],
-                        ['%d'],
-                        ['%d']
-                    );
+                    WMSW_ShopifyStore::resetAllDefault();
                 }
                 $store->set_is_default($is_default);
             } else {
@@ -117,15 +109,7 @@ class WMSW_StoreHandler
                 // Handle default store logic for new stores
                 if ($is_default) {
                     // Reset all other stores to not default
-                    global $wpdb;
-                    $table = $wpdb->prefix . WMSW_STORES_TABLE;
-                    $wpdb->update(
-                        $table,
-                        ['is_default' => 0],
-                        ['is_default' => 1],
-                        ['%d'],
-                        ['%d']
-                    );
+                    WMSW_ShopifyStore::resetAllDefault();
                 }
 
                 $store = new WMSW_ShopifyStore([
@@ -158,7 +142,7 @@ class WMSW_StoreHandler
                     'message' => $error_message,
                     'debug_info' => [
                         'db_error' => $db_error,
-                        'table_exists' => $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $wpdb->prefix . WMSW_STORES_TABLE)) ? true : false,
+                        'table_exists' => WMSW_ShopifyStore::tableExists(),
                         'store_data' => [
                             'store_name' => $store_name,
                             'shop_domain' => $shop_domain,
@@ -239,31 +223,13 @@ class WMSW_StoreHandler
             ]);
         }
 
-        global $wpdb;
-        $table = $wpdb->prefix . WMSW_STORES_TABLE;
-
         // Get previous default store for logging
-        $previous_default = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->esc_sql($table)} WHERE is_default = %d", 1));
+        $previous_default = WMSW_ShopifyStore::getDefaultStoreId();
 
-        // First, remove default status from all stores
-        $wpdb->update(
-            $table,
-            ['is_default' => 0],
-            ['is_default' => 1],
-            ['%d'],
-            ['%d']
-        );
+        // Set the selected store as default (this also resets all others)
+        $result = WMSW_ShopifyStore::setAsDefault($store_id);
 
-        // Then set the selected store as default
-        $result = $wpdb->update(
-            $table,
-            ['is_default' => 1],
-            ['id' => $store_id],
-            ['%d'],
-            ['%d']
-        );
-
-        if ($result !== false) {
+        if ($result) {
             // Log the change
             if (class_exists(WMSW_StoreLogger::class)) {
                 WMSW_StoreLogger::log(
@@ -293,16 +259,14 @@ class WMSW_StoreHandler
      */
     public function set_default_store($store_id)
     {
-        global $wpdb;
-        $table = $wpdb->prefix . WMSW_STORES_TABLE;
         if (!$store_id) {
             return new \WP_Error('invalid_store_id', esc_html__('Invalid store ID', 'wp-migrate-shopify-woo'));
         }
-        // Remove default from all
-        $wpdb->update($table, ['is_default' => 0], ['is_default' => 1], ['%d'], ['%d']);
-        // Set selected as default
-        $result = $wpdb->update($table, ['is_default' => 1], ['id' => $store_id], ['%d'], ['%d']);
-        if ($result !== false) {
+        
+        // Use the model method to set as default
+        $result = WMSW_ShopifyStore::setAsDefault($store_id);
+        
+        if ($result) {
             if (class_exists('wmsw_StoreLogger')) {
                 \ShopifyWooImporter\Services\WMSW_StoreLogger::log($store_id, 'set_default', []);
             }

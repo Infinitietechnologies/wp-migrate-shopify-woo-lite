@@ -126,10 +126,10 @@ class WMSW_Task
 
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use $wpdb->esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = $wpdb->esc_sql($table);
-        
+
         $result = $wpdb->delete(
             $escaped_table,
             ['id' => $this->id],
@@ -146,12 +146,12 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use $wpdb->esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = $wpdb->esc_sql($table);
-        
+
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM `{$escaped_table}` WHERE id = %d", $id),
+            $wpdb->prepare("SELECT * FROM " . esc_sql($table) . " WHERE id = %d", $id),
             \ARRAY_A
         );
 
@@ -165,7 +165,7 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
@@ -216,11 +216,13 @@ class WMSW_Task
             if ($limit) {
                 $order_limit_clause .= " LIMIT %d";
             }
-            
+
             $tasks = $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->esc_sql($table)} {$where_clause} {$order_limit_clause}",
-                    $where_values
+                    "SELECT * FROM" . esc_sql($table) . "%s %s %s",
+                    $where_clause,
+                    $where_values,
+                    $order_limit_clause,
                 ),
                 \ARRAY_A
             );
@@ -229,9 +231,14 @@ class WMSW_Task
             if ($limit) {
                 $order_limit_clause .= " LIMIT {$limit}";
             }
-            
+
             $tasks = $wpdb->get_results(
-                "SELECT * FROM {$wpdb->esc_sql($table)} {$where_clause} {$order_limit_clause}",
+                $wpdb->prepare(
+                    "SELECT * FROM" . esc_sql($table) . "%s %s %s",
+                    $where_clause,
+                    $where_values,
+                    $order_limit_clause,
+                ),
                 \ARRAY_A
             );
         }
@@ -252,13 +259,12 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use $wpdb->esc_sql for table names since %i is only supported in WP 6.2+
-        $escaped_table = $wpdb->esc_sql($table);
 
         $tasks = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM `{$escaped_table}` 
+                "SELECT * FROM " . esc_sql($table) . "
                 WHERE status = 'active' AND next_run <= %s
                 ORDER BY next_run ASC
                 LIMIT %d",
@@ -317,13 +323,10 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
-        // Use esc_sql for table names since %i is only supported in WP 6.2+
-        $escaped_table = esc_sql($table);
 
         $tasks = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM `{$escaped_table}` 
+                "SELECT * FROM" . esc_sql($table) . "
                 WHERE status = 'active' AND next_run < %s
                 ORDER BY next_run ASC
                 LIMIT %d",
@@ -372,7 +375,7 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
@@ -394,7 +397,7 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
@@ -433,19 +436,19 @@ class WMSW_Task
         switch ($frequency) {
             case 'hourly':
                 return gmdate('Y-m-d H:i:s', $from_time + 3600);
-                
+
             case 'twicedaily':
                 return gmdate('Y-m-d H:i:s', $from_time + 43200);
-                
+
             case 'daily':
                 return gmdate('Y-m-d H:i:s', $from_time + 86400);
-                
+
             case 'weekly':
                 return gmdate('Y-m-d H:i:s', $from_time + 604800);
-                
+
             case 'monthly':
                 return gmdate('Y-m-d H:i:s', strtotime('+1 month', $from_time));
-                
+
             default:
                 return gmdate('Y-m-d H:i:s', $from_time + 86400); // Default to daily
         }
@@ -559,17 +562,17 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
         if ($status) {
             $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$escaped_table}` WHERE status = %s",
+                "SELECT COUNT(*) FROM " . esc_sql($table) . " WHERE status = %s",
                 $status
             ));
         } else {
-            $count = $wpdb->get_var("SELECT COUNT(*) FROM `{$escaped_table}`");
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM" . esc_sql($table));
         }
 
         return (int) $count;
@@ -582,19 +585,19 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
         if ($status) {
             $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$escaped_table}` WHERE store_id = %d AND status = %s",
+                "SELECT COUNT(*) FROM " . esc_sql($table) . " WHERE store_id = %d AND status = %s",
                 $store_id,
                 $status
             ));
         } else {
             $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$escaped_table}` WHERE store_id = %d",
+                "SELECT COUNT(*) FROM " . esc_sql($table) . " WHERE store_id = %d",
                 $store_id
             ));
         }
@@ -609,7 +612,7 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
@@ -623,11 +626,11 @@ class WMSW_Task
         ];
 
         // Get total count
-        $stats['total'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$escaped_table}`");
+        $stats['total'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($table));
 
         // Get counts by status
         $status_counts = $wpdb->get_results(
-            "SELECT status, COUNT(*) as count FROM `{$escaped_table}` GROUP BY status"
+            "SELECT status, COUNT(*) as count FROM " . esc_sql($table) . " GROUP BY status"
         );
 
         foreach ($status_counts as $status_count) {
@@ -646,7 +649,7 @@ class WMSW_Task
     {
         global $wpdb;
         $table = self::get_table_name();
-        
+
         // Use esc_sql for table names since %i is only supported in WP 6.2+
         $escaped_table = esc_sql($table);
 
@@ -655,7 +658,8 @@ class WMSW_Task
 
         $result = $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM `{$escaped_table}` WHERE status IN ({$status_list}) AND created_at < %s",
+                "DELETE FROM " . esc_sql($table) . " WHERE status IN %s AND created_at < %s",
+                $status_list,
                 $cutoff_date
             )
         );
@@ -664,24 +668,70 @@ class WMSW_Task
     }
 
     // Getters
-    public function get_id() { return $this->id; }
-    public function get_store_id() { return $this->store_id; }
-    public function get_task_type() { return $this->task_type; }
-    public function get_frequency() { return $this->frequency; }
-    public function get_last_run() { return $this->last_run; }
-    public function get_next_run() { return $this->next_run; }
-    public function get_status() { return $this->status; }
-    public function get_options() { 
-        return is_string($this->options) ? json_decode($this->options, true) : $this->options; 
+    public function get_id()
+    {
+        return $this->id;
     }
-    public function get_created_at() { return $this->created_at; }
+    public function get_store_id()
+    {
+        return $this->store_id;
+    }
+    public function get_task_type()
+    {
+        return $this->task_type;
+    }
+    public function get_frequency()
+    {
+        return $this->frequency;
+    }
+    public function get_last_run()
+    {
+        return $this->last_run;
+    }
+    public function get_next_run()
+    {
+        return $this->next_run;
+    }
+    public function get_status()
+    {
+        return $this->status;
+    }
+    public function get_options()
+    {
+        return is_string($this->options) ? json_decode($this->options, true) : $this->options;
+    }
+    public function get_created_at()
+    {
+        return $this->created_at;
+    }
 
     // Setters
-    public function set_store_id($store_id) { $this->store_id = $store_id; }
-    public function set_task_type($task_type) { $this->task_type = $task_type; }
-    public function set_frequency($frequency) { $this->frequency = $frequency; }
-    public function set_last_run($last_run) { $this->last_run = $last_run; }
-    public function set_next_run($next_run) { $this->next_run = $next_run; }
-    public function set_status($status) { $this->status = $status; }
-    public function set_options($options) { $this->options = $options; }
+    public function set_store_id($store_id)
+    {
+        $this->store_id = $store_id;
+    }
+    public function set_task_type($task_type)
+    {
+        $this->task_type = $task_type;
+    }
+    public function set_frequency($frequency)
+    {
+        $this->frequency = $frequency;
+    }
+    public function set_last_run($last_run)
+    {
+        $this->last_run = $last_run;
+    }
+    public function set_next_run($next_run)
+    {
+        $this->next_run = $next_run;
+    }
+    public function set_status($status)
+    {
+        $this->status = $status;
+    }
+    public function set_options($options)
+    {
+        $this->options = $options;
+    }
 }

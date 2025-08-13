@@ -3,6 +3,7 @@
 namespace ShopifyWooImporter\Handlers;
 
 use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+use ShopifyWooImporter\Services\WMSW_DatabaseService;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -278,15 +279,8 @@ class WMSW_ActivationHandler
             $wpdb->prefix . \WMSW_IMPORTS_TABLE
         ];
 
-        foreach ($tables as $table) {
-            $escaped_table = esc_sql($table);
-            $wpdb->query(
-                $wpdb->prepare(
-                    "DROP TABLE IF EXISTS `%s`", 
-                    $escaped_table
-                )
-            );
-        }
+        // Use database service to drop tables
+        WMSW_DatabaseService::drop_tables($tables);
     }
 
     /**

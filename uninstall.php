@@ -41,11 +41,9 @@ function wmsw_uninstall_plugin()
             // This is the standard approach used in WordPress plugins
             // Use esc_sql for table names since %i is only supported in WP 6.2+
             $escaped_table = esc_sql($table);
-            $result = $wpdb->query("DROP TABLE IF EXISTS `{$escaped_table}`");
+            $result = $wpdb->query("DROP TABLE IF EXISTS " . esc_sql($table));
             if ($result === false) {
-                if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
-                    error_log("Failed to drop table: $table");
-                }
+                // Log error will be here
             }
         }
 
@@ -59,7 +57,7 @@ function wmsw_uninstall_plugin()
         $user_meta_deleted = delete_metadata('user', 0, 'wmsw_user_preferences', '', true);
         if ($user_meta_deleted === false) {
             if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
-                error_log("Failed to delete user meta: wmsw_user_preferences");
+                // You can add error logs here
             }
         }
 
@@ -77,7 +75,7 @@ function wmsw_uninstall_plugin()
             $post_meta_deleted = delete_metadata('post', 0, $meta_key, '', true);
             if ($post_meta_deleted === false) {
                 if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
-                    error_log("Failed to delete post meta: $meta_key");
+                    // You can add error logs here
                 }
             }
         }

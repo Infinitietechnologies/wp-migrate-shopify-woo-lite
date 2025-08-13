@@ -130,7 +130,7 @@ class WMSW_ShopifyStore
 
         $table = $wpdb->prefix . WMSW_STORES_TABLE;
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM". esc_sql($wpdb->prefix . WMSW_STORES_TABLE)." WHERE id = %d", $id),
+            $wpdb->prepare("SELECT * FROM" . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE id = %d", $id),
             \ARRAY_A
         );
 
@@ -145,7 +145,7 @@ class WMSW_ShopifyStore
         global $wpdb;
 
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." WHERE shop_domain = %s", $shop_domain),
+            $wpdb->prepare("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE shop_domain = %s", $shop_domain),
             ARRAY_A
         );
 
@@ -161,7 +161,7 @@ class WMSW_ShopifyStore
 
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
         $rows = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM ".esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." WHERE is_active = %d ORDER BY store_name", 1),
+            $wpdb->prepare("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE is_active = %d ORDER BY store_name", 1),
             ARRAY_A
         );
 
@@ -196,7 +196,7 @@ class WMSW_ShopifyStore
     {
         global $wpdb;
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
-        $rows = $wpdb->get_results("SELECT * FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." ORDER BY store_name", ARRAY_A);
+        $rows = $wpdb->get_results("SELECT * FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " ORDER BY store_name", ARRAY_A);
         $stores = [];
         foreach ($rows as $row) {
             $stores[] = [
@@ -301,7 +301,7 @@ class WMSW_ShopifyStore
         // Get all stores with non-empty access tokens
         $stores = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT id, access_token FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) ." WHERE access_token != %s AND access_token IS NOT NULL",
+                "SELECT id, access_token FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE) . " WHERE access_token != %s AND access_token IS NOT NULL",
                 ''
             ),
             ARRAY_A
@@ -361,7 +361,7 @@ class WMSW_ShopifyStore
         $table = esc_sql($wpdb->prefix . WMSW_STORES_TABLE);
 
         // Get all column names
-        $columns = $wpdb->get_col("SHOW COLUMNS FROM ". esc_sql($wpdb->prefix . WMSW_STORES_TABLE) .");
+        $columns = $wpdb->get_col("SHOW COLUMNS FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE));
 
         // Remove access_token column
         $columns = array_diff($columns, ['access_token']);
@@ -396,5 +396,177 @@ class WMSW_ShopifyStore
             $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($wpdb->prefix . WMSW_STORES_TABLE));
         }
         return $count;
+    }
+
+    /**
+     * Get stores with pagination and optional status filter
+     *
+     * @param int $limit Number of stores per page
+     * @param int $offset Offset for pagination
+     * @param string $status Optional status filter ('active', 'inactive', 'error', or empty for all)
+     * @return array Array of store objects with virtual status field
+     */
+    public static function getStoresPaginated($limit = 20, $offset = 0, $status = '')
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . WMSW_STORES_TABLE;
+
+        if (!empty($status)) {
+            // Map status values to database columns
+            switch ($status) {
+                case 'active':
+                    $where_clause = 'is_active = 1';
+                    break;
+                case 'inactive':
+                    $where_clause = 'is_active = 0';
+                    break;
+                case 'error':
+                    // For now, treat as inactive stores since there's no error column
+                    $where_clause = 'is_active = 0';
+                    break;
+                default:
+                    $where_clause = '1=1'; // All stores
+            }
+
+            $stores = $wpdb->get_results($wpdb->prepare(
+                "SELECT *, CASE WHEN is_active = 1 THEN 'active' ELSE 'inactive' END as status FROM" . esc_sql($table) . " WHERE %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                $where_clause,
+                $limit,
+                $offset
+            ));
+        } else {
+            $stores = $wpdb->get_results($wpdb->prepare(
+                "SELECT *, CASE WHEN is_active = 1 THEN 'active' ELSE 'inactive' END as status FROM" . esc_sql($table) . " ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                $limit,
+                $offset
+            ));
+        }
+
+        return $stores;
+    }
+
+    /**
+     * Get total count of stores with optional status filter
+     *
+     * @param string $status Optional status filter ('active', 'inactive', 'error', or empty for all)
+     * @return int Total count of stores
+     */
+    public static function getStoresCount($status = '')
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . WMSW_STORES_TABLE;
+
+        if (!empty($status)) {
+            // Map status values to database columns
+            switch ($status) {
+                case 'active':
+                    $where_clause = 'is_active = 1';
+                    break;
+                case 'inactive':
+                    $where_clause = 'is_active = 0';
+                    break;
+                case 'error':
+                    // For now, treat as inactive stores since there's no error column
+                    $where_clause = 'is_active = 0';
+                    break;
+                default:
+                    $where_clause = '1=1'; // All stores
+            }
+
+            $count = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM" . esc_sql($table) . " WHERE %s",
+                    $where_clause
+                )
+            );
+        } else {
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM " . esc_sql($table));
+        }
+
+        return (int) $count;
+    }
+
+    /**
+     * Reset all stores to not be default
+     * 
+     * @return bool Success status
+     */
+    public static function resetAllDefault()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . WMSW_STORES_TABLE;
+
+        $result = $wpdb->update(
+            $table,
+            ['is_default' => 0],
+            ['is_default' => 1],
+            ['%d'],
+            ['%d']
+        );
+
+        return $result !== false;
+    }
+
+    /**
+     * Set a specific store as the default store (and reset others)
+     * 
+     * @param int $store_id The store ID to set as default
+     * @return bool Success status
+     */
+    public static function setAsDefault($store_id)
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . WMSW_STORES_TABLE;
+
+        // First reset all stores to not default
+        self::resetAllDefault();
+
+        // Then set the specified store as default
+        $result = $wpdb->update(
+            $table,
+            ['is_default' => 1],
+            ['id' => $store_id],
+            ['%d'],
+            ['%d']
+        );
+
+        return $result !== false;
+    }
+
+    /**
+     * Get the current default store ID
+     * 
+     * @return int|null Default store ID or null if none set
+     */
+    public static function getDefaultStoreId()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . WMSW_STORES_TABLE;
+
+        $default_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$wpdb->esc_sql($table)} WHERE is_default = %d",
+                1
+            )
+        );
+
+        return $default_id ? (int) $default_id : null;
+    }
+
+    /**
+     * Check if table exists (for debug purposes)
+     * 
+     * @return bool Whether the stores table exists
+     */
+    public static function tableExists()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . WMSW_STORES_TABLE;
+        
+        $exists = $wpdb->get_var(
+            $wpdb->prepare("SHOW TABLES LIKE %s", $table)
+        );
+        
+        return !empty($exists);
     }
 }
