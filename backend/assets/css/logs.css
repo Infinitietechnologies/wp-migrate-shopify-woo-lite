@@ -1,0 +1,1217 @@
+/* Import Logs Page Styles */
+/* Import centralized CSS variables */
+@import url('../../../assets/css/variables.css');
+
+.swi-logs-page .swi-admin {
+    padding: var(--spacing-5) 0;
+    margin: 0;
+    max-width: 100%;
+}
+
+.swi-filter-tag>.dashicons {
+    height: auto !important;
+}
+
+.swi-logs-page .swi-reset {
+    all: revert;
+    box-sizing: border-box;
+}
+
+/* Stats Dashboard */
+.swi-logs-page .swi-stats-dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-8);
+}
+
+.swi-logs-page .swi-stat-card {
+    background: var(--panel-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    text-align: left;
+    transition: var(--transition-all-normal);
+    height: 100%;
+}
+
+
+.swi-logs-page .swi-stat-card.info {
+    border-top: var(--border-width-thicker) solid var(--color-primary);
+}
+
+.swi-logs-page .swi-stat-card.stat-error {
+    border-top: var(--border-width-thicker) solid var(--color-error);
+}
+
+.swi-logs-page .swi-stat-card.warning {
+    border-top: var(--border-width-thicker) solid var(--color-warning);
+}
+
+.swi-logs-page .swi-stat-card.debug {
+    border-top: 4px solid #72aee6;
+}
+
+.swi-logs-page .swi-stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.swi-logs-page .swi-stat-card.stat-error .swi-stat-number {
+    color: #d63638;
+}
+
+.swi-logs-page .swi-stat-card.warning .swi-stat-number {
+    color: #dba617;
+}
+
+.swi-logs-page .swi-stat-card.info .swi-stat-number {
+    color: #2271b1;
+}
+
+.swi-logs-page .swi-stat-card.debug .swi-stat-number {
+    color: #50575e;
+}
+
+.swi-logs-page .swi-stat-label {
+    font-size: 14px;
+    color: #50575e;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.swi-logs-page .swi-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    opacity: 0.8;
+}
+
+.swi-logs-page .swi-stat-card.stat-error .swi-stat-icon {
+    background-color: rgba(214, 54, 56, 0.1);
+    color: #d63638;
+}
+
+.swi-logs-page .swi-stat-card.warning .swi-stat-icon {
+    background-color: rgba(219, 166, 23, 0.1);
+    color: #dba617;
+}
+
+.swi-logs-page .swi-stat-card.info .swi-stat-icon {
+    background-color: rgba(34, 113, 177, 0.1);
+    color: #2271b1;
+}
+
+.swi-logs-page .swi-stat-card.debug .swi-stat-icon {
+    background-color: rgba(80, 87, 94, 0.1);
+    color: #50575e;
+}
+
+/* Advanced Filters */
+.swi-logs-page .swi-filters-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    border: 1px solid #dcdcde;
+}
+
+.swi-logs-page .swi-filters-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    cursor: pointer;
+    font-weight: 500;
+    color: #3c434a;
+}
+
+.swi-logs-page .swi-filters-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    color: #2271b1;
+}
+
+.swi-filters-body {
+    padding-top: 14px;
+    border-top: 1px solid #dcdcde;
+    margin-top: 6px;
+}
+
+.swi-logs-page .swi-filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.swi-logs-page .swi-filters-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.swi-filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.swi-logs-page .swi-filter-group {
+    margin-bottom: 12px;
+}
+
+.swi-filter-label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #50575e;
+}
+
+.swi-logs-page .swi-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.swi-logs-page .swi-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    height: 30px;
+    background: #f6f7f7;
+    border: 1px solid #2271b1;
+    border-radius: 3px;
+    color: #2271b1;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.1s ease;
+}
+
+.swi-logs-page .swi-btn:hover {
+    background: #f0f0f1;
+}
+
+.swi-logs-page .swi-btn:focus {
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+    outline: none;
+}
+
+.swi-logs-page .swi-btn-primary {
+    background: #2271b1;
+    color: white;
+    border-color: #2271b1;
+}
+
+.swi-logs-page .swi-btn-primary:hover {
+    background: #1a5b91;
+}
+
+.swi-logs-page .swi-btn-secondary {
+    background: #f6f7f7;
+    border-color: #c3c4c7;
+    color: #3c434a;
+}
+
+.swi-logs-page .swi-btn-secondary:hover {
+    background: #ececec;
+    border-color: #8c8f94;
+}
+
+.swi-logs-page .swi-search-box {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.swi-logs-page .swi-search-box input.swi-form-input {
+    padding: 6px 10px 6px 32px;
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid #8c8f94;
+    font-size: 13px;
+    line-height: 1.5;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.swi-logs-page .swi-search-box input.swi-form-input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.swi-logs-page .swi-search-box input.swi-form-input:hover {
+    border-color: #646970;
+}
+
+.swi-logs-page .swi-search-icon {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #3c434a;
+    font-size: 16px;
+}
+
+.swi-logs-page .swi-form-select {
+    width: 100%;
+    max-width: 100%;
+    padding: 6px 24px 6px 10px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    color: #2c3338;
+    font-size: 13px;
+    line-height: 1.5;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.swi-logs-page .swi-form-select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.swi-logs-page .swi-form-select:hover {
+    border-color: #646970;
+}
+
+/* Date range picker */
+.swi-logs-page .swi-date-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.swi-logs-page .swi-date-range input.swi-form-input {
+    width: calc(50% - 4px);
+    padding: 6px 10px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    color: #2c3338;
+    font-size: 13px;
+    line-height: 1.5;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.swi-logs-page .swi-date-range input.swi-form-input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.swi-logs-page .swi-date-range input.swi-form-input:hover {
+    border-color: #646970;
+}
+
+/* Log Entries Table */
+.swi-logs-page .swi-logs-table-container {
+    margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    position: relative;
+}
+
+.swi-logs-page .swi-logs-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+}
+
+.swi-logs-page .swi-logs-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f0f0f1;
+}
+
+.swi-logs-page .swi-logs-table thead th {
+    background-color: #f0f0f1;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #3c434a;
+    border-bottom: 1px solid #c3c4c7;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.swi-logs-page .swi-logs-table tbody tr {
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.swi-logs-page .swi-logs-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.swi-logs-page .swi-logs-table tbody tr:hover {
+    background-color: #f6f7f7;
+}
+
+.swi-logs-page .swi-logs-table td {
+    padding: 8px 10px;
+    vertical-align: middle;
+    font-size: 13px;
+    color: #50575e;
+    word-wrap: break-word;
+    max-width: 200px;
+}
+
+.swi-logs-page .swi-logs-table td.message-cell {
+    max-width: 300px;
+}
+
+/* Log level indicators */
+.swi-logs-page .swi-level-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 11px;
+    text-align: center;
+    min-width: 60px;
+}
+
+.swi-logs-page .swi-level-error {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.swi-logs-page .swi-level-success {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+}
+
+.swi-logs-page .swi-level-warning {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.swi-logs-page .swi-level-info {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.swi-logs-page .swi-level-debug {
+    background-color: #f0f0f1;
+    color: #3c434a;
+}
+
+/* Status badges */
+.swi-logs-page .swi-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 11px;
+    text-align: center;
+    min-width: 60px;
+}
+
+.swi-logs-page .swi-status-pending {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.swi-logs-page .swi-status-in_progress {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.swi-logs-page .swi-status-completed {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.swi-logs-page .swi-status-failed {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.swi-logs-page .swi-status-unknown {
+    background-color: #f0f0f1;
+    color: #3c434a;
+}
+
+/* Context toggle */
+.swi-logs-page .swi-context-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    color: #2271b1;
+    margin-left: 8px;
+    padding: 0;
+    font-size: 12px;
+}
+
+.swi-logs-page .swi-context-content {
+    margin-top: 8px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    font-size: 12px;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    max-height: 200px;
+    max-width: 750px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+
+/* Pagination */
+.swi-logs-page .swi-pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.swi-logs-page .swi-pagination-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.swi-logs-page .swi-pagination-links li {
+    margin: 0;
+}
+
+.swi-logs-page .swi-pagination-links a,
+.swi-logs-page .swi-pagination-links span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #2271b1;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.swi-logs-page .swi-pagination-links a:hover {
+    background: #f0f0f0;
+    border-color: #c3c4c7;
+}
+
+.swi-logs-page .swi-pagination-links .current {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+    cursor: default;
+}
+
+/* Pagination info */
+.swi-logs-page .swi-pagination-info {
+    text-align: center;
+    margin-top: 8px;
+    color: #666;
+    font-size: 13px;
+}
+
+/* Notifications */
+.swi-logs-page .swi-notification {
+    position: fixed;
+    top: 32px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border-left: 4px solid #2271b1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    max-width: 400px;
+    animation: swi-slide-in 0.3s ease;
+}
+
+.swi-logs-page .swi-notification-success {
+    border-left-color: #46b450;
+}
+
+.swi-logs-page .swi-notification-error {
+    border-left-color: #dc3232;
+}
+
+.swi-logs-page .swi-notification .dashicons {
+    margin-right: 12px;
+    font-size: 20px;
+}
+
+.swi-logs-page .swi-notification-success .dashicons {
+    color: #46b450;
+}
+
+.swi-logs-page .swi-notification-error .dashicons {
+    color: #dc3232;
+}
+
+.swi-logs-page .swi-notification-message {
+    flex: 1;
+    font-size: 14px;
+    color: #444;
+}
+
+.swi-logs-page .swi-notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    margin-left: 12px;
+}
+
+.swi-logs-page .swi-notification-close:hover {
+    color: #666;
+}
+
+/* Loading indicator */
+.swi-logs-page .swi-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+    color: #666;
+}
+
+.swi-logs-page .swi-loading .dashicons {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Filter form enhancements for refresh-based filtering */
+.swi-logs-page .swi-filters-panel {
+    transition: all 0.3s ease;
+}
+
+.swi-logs-page .swi-filters-panel.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.swi-logs-page .swi-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.swi-logs-page .swi-btn:disabled .dashicons {
+    animation: swi-spin 1.5s linear infinite;
+}
+
+/* Active filter indicators */
+.swi-logs-page .swi-filter-group.has-active-filter {
+    position: relative;
+}
+
+.swi-logs-page .swi-filter-group.has-active-filter::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #2271b1;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Filter summary */
+.swi-logs-page .swi-filter-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.swi-logs-page .swi-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: #2271b1;
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.swi-logs-page .swi-filter-tag .dashicons {
+    margin-left: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.swi-logs-page .swi-filter-tag .dashicons:hover {
+    opacity: 0.8;
+}
+
+/* Animations */
+@keyframes swi-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes swi-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.swi-logs-page .swi-spin {
+    animation: swi-spin 1.5s linear infinite;
+    display: inline-block;
+}
+
+.swi-logs-page .swi-highlight {
+    background-color: #f0f7ff !important;
+}
+
+.swi-logs-page .swi-mr-2 {
+    margin-right: 8px;
+}
+
+.swi-logs-page .swi-mt-4 {
+    margin-top: 16px;
+}
+
+/* Page Header */
+.swi-logs-page .swi-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.swi-logs-page .swi-page-title {
+    font-size: 23px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    line-height: 1.3;
+    color: #1d2327;
+}
+
+.swi-logs-page .swi-page-subtitle {
+    margin: 8px 0 0;
+    color: #50575e;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.swi-logs-page .swi-page-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Large screens (1200px and up) */
+@media screen and (min-width: 1200px) {
+    .swi-logs-page .swi-stats-dashboard {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-5);
+    }
+
+    .swi-logs-page .swi-filters-row {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .swi-logs-page .swi-logs-table {
+        min-width: 1000px;
+    }
+}
+
+/* Medium screens (768px to 1199px) */
+@media screen and (max-width: 1199px) and (min-width: 768px) {
+    .swi-logs-page .swi-stats-dashboard {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+
+    .swi-logs-page .swi-stat-card {
+        padding: var(--spacing-5);
+    }
+
+    .swi-logs-page .swi-stat-number {
+        font-size: 32px;
+    }
+
+    .swi-logs-page .swi-filters-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .swi-logs-page .swi-filters-panel {
+        padding: 14px 16px;
+    }
+
+    .swi-logs-page .swi-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .swi-logs-page .swi-page-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* Small screens (600px to 767px) */
+@media screen and (max-width: 767px) and (min-width: 600px) {
+    .swi-logs-page .swi-stats-dashboard {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-3);
+    }
+
+    .swi-logs-page .swi-stat-card {
+        padding: var(--spacing-4);
+    }
+
+    .swi-logs-page .swi-stat-number {
+        font-size: 28px;
+    }
+
+    .swi-logs-page .swi-stat-label {
+        font-size: 12px;
+    }
+
+    .swi-logs-page .swi-stat-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .swi-logs-page .swi-filters-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .swi-logs-page .swi-filters-panel {
+        padding: 12px 14px;
+        margin-bottom: 20px;
+    }
+
+    .swi-logs-page .swi-filter-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .swi-logs-page .swi-btn {
+        width: 100%;
+        justify-content: center;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .swi-logs-page .swi-date-range {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .swi-logs-page .swi-date-range input.swi-form-input {
+        width: 100%;
+    }
+
+    .swi-logs-page .swi-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+    }
+
+    .swi-logs-page .swi-page-title {
+        font-size: 20px;
+    }
+
+    .swi-logs-page .swi-page-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .swi-logs-page .swi-logs-table-container {
+        margin-bottom: 15px;
+        overflow-x: auto;
+    }
+
+    .swi-logs-page .swi-logs-table {
+        min-width: 600px !important;
+        font-size: 12px;
+    }
+
+    .swi-logs-page .swi-logs-table thead th,
+    .swi-logs-page .swi-logs-table td {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+
+    .swi-logs-page .swi-level-badge,
+    .swi-logs-page .swi-status-badge {
+        font-size: 10px;
+        min-width: 50px;
+        padding: 1px 4px;
+    }
+
+    .swi-logs-page .swi-pagination {
+        margin: 15px 0;
+    }
+
+    .swi-logs-page .swi-pagination-links a,
+    .swi-logs-page .swi-pagination-links span {
+        min-width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .swi-logs-page .swi-notification {
+        top: 20px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+/* Extra small screens (up to 599px) */
+@media screen and (max-width: 599px) {
+    .swi-logs-page .swi-admin {
+        padding: var(--spacing-3) 0;
+    }
+
+    .swi-logs-page .swi-stats-dashboard {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-3);
+        margin-bottom: var(--spacing-6);
+    }
+
+    .swi-logs-page .swi-stat-card {
+        padding: var(--spacing-4);
+        flex-direction: row;
+        text-align: left;
+        gap: var(--spacing-3);
+        align-items: center;
+    }
+
+    .swi-logs-page .swi-stat-number {
+        font-size: 24px;
+    }
+
+    .swi-logs-page .swi-stat-label {
+        font-size: 11px;
+    }
+
+    .swi-logs-page .swi-stat-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .swi-logs-page .swi-filters-panel {
+        padding: 10px 12px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+    }
+
+    .swi-logs-page .swi-filters-toggle {
+        padding: 6px 0;
+        font-size: 14px;
+    }
+
+    .swi-filters-body {
+        padding-top: 10px;
+        margin-top: 4px;
+    }
+
+    .swi-logs-page .swi-filters-title {
+        font-size: 13px;
+    }
+
+    .swi-filters-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .swi-logs-page .swi-filter-group {
+        margin-bottom: 8px;
+    }
+
+    .swi-filter-label {
+        font-size: 12px;
+        margin-bottom: 3px;
+    }
+
+    .swi-logs-page .swi-filter-actions {
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .swi-logs-page .swi-btn {
+        width: 100%;
+        justify-content: center;
+        height: 40px;
+        font-size: 14px;
+        padding: 0 16px;
+    }
+
+    .swi-logs-page .swi-search-box {
+        margin-bottom: 10px;
+    }
+
+    .swi-logs-page .swi-search-box input.swi-form-input {
+        padding: 8px 10px 8px 32px;
+        font-size: 14px;
+    }
+
+    .swi-logs-page .swi-form-select {
+        padding: 8px 24px 8px 10px;
+        font-size: 14px;
+    }
+
+    .swi-logs-page .swi-date-range {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .swi-logs-page .swi-date-range input.swi-form-input {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .swi-logs-page .swi-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+
+    .swi-logs-page .swi-page-title {
+        font-size: 18px;
+    }
+
+    .swi-logs-page .swi-page-subtitle {
+        font-size: 12px;
+    }
+
+    .swi-logs-page .swi-page-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .swi-logs-page .swi-logs-table-container {
+        margin-bottom: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+    }
+
+    .swi-logs-page .swi-logs-table {
+        min-width: 500px !important;
+        font-size: 11px;
+        border-radius: 0;
+    }
+
+    .swi-logs-page .swi-logs-table thead th {
+        padding: 6px 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .swi-logs-page .swi-logs-table td {
+        padding: 6px 6px;
+        font-size: 11px;
+        max-width: 120px;
+    }
+
+    .swi-logs-page .swi-logs-table td.message-cell {
+        max-width: 150px;
+    }
+
+    .swi-logs-page .swi-level-badge,
+    .swi-logs-page .swi-status-badge {
+        font-size: 9px;
+        min-width: 40px;
+        padding: 1px 3px;
+    }
+
+    .swi-logs-page .swi-pagination {
+        margin: 12px 0;
+        gap: 2px;
+    }
+
+    .swi-logs-page .swi-pagination-links {
+        gap: 2px;
+    }
+
+    .swi-logs-page .swi-pagination-links a,
+    .swi-logs-page .swi-pagination-links span {
+        min-width: 24px;
+        height: 24px;
+        font-size: 11px;
+        padding: 0 4px;
+    }
+
+    .swi-logs-page .swi-pagination-info {
+        font-size: 11px;
+        margin-top: 6px;
+    }
+
+    .swi-logs-page .swi-notification {
+        top: 10px;
+        right: 5px;
+        left: 5px;
+        max-width: none;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .swi-logs-page .swi-notification .dashicons {
+        font-size: 16px;
+        margin-right: 8px;
+    }
+
+    .swi-logs-page .swi-loading {
+        padding: 30px 15px;
+        font-size: 13px;
+    }
+
+    .swi-logs-page .swi-empty-state {
+        padding: 30px 15px;
+    }
+
+    .swi-logs-page .swi-empty-icon {
+        font-size: 36px;
+        height: 36px;
+        width: 36px;
+        margin-bottom: 15px;
+    }
+
+    .swi-logs-page .swi-empty-title {
+        font-size: 16px;
+    }
+
+    .swi-logs-page .swi-empty-description {
+        font-size: 12px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media screen and (max-width: 767px) and (orientation: landscape) {
+    .swi-logs-page .swi-stats-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .swi-logs-page .swi-filters-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .swi-logs-page .swi-filter-actions {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .swi-logs-page .swi-btn {
+        width: auto;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .swi-logs-page .swi-logs-table {
+        border-width: 0.5px;
+    }
+
+    .swi-logs-page .swi-filters-panel {
+        border-width: 0.5px;
+    }
+}
+
+/* Print styles */
+@media print {
+
+    .swi-logs-page .swi-filters-panel,
+    .swi-logs-page .swi-page-actions,
+    .swi-logs-page .swi-pagination,
+    .swi-logs-page .swi-notification {
+        display: none !important;
+    }
+
+    .swi-logs-page .swi-logs-table {
+        border: 1px solid #000;
+        min-width: auto;
+    }
+
+    .swi-logs-page .swi-logs-table thead th {
+        background-color: #f0f0f0 !important;
+        color: #000 !important;
+    }
+}
