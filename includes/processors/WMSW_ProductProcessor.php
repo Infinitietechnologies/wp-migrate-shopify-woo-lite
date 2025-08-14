@@ -1,24 +1,39 @@
+
 <?php
 
+
 namespace ShopifyWooImporter\Processors;
+// Import WordPress functions used in this file (after namespace)
+use function get_posts;
+use function update_post_meta;
+use function get_term_by;
+use function wp_insert_term;
+use function delete_transient;
+use function is_wp_error;
+use function download_url;
+use function sanitize_file_name;
+use function wp_parse_url;
+use function esc_url_raw;
+use function wp_delete_file;
+use function media_handle_sideload;
+use function set_post_thumbnail;
+use function get_option;
+use function get_transient;
+use function set_transient;
 
 use ShopifyWooImporter\Core\WMSW_ShopifyClient;
 use ShopifyWooImporter\Helpers\WMSW_PaginationHelper;
 use ShopifyWooImporter\Helpers\WMSW_DatabaseHelper;
 use ShopifyWooImporter\Services\WMSW_Logger;
 
-use function download_url;
-use function is_wp_error;
-use function media_handle_sideload;
-use function set_post_thumbnail;
-use function update_post_meta;
-use function get_option;
-use function get_transient;
-use function set_transient;
-use function get_posts;
+
 
 /**
  * Product Processor
+ * 
+ * Note: For optimal performance, consider adding the following database index:
+ * ALTER TABLE wp_postmeta ADD INDEX idx_wmsw_original_image_url (meta_key, meta_value(191));
+ * This will significantly improve the performance of get_existing_attachment_id() method.
  */
 class WMSW_ProductProcessor
 {
@@ -32,7 +47,7 @@ class WMSW_ProductProcessor
         $this->shopify_client = $shopify_client;
         $this->logger = $logger ?: new WMSW_Logger();
         // Get batch size from settings, fallback to constant
-        $settings = \get_option('wmsw_options', []);
+    $settings = get_option('wmsw_options', []);
         $this->batch_size = isset($settings['import_batch_size']) ? (int)$settings['import_batch_size'] : WMSW_BATCH_SIZE_PRODUCTS;
     }
     /**
@@ -59,7 +74,7 @@ class WMSW_ProductProcessor
 
         // Safety check: Track batch processing to prevent infinite loops
         $batch_count_key = 'wmsw_product_batch_count_' . $tab;
-        $batch_count = \get_transient($batch_count_key) ?: 0;
+    $batch_count = get_transient($batch_count_key) ?: 0;
         $max_batches = 1000; // Maximum number of batches to prevent infinite loops
 
         if ($batch_count >= $max_batches) {
@@ -81,7 +96,7 @@ class WMSW_ProductProcessor
         }
 
         // Increment batch count
-        \set_transient($batch_count_key, $batch_count + 1, 3600); // 1 hour expiry
+    set_transient($batch_count_key, $batch_count + 1, 3600); // 1 hour expiry
 
         // Get one page of products from Shopify
         $this->logger->debug('Fetching products from Shopify API');
@@ -800,9 +815,9 @@ class WMSW_ProductProcessor
             return false;
         }
 
-        require_once \ABSPATH . 'wp-admin/includes/image.php';
-        require_once \ABSPATH . 'wp-admin/includes/file.php';
-        require_once \ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
 
         $image_ids = [];
 
@@ -835,10 +850,10 @@ class WMSW_ProductProcessor
                 $product->save(); // Save to ensure post exists
             }
             // Attach featured image
-            \set_post_thumbnail($product->get_id(), $image_ids[0]);
+            set_post_thumbnail($product->get_id(), $image_ids[0]);
             // Attach gallery images
             if (count($image_ids) > 1) {
-                \update_post_meta($product->get_id(), '_product_image_gallery', implode(',', array_slice($image_ids, 1)));
+                update_post_meta($product->get_id(), '_product_image_gallery', implode(',', array_slice($image_ids, 1)));
             }
             $this->logger->debug('Imported and attached ' . count($image_ids) . ' images.');
         } else {
@@ -858,23 +873,38 @@ class WMSW_ProductProcessor
 
     private function get_existing_attachment_id($url)
     {
-        $existing = \get_posts([
-            'post_type'  => 'attachment',
-            'meta_query' => [[
-                'key'     => '_WMSW_original_image_url',
-                'value'   => $url,
-                'compare' => '='
-            ]],
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-        ]);
-        return !empty($existing) ? $existing[0] : 0;
+        static $cache = [];
+        if (isset($cache[$url])) {
+            return $cache[$url];
+        }
+
+        // Use direct SQL query for better performance instead of meta_query
+        global $wpdb;
+        
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $attachment_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id 
+             FROM {$wpdb->postmeta} pm 
+             INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID 
+             WHERE pm.meta_key = %s 
+             AND pm.meta_value = %s 
+             AND p.post_type = 'attachment' ",
+            '_WMSW_original_image_url',
+            $url
+        ));
+            $url
+        ));
+
+        $attachment_id = $attachment_id ? (int) $attachment_id : 0;
+        $cache[$url] = $attachment_id;
+        
+        return $attachment_id;
     }
 
     private function sideload_image($image_url, $product_id)
     {
-        $tmp = \download_url($image_url);
-        if (is_wp_error($tmp)) {
+    $tmp = download_url($image_url);
+    if (is_wp_error($tmp)) {
             $this->logger->error("Download failed: {$image_url}");
             return 0;
         }
@@ -884,14 +914,14 @@ class WMSW_ProductProcessor
             'tmp_name' => $tmp,
         ];
 
-        $attachment_id = media_handle_sideload($file_array, $product_id);
-        if (is_wp_error($attachment_id)) {
-            \wp_delete_file($file_array['tmp_name']);
+    $attachment_id = media_handle_sideload($file_array, $product_id);
+    if (is_wp_error($attachment_id)) {
+            wp_delete_file($file_array['tmp_name']);
             $this->logger->error("Sideload failed: {$image_url}");
             return 0;
         }
 
-        update_post_meta($attachment_id, '_WMSW_original_image_url', esc_url_raw($image_url));
+    update_post_meta($attachment_id, '_WMSW_original_image_url', esc_url_raw($image_url));
         return $attachment_id;
     }
 
@@ -953,7 +983,7 @@ class WMSW_ProductProcessor
         $this->logger->debug('Getting or creating category for collection: ' . $collection['title']);
 
         // First check if category exists by handle (slug)
-        $existing_term = \get_term_by('slug', $collection['handle'], 'product_cat');
+    $existing_term = get_term_by('slug', $collection['handle'], 'product_cat');
 
         if ($existing_term) {
             $this->logger->debug('Found existing category by slug: ' . $collection['handle'] . ' (ID: ' . $existing_term->term_id . ')');
@@ -961,7 +991,7 @@ class WMSW_ProductProcessor
         }
 
         // Check if category exists by name
-        $existing_term = \get_term_by('name', $collection['title'], 'product_cat');
+    $existing_term = get_term_by('name', $collection['title'], 'product_cat');
 
         if ($existing_term) {
             $this->logger->debug('Found existing category by name: ' . $collection['title'] . ' (ID: ' . $existing_term->term_id . ')');
@@ -976,9 +1006,9 @@ class WMSW_ProductProcessor
             'slug' => $collection['handle']
         ];
 
-        $result = \wp_insert_term($collection['title'], 'product_cat', $category_data);
+    $result = wp_insert_term($collection['title'], 'product_cat', $category_data);
 
-        if (\is_wp_error($result)) {
+    if (is_wp_error($result)) {
             $this->logger->error('Error creating category: ' . $result->get_error_message());
             return false;
         }
@@ -1015,7 +1045,7 @@ class WMSW_ProductProcessor
     private function cleanupBatchTracking($tab = 'products')
     {
         $batch_count_key = 'wmsw_product_batch_count_' . $tab;
-        \delete_transient($batch_count_key);
+    delete_transient($batch_count_key);
         WMSW_PaginationHelper::deleteCursor($tab);
         $this->logger->debug('Cleaned up batch tracking for tab: ' . $tab);
     }
@@ -1060,5 +1090,85 @@ class WMSW_ProductProcessor
                 'items_total' => $total_count
             ]);
         }
+    }
+
+    /**
+     * Optimize database performance for image lookups
+     * This method can be called during plugin activation or manually
+     */
+    public function optimize_database_performance()
+    {
+        global $wpdb;
+        
+        try {
+            // Check if the index already exists
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $index_exists = $wpdb->get_var(
+                "SHOW INDEX FROM {$wpdb->postmeta} WHERE Key_name = 'idx_wmsw_original_image_url'"
+            );
+            
+            if (!$index_exists) {
+                // Add index for better performance on image lookups
+                // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+                $result = $wpdb->query(
+                    "ALTER TABLE {$wpdb->postmeta} ADD INDEX idx_wmsw_original_image_url (meta_key, meta_value(191))"
+                );
+                // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+                if ($result !== false) {
+                    $this->logger->info('Database index added successfully for improved image lookup performance');
+                    return true;
+                } else {
+                    $this->logger->warning('Failed to add database index - this may be due to insufficient permissions');
+                    return false;
+                }
+            } else {
+                $this->logger->info('Database index already exists for image lookups');
+                return true;
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error optimizing database performance: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get performance statistics for image lookups
+     */
+    public function get_performance_stats()
+    {
+        global $wpdb;
+        
+        $stats = [
+            'total_attachments' => 0,
+            'attachments_with_wmsw_meta' => 0,
+            'cache_hit_rate' => 0,
+            'index_status' => 'unknown'
+        ];
+        
+        try {
+            // Check total attachments
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $stats['total_attachments'] = $wpdb->get_var(
+                "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_status = 'inherit'"
+            );
+            
+            // Check attachments with WMSW meta
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $stats['attachments_with_wmsw_meta'] = $wpdb->get_var(
+                "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_WMSW_original_image_url'"
+            );
+            
+            // Check index status
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $index_exists = $wpdb->get_var(
+                "SHOW INDEX FROM {$wpdb->postmeta} WHERE Key_name = 'idx_wmsw_original_image_url'"
+            );
+            $stats['index_status'] = $index_exists ? 'exists' : 'missing';
+            
+        } catch (Exception $e) {
+            $this->logger->error('Error getting performance stats: ' . $e->getMessage());
+        }
+        
+        return $stats;
     }
 }

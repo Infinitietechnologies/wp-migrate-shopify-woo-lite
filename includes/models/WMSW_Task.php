@@ -219,6 +219,7 @@ class WMSW_Task
                 $order_limit_clause .= " LIMIT %d";
             }
 
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $tasks = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT * FROM" . esc_sql($table) . "%s %s %s",

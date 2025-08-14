@@ -321,7 +321,7 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $row = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM {$wpdb->esc_sql($table)} WHERE store_id = %d AND import_type = %s AND status = 'in_progress' ORDER BY id DESC LIMIT 1",
@@ -330,7 +330,7 @@ class WMSW_ImportLog
             ),
             \ARRAY_A
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $row ? new self($row) : null;
     }
@@ -346,14 +346,14 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$wpdb->esc_sql($table)} WHERE status = 'in_progress' AND id != %d",
                 $exclude_import_id
             )
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return intval($count);
     }
@@ -368,13 +368,13 @@ class WMSW_ImportLog
         }
 
         global $wpdb;
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching	
         $result = $wpdb->delete(
             self::get_table_name(),
             ['id' => $this->id],
             ['%d']
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching	
 
         return $result !== false;
     }
@@ -387,12 +387,12 @@ class WMSW_ImportLog
         global $wpdb;
         $table = self::get_table_name();
 
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $row = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM {$wpdb->esc_sql($table)} WHERE id = %d", $id),
             \ARRAY_A
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
         return $row ? new self($row) : null;
     }

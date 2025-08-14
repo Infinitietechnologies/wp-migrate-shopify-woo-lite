@@ -1,6 +1,24 @@
 <?php
 
+
 namespace ShopifyWooImporter\Handlers;
+
+// Import WordPress functions/constants used in this file
+use function wp_cache_get;
+use function wp_cache_set;
+use function get_option;
+use function get_post_meta;
+use function get_posts;
+use function wp_strip_all_tags;
+use function wp_verify_nonce;
+use function sanitize_text_field;
+use function wp_unslash;
+use function wp_send_json_error;
+use function wp_send_json_success;
+use function add_action;
+use function __;
+use const HOUR_IN_SECONDS;
+use function current_time;
 
 use ShopifyWooImporter\Core\WMSW_ShopifyClient;
 use ShopifyWooImporter\Models\WMSW_ShopifyStore;
@@ -10,12 +28,6 @@ use ShopifyWooImporter\Services\WMSW_Logger;
 use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
 use ShopifyWooImporter\Helpers\WMSW_PaginationHelper;
 
-use function get_option;
-use function add_action;
-use function wp_send_json_error;
-use function wp_send_json_success;
-use function __;
-use function current_time;
 
 /**
  * Product Preview Handler
@@ -650,29 +662,23 @@ class WMSW_ProductHandler
 
     private function handleMetaValue()
     {
+        global $wpdb;
         // Create a cache key
         $cache_key = 'shopify_handle_product_meta';
         $results   = wp_cache_get($cache_key);
 
         if (false === $results) {
-            // Query posts with post_type and post_status conditions
-            $posts = get_posts([
-                'post_type'      => 'product',
-                'post_status'    => ['publish', 'draft'],
-                'fields'         => 'ids',
-                'posts_per_page' => -1,
-            ]);
-
-            $results = [];
-
-            if (! empty($posts)) {
-                foreach ($posts as $post_id) {
-                    $meta_value = get_post_meta($post_id, '_shopify_handle', true);
-                    if ('' !== $meta_value) {
-                        $results[] = (object) ['meta_value' => $meta_value];
-                    }
-                }
-            }
+            // Query all product handles by meta_key only (avoid meta_value in WHERE)
+            $meta_key = '_shopify_handle'; // Change if your meta_key is different
+            
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $results = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s",
+                    $meta_key
+                )
+            );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
             // Store in cache for 1 hour
             wp_cache_set($cache_key, $results, '', HOUR_IN_SECONDS);
