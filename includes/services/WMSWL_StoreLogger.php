@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class WMSW_StoreLogger
+class WMSWL_StoreLogger
 {
 
     /**

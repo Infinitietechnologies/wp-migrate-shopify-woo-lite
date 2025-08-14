@@ -39,7 +39,7 @@ use function wp_die;
  *
  * Provides helper functions for security operations like nonce verification
  */
-class WMSW_SecurityHelper
+class WMSWL_SecurityHelper
 {
     /**
      * Verifies the admin nonce for AJAX requests
@@ -56,7 +56,7 @@ class WMSW_SecurityHelper
 
         if (!$verified && !$returnResult) {
             wp_send_json_error([
-                'message'    => esc_html__('Security check failed', 'wp-migrate-shopify-woo'),
+                'message'    => esc_html__('Security check failed', 'wp-migrate-shopify-woo-lite'),
                 'error_type' => 'security',
             ]);
         }
@@ -77,7 +77,7 @@ class WMSW_SecurityHelper
 
         if (!$hasCapability && !$returnResult) {
             wp_send_json_error([
-                'message'    => esc_html__('You do not have permission to perform this action', 'wp-migrate-shopify-woo'),
+                'message'    => esc_html__('You do not have permission to perform this action', 'wp-migrate-shopify-woo-lite'),
                 'error_type' => 'permission',
             ]);
         }
@@ -123,7 +123,7 @@ class WMSW_SecurityHelper
     public static function verifyAdminPage($capability = 'manage_options')
     {
         if (!current_user_can($capability)) {
-            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'wp-migrate-shopify-woo'));
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'wp-migrate-shopify-woo-lite'));
         }
     }
 
@@ -137,7 +137,7 @@ class WMSW_SecurityHelper
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
         return isset($_POST[$field]) ? intval(sanitize_text_field(wp_unslash($_POST[$field]))) : 0;
     }
@@ -152,14 +152,14 @@ class WMSW_SecurityHelper
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
         foreach ($requiredFields as $field) {
             if (empty($_POST[$field])) {
                 wp_send_json_error([
                     'message' => sprintf(
                         /* translators: %s: field name */
-                        __('Required field "%s" is missing', 'wp-migrate-shopify-woo'),
+                        __('Required field "%s" is missing', 'wp-migrate-shopify-woo-lite'),
                         $field
                     ),
                     'error_type' => 'validation',
@@ -180,7 +180,7 @@ class WMSW_SecurityHelper
     public static function getPostData($field, $default = '', $sanitizer = 'sanitize_text_field')
     {
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         if (!isset($_POST[$field])) {
@@ -222,7 +222,7 @@ class WMSW_SecurityHelper
         $sanitizedData = [];
         foreach ($rules as $field => $sanitizer) {
             if (!array_key_exists($field, $data)) {
-                return ['error' => __('Missing field: ', 'wp-migrate-shopify-woo') . $field];
+                return ['error' => __('Missing field: ', 'wp-migrate-shopify-woo-lite') . $field];
             }
             $sanitizedData[$field] = self::getPostData($data[$field], '', $sanitizer);
         }
@@ -299,8 +299,8 @@ class WMSW_SecurityHelper
     public static function isDebugModeEnabled(): bool
     {
         // Use the Logger's static method if available
-        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-            return \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled();
+        if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+            return \ShopifyWooImporter\Services\WMSWL_Logger::isDebugModeEnabled();
         }
 
         // Fallback to WordPress debug mode
@@ -320,8 +320,8 @@ class WMSW_SecurityHelper
         }
 
         // Use WordPress logger if available, otherwise use WordPress debug log
-        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-            $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+        if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+            $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
             if (is_array($message) || is_object($message)) {
                 $logger->debug($prefix . ' ' . json_encode($message, JSON_PRETTY_PRINT));
             } else {

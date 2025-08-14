@@ -2,12 +2,12 @@
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
-use ShopifyWooImporter\Models\WMSW_ImportLog;
-use ShopifyWooImporter\Processors\WMSW_OrderProcessor;
-use ShopifyWooImporter\Services\WMSW_Logger;
-use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
+use ShopifyWooImporter\Models\WMSWL_ImportLog;
+use ShopifyWooImporter\Processors\WMSWL_OrderProcessor;
+use ShopifyWooImporter\Services\WMSWL_Logger;
+use ShopifyWooImporter\Helpers\WMSWL_SecurityHelper;
 
 // WordPress functions
 use function get_option;
@@ -29,10 +29,10 @@ use function absint;
  *
  * Handles order preview and import functionality
  */
-class WMSW_OrderHandler
+class WMSWL_OrderHandler
 {
     /**
-     * @var WMSW_Logger
+     * @var WMSWL_Logger
      */
     private $logger;
 
@@ -41,7 +41,7 @@ class WMSW_OrderHandler
      */
     public function __construct()
     {
-        $this->logger = new WMSW_Logger();
+        $this->logger = new WMSWL_Logger();
         $this->initHooks();
     }
 
@@ -68,7 +68,7 @@ class WMSW_OrderHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         try {
@@ -78,20 +78,20 @@ class WMSW_OrderHandler
 
             if (!$store_id) {
                 wp_send_json_error([
-                    'message' => __('Please select a store.', 'wp-migrate-shopify-woo')
+                    'message' => __('Please select a store.', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
             // Get store details
-            $store = WMSW_ShopifyStore::find($store_id);
+            $store = WMSWL_ShopifyStore::find($store_id);
             if (!$store) {
                 wp_send_json_error([
-                    'message' => __('Store not found.', 'wp-migrate-shopify-woo')
+                    'message' => __('Store not found.', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
             // Initialize Shopify client
-            $client = new WMSW_ShopifyClient(
+            $client = new WMSWL_ShopifyClient(
                 $store->get_shop_domain(),
                 $store->get_access_token(),
                 $store->get_api_version()
@@ -128,10 +128,10 @@ class WMSW_OrderHandler
                         'id' => $order['id'],
                         'order_number' => $order['name'] ?? '#' . ($order['id'] ?? ''),
                         'name' => $order['name'] ?? '#' . ($order['id'] ?? ''),
-                        'customer_email' => $order['email'] ?? $order['customer']['email'] ?? __('Guest', 'wp-migrate-shopify-woo'),
+                        'customer_email' => $order['email'] ?? $order['customer']['email'] ?? __('Guest', 'wp-migrate-shopify-woo-lite'),
                         'customer_name' => isset($order['customer']) ?
-                            ($order['customer']['displayName'] ?? $order['customer']['email'] ?? __('Guest', 'wp-migrate-shopify-woo')) :
-                            __('Guest', 'wp-migrate-shopify-woo'),
+                            ($order['customer']['displayName'] ?? $order['customer']['email'] ?? __('Guest', 'wp-migrate-shopify-woo-lite')) :
+                            __('Guest', 'wp-migrate-shopify-woo-lite'),
                         'total' => $total_price,
                         'currency' => $currency,
                         'status' => $order['displayFinancialStatus'] ?? 'PENDING',
@@ -152,7 +152,7 @@ class WMSW_OrderHandler
                 ]);
             } else {
                 wp_send_json_error([
-                    'message' => __('No orders found or unable to fetch orders.', 'wp-migrate-shopify-woo')
+                    'message' => __('No orders found or unable to fetch orders.', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
         } catch (\Exception $e) {
@@ -162,7 +162,7 @@ class WMSW_OrderHandler
             ]);
 
             wp_send_json_error([
-                'message' => __('Failed to preview orders: ', 'wp-migrate-shopify-woo') . $e->getMessage()
+                'message' => __('Failed to preview orders: ', 'wp-migrate-shopify-woo-lite') . $e->getMessage()
             ]);
         }
     }
@@ -175,7 +175,7 @@ class WMSW_OrderHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         try {
@@ -187,15 +187,15 @@ class WMSW_OrderHandler
 
             if (!$store_id) {
                 wp_send_json_error([
-                    'message' => __('Please select a store.', 'wp-migrate-shopify-woo')
+                    'message' => __('Please select a store.', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
             // Get store details
-            $store = WMSW_ShopifyStore::find($store_id);
+            $store = WMSWL_ShopifyStore::find($store_id);
             if (!$store) {
                 wp_send_json_error([
-                    'message' => __('Store not found.', 'wp-migrate-shopify-woo')
+                    'message' => __('Store not found.', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
@@ -209,7 +209,7 @@ class WMSW_OrderHandler
 
             if (!$import_id) {
                 wp_send_json_error([
-                    'message' => __('Failed to create import session', 'wp-migrate-shopify-woo')
+                    'message' => __('Failed to create import session', 'wp-migrate-shopify-woo-lite')
                 ]);
                 return;
             }
@@ -220,7 +220,7 @@ class WMSW_OrderHandler
                 'status' => 'starting',
                 'current' => 0,
                 'total' => 0,
-                'message' => __('Initializing order import...', 'wp-migrate-shopify-woo'),
+                'message' => __('Initializing order import...', 'wp-migrate-shopify-woo-lite'),
                 'errors' => [],
                 'start_time' => time(),
                 'import_id' => $import_id  // Link to import session
@@ -254,7 +254,7 @@ class WMSW_OrderHandler
             ]);
 
             wp_send_json_success([
-                'message' => __('Orders import started successfully.', 'wp-migrate-shopify-woo'),
+                'message' => __('Orders import started successfully.', 'wp-migrate-shopify-woo-lite'),
                 'progress_key' => $progress_key,
                 'import_id' => $import_id
             ]);
@@ -265,7 +265,7 @@ class WMSW_OrderHandler
             ]);
 
             wp_send_json_error([
-                'message' => __('Failed to start orders import: ', 'wp-migrate-shopify-woo') . $e->getMessage()
+                'message' => __('Failed to start orders import: ', 'wp-migrate-shopify-woo-lite') . $e->getMessage()
             ]);
         }
     }
@@ -278,7 +278,7 @@ class WMSW_OrderHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
         
         
@@ -288,7 +288,7 @@ class WMSW_OrderHandler
 
         if (!$progress_key) {
             wp_send_json_error([
-                'message' => __('Invalid progress key.', 'wp-migrate-shopify-woo')
+                'message' => __('Invalid progress key.', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
@@ -297,7 +297,7 @@ class WMSW_OrderHandler
         if ($progress === false) {
             $this->logger->debugLog('Progress transient not found for key: ' . $progress_key);
             wp_send_json_error([
-                'message' => __('Import progress not found.', 'wp-migrate-shopify-woo')
+                'message' => __('Import progress not found.', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
@@ -314,9 +314,9 @@ class WMSW_OrderHandler
 
         try {
             // Get store details
-            $store = WMSW_ShopifyStore::find($store_id);
+            $store = WMSWL_ShopifyStore::find($store_id);
             if (!$store) {
-                throw new \Exception(__('Store not found.', 'wp-migrate-shopify-woo'));
+                throw new \Exception(__('Store not found.', 'wp-migrate-shopify-woo-lite'));
             }
 
             // Update import session status to in_progress
@@ -327,19 +327,19 @@ class WMSW_OrderHandler
                     'items_processed' => 0,
                     'level' => 'info',
                     'updated_at' => current_time('mysql'),
-                    'message' => __('Import process started.', 'wp-migrate-shopify-woo')
+                    'message' => __('Import process started.', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
             // Initialize Shopify client for the processor
-            $shopify_client = new WMSW_ShopifyClient(
+            $shopify_client = new WMSWL_ShopifyClient(
                 $store->get_shop_domain(),
                 $store->get_access_token(),
                 $store->get_api_version()
             );
             
             // Initialize processor with required dependencies
-            $processor = new WMSW_OrderProcessor($shopify_client, $this->logger);
+            $processor = new WMSWL_OrderProcessor($shopify_client, $this->logger);
 
             // Start the import process
             $result = $processor->import_orders($store, $import_options, $progress_key);
@@ -418,7 +418,7 @@ class WMSW_OrderHandler
     private function createOrderImportSession($store_id, $options)
     {
         // Create import session using the model
-        $import_session = WMSW_ImportLog::createImportSession($store_id, 'orders', $options);
+        $import_session = WMSWL_ImportLog::createImportSession($store_id, 'orders', $options);
 
         if ($import_session) {
             $import_id = $import_session->getId();
@@ -458,7 +458,7 @@ class WMSW_OrderHandler
     private function updateOrderImportSession($import_id, $data)
     {
         // Find the import session
-        $import_session = WMSW_ImportLog::find($import_id);
+        $import_session = WMSWL_ImportLog::find($import_id);
         
         if (!$import_session) {
             $this->logger->error('Failed to find order import session', [
@@ -515,7 +515,7 @@ class WMSW_OrderHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Get store ID
@@ -523,13 +523,13 @@ class WMSW_OrderHandler
         
         if (!$store_id) {
             wp_send_json_error([
-                'message' => __('No store specified', 'wp-migrate-shopify-woo')
+                'message' => __('No store specified', 'wp-migrate-shopify-woo-lite')
             ]);
             return;
         }
 
         // Check for active order imports using the model
-        $active_import = WMSW_ImportLog::findActiveImportSession($store_id, 'orders');
+        $active_import = WMSWL_ImportLog::findActiveImportSession($store_id, 'orders');
 
         if ($active_import) {
             // Calculate percentage
@@ -564,12 +564,12 @@ class WMSW_OrderHandler
 
             wp_send_json_success([
                 'active_import' => $active_job,
-                'message' => __('Active order import found', 'wp-migrate-shopify-woo')
+                'message' => __('Active order import found', 'wp-migrate-shopify-woo-lite')
             ]);
         } else {
             wp_send_json_success([
                 'active_import' => null,
-                'message' => __('No active order imports found', 'wp-migrate-shopify-woo')
+                'message' => __('No active order imports found', 'wp-migrate-shopify-woo-lite')
             ]);
         }
     }

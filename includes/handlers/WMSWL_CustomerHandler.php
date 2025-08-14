@@ -2,13 +2,13 @@
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Models\WMSW_ImportLog;
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
-use ShopifyWooImporter\Processors\WMSW_ProductProcessor;
-use ShopifyWooImporter\Services\WMSW_Logger;
-use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
-use ShopifyWooImporter\Processors\WMSW_CustomerProcessor;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Models\WMSWL_ImportLog;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
+use ShopifyWooImporter\Processors\WMSWL_ProductProcessor;
+use ShopifyWooImporter\Services\WMSWL_Logger;
+use ShopifyWooImporter\Helpers\WMSWL_SecurityHelper;
+use ShopifyWooImporter\Processors\WMSWL_CustomerProcessor;
 
 // WordPress functions
 use function get_option;
@@ -29,10 +29,10 @@ use function wp_verify_nonce;
  *
  * Handles customer preview and import functionality
  */
-class WMSW_CustomerHandler
+class WMSWL_CustomerHandler
 {
     /**
-     * @var WMSW_Logger
+     * @var WMSWL_Logger
      */
     private $logger;
 
@@ -41,7 +41,7 @@ class WMSW_CustomerHandler
      */
     public function __construct()
     {
-        $this->logger = new WMSW_Logger();
+        $this->logger = new WMSWL_Logger();
         $this->initHooks();
     }
 
@@ -67,26 +67,26 @@ class WMSW_CustomerHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Validate store ID
         if (!isset($_POST['store_id']) || empty($_POST['store_id'])) {
             wp_send_json_error([
-                'message' => __('No store specified', 'wp-migrate-shopify-woo')
+                'message' => __('No store specified', 'wp-migrate-shopify-woo-lite')
             ]);
             return;
         }
 
         $store_id = intval(wp_unslash($_POST['store_id']));
 
-        $store_details = new WMSW_ShopifyStore();
+        $store_details = new WMSWL_ShopifyStore();
         $store = $store_details->find($store_id);
 
         // Check if store exists and has required fields
         if (empty($store->get_id())) {
             wp_send_json_error([
-                'message' => __('Store not found', 'wp-migrate-shopify-woo')
+                'message' => __('Store not found', 'wp-migrate-shopify-woo-lite')
             ]);
             return;
         }
@@ -108,7 +108,7 @@ class WMSW_CustomerHandler
 
         try {
             // Get Shopify client
-            $shopify_client = new WMSW_ShopifyClient(
+            $shopify_client = new WMSWL_ShopifyClient(
                 $store->get_shop_domain(),
                 $store->get_access_token(),
                 $store->get_api_version()
@@ -119,7 +119,7 @@ class WMSW_CustomerHandler
 
             if (empty($customers)) {
                 wp_send_json_error([
-                    'message' => __('No customers found matching your criteria', 'wp-migrate-shopify-woo')
+                    'message' => __('No customers found matching your criteria', 'wp-migrate-shopify-woo-lite')
                 ]);
                 return;
             }
@@ -135,7 +135,7 @@ class WMSW_CustomerHandler
             wp_send_json_success([
                 'message' => sprintf(
                     /* translators: %d: number of customers found */
-                    __('Found %d customers matching your criteria', 'wp-migrate-shopify-woo'),
+                    __('Found %d customers matching your criteria', 'wp-migrate-shopify-woo-lite'),
                     count($customers)
                 ),
                 'preview_data' => $preview_data,
@@ -152,7 +152,7 @@ class WMSW_CustomerHandler
     /**
      * Fetch customers from Shopify API for preview
      *
-     * @param WMSW_ShopifyClient $client Shopify API client
+     * @param WMSWL_ShopifyClient $client Shopify API client
      * @param array $options Query options
      * @return array Array of customers
      */
@@ -331,23 +331,23 @@ class WMSW_CustomerHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Validate store ID
         if (!isset($_POST['store_id']) || empty(sanitize_text_field(wp_unslash($_POST['store_id'])))) {
             wp_send_json_error([
-                'message' => __('No store selected.', 'wp-migrate-shopify-woo')
+                'message' => __('No store selected.', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
         $store_id = intval(wp_unslash($_POST['store_id']));
-        $store_details = new WMSW_ShopifyStore();
+        $store_details = new WMSWL_ShopifyStore();
         $store = $store_details->find($store_id);
 
         if (empty($store->get_id())) {
             wp_send_json_error([
-                'message' => __('Invalid store selected.', 'wp-migrate-shopify-woo')
+                'message' => __('Invalid store selected.', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
@@ -379,7 +379,7 @@ class WMSW_CustomerHandler
                 'failed' => 0,
                 'percentage' => 0,
                 'completed' => false,
-                'last_message' => __('Starting import...', 'wp-migrate-shopify-woo'),
+                'last_message' => __('Starting import...', 'wp-migrate-shopify-woo-lite'),
                 'start_time' => time(),
                 'last_update' => time()
             ],
@@ -406,7 +406,7 @@ class WMSW_CustomerHandler
         );
 
         wp_send_json_success([
-            'message' => __('Customer import started successfully! You can close this page and the import will continue in the background.', 'wp-migrate-shopify-woo'),
+            'message' => __('Customer import started successfully! You can close this page and the import will continue in the background.', 'wp-migrate-shopify-woo-lite'),
             'job_id' => $job_id
         ]);
     }
@@ -433,31 +433,31 @@ class WMSW_CustomerHandler
         ]);
 
         // Get store details
-        $store_details = new WMSW_ShopifyStore();
+        $store_details = new WMSWL_ShopifyStore();
         $store = $store_details->find($store_id);
 
         if (empty($store->get_id())) {
             $this->logger->error('Store not found: ' . $store_id);
             $import_data['status']['completed'] = true;
-            $import_data['status']['last_message'] = __('Store not found', 'wp-migrate-shopify-woo');
+            $import_data['status']['last_message'] = __('Store not found', 'wp-migrate-shopify-woo-lite');
             \set_transient($job_id, $import_data, 6 * 3600);
             return;
         }
 
         try {
             // Get Shopify client
-            $shopify_client = new WMSW_ShopifyClient(
+            $shopify_client = new WMSWL_ShopifyClient(
                 $store->get_shop_domain(),
                 $store->get_access_token(),
                 $store->get_api_version()
             );
 
             // Use a logger instance tied to this job_id for DB logging
-            $logger = new WMSW_Logger($job_id);
-            $processor = new WMSW_CustomerProcessor($shopify_client, $logger);
+            $logger = new WMSWL_Logger($job_id);
+            $processor = new WMSWL_CustomerProcessor($shopify_client, $logger);
 
             // Update the status
-            $import_data['status']['last_message'] = __('Fetching customers from Shopify...', 'wp-migrate-shopify-woo');
+            $import_data['status']['last_message'] = __('Fetching customers from Shopify...', 'wp-migrate-shopify-woo-lite');
             \set_transient($job_id, $import_data, 6 * 3600);
 
             // Process the import (one batch)
@@ -482,7 +482,7 @@ class WMSW_CustomerHandler
 
             // If there are more customers, schedule the next batch
             if (!empty($results['has_next_page']) && !empty($results['next_cursor'])) {
-                $import_data['status']['last_message'] = __('Continuing customer import...', 'wp-migrate-shopify-woo');
+                $import_data['status']['last_message'] = __('Continuing customer import...', 'wp-migrate-shopify-woo-lite');
                 $import_data['status']['percentage'] = min(99, $import_data['status']['percentage'] + 1); // crude progress
                 $import_data['status']['last_update'] = time();
                 \set_transient($job_id, $import_data, 6 * 3600);
@@ -504,7 +504,7 @@ class WMSW_CustomerHandler
                 $import_data['status']['completed'] = true;
                 $import_data['status']['last_message'] = sprintf(
                     /* translators: %1$d: number of imported customers, %2$d: number of updated customers, %3$d: number of failed imports, %4$d: number of skipped customers */
-                    __('Import complete. Imported: %1$d, Updated: %2$d, Failed: %3$d, Skipped: %4$d', 'wp-migrate-shopify-woo'),
+                    __('Import complete. Imported: %1$d, Updated: %2$d, Failed: %3$d, Skipped: %4$d', 'wp-migrate-shopify-woo-lite'),
                     $import_data['status']['imported'],
                     $import_data['status']['updated'],
                     $import_data['status']['failed'],
@@ -525,7 +525,7 @@ class WMSW_CustomerHandler
 
             // Update status with error
             $import_data['status']['completed'] = true;
-            $import_data['status']['last_message'] = __('Error: ', 'wp-migrate-shopify-woo') . $e->getMessage();
+            $import_data['status']['last_message'] = __('Error: ', 'wp-migrate-shopify-woo-lite') . $e->getMessage();
             $import_data['log'][] = 'Error: ' . $e->getMessage();
             \set_transient($job_id, $import_data, 6 * 3600);
         }
@@ -538,13 +538,13 @@ class WMSW_CustomerHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Check job ID
         if (empty($_POST['job_id'])) {
             \wp_send_json_error([
-                'message' => __('Missing job ID', 'wp-migrate-shopify-woo')
+                'message' => __('Missing job ID', 'wp-migrate-shopify-woo-lite')
             ]);
             return;
         }
@@ -556,7 +556,7 @@ class WMSW_CustomerHandler
 
         if (!$import_data) {
             \wp_send_json_error([
-                'message' => __('Import job not found', 'wp-migrate-shopify-woo')
+                'message' => __('Import job not found', 'wp-migrate-shopify-woo-lite')
             ]);
             return;
         }
@@ -570,7 +570,7 @@ class WMSW_CustomerHandler
         // Return the progress data
         \wp_send_json_success([
             'percentage' => isset($import_data['status']['percentage']) ? $import_data['status']['percentage'] : 0,
-            'message' => isset($import_data['status']['last_message']) ? $import_data['status']['last_message'] : __('Processing...', 'wp-migrate-shopify-woo'),
+            'message' => isset($import_data['status']['last_message']) ? $import_data['status']['last_message'] : __('Processing...', 'wp-migrate-shopify-woo-lite'),
             'log_message' => $last_log,
             'completed' => isset($import_data['status']['completed']) ? $import_data['status']['completed'] : false,
             'imported' => isset($import_data['status']['imported']) ? $import_data['status']['imported'] : 0,
@@ -588,7 +588,7 @@ class WMSW_CustomerHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Get store ID
@@ -596,23 +596,23 @@ class WMSW_CustomerHandler
 
         if (!$store_id) {
             wp_send_json_error([
-                'message' => __('No store specified', 'wp-migrate-shopify-woo')
+                'message' => __('No store specified', 'wp-migrate-shopify-woo-lite')
             ]);
             return;
         }
 
         // Check for active imports using the ImportLog model
-        $active_job = WMSW_ImportLog::get_active_customer_import($store_id);
+        $active_job = WMSWL_ImportLog::get_active_customer_import($store_id);
 
         if ($active_job) {
             wp_send_json_success([
                 'active_import' => $active_job,
-                'message' => __('Active customer import found', 'wp-migrate-shopify-woo')
+                'message' => __('Active customer import found', 'wp-migrate-shopify-woo-lite')
             ]);
         } else {
             wp_send_json_success([
                 'active_import' => null,
-                'message' => __('No active customer imports found', 'wp-migrate-shopify-woo')
+                'message' => __('No active customer imports found', 'wp-migrate-shopify-woo-lite')
             ]);
         }
     }

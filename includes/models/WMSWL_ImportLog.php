@@ -1253,6 +1253,6 @@ class WMSWL_ImportLog
      */
     public static function get_active_customer_import($store_id)
     {
-        return \ShopifyWooImporter\Services\WMSW_DatabaseService::get_active_customer_import($store_id);
+        return \ShopifyWooImporter\Services\WMSWL_DatabaseService::get_active_customer_import($store_id);
     }
 }

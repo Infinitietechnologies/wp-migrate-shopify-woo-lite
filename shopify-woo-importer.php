@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: WP Migrate & Import Shopify to WooCommerce
+ * Plugin Name: WP Migrate & Import Shopify to WC Lite
  * Plugin URI: https://infinitietech.com/shopify-woo-importer
  * Description: Multi-Store Product & Data Migration Tool - Import from Shopify to WooCommerce in just a few clicks
  * Version: 1.0.0
@@ -9,7 +9,7 @@
  * Author URI: https://infinitietech.com/
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-migrate-shopify-woo
+ * Text Domain: wp-migrate-shopify-woo-lite
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.8
@@ -119,29 +119,29 @@ final class WMSW_ShopifyWooImporter
     {
         // Initialize backend
         if (is_admin()) {
-            require_once WMSW_PLUGIN_DIR . 'backend/WMSW_Backend.php';
-            new ShopifyWooImporter\Backend\WMSW_Backend();
+            require_once WMSW_PLUGIN_DIR . 'backend/WMSWL_Backend.php';
+            new ShopifyWooImporter\Backend\WMSWL_Backend();
         }
 
         // Initialize frontend (if needed)
-        require_once WMSW_PLUGIN_DIR . 'frontend/WMSW_Frontend.php';
-        new ShopifyWooImporter\Frontend\WMSW_Frontend();
+        require_once WMSW_PLUGIN_DIR . 'frontend/WMSWL_Frontend.php';
+        new ShopifyWooImporter\Frontend\WMSWL_Frontend();
 
         // Initialize handlers
-        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSW_CronHandler.php';
-        new ShopifyWooImporter\Handlers\WMSW_CronHandler();
+        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSWL_CronHandler.php';
+        new ShopifyWooImporter\Handlers\WMSWL_CronHandler();
         
         // Initialize product handler for background processing
-        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSW_ProductHandler.php';
-        $productHandler = new ShopifyWooImporter\Handlers\WMSW_ProductHandler();
+        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSWL_ProductHandler.php';
+        $productHandler = new ShopifyWooImporter\Handlers\WMSWL_ProductHandler();
 
         // Load Customer Handler
-        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSW_CustomerHandler.php';
-        $customerHandler = new ShopifyWooImporter\Handlers\WMSW_CustomerHandler();
+        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSWL_CustomerHandler.php';
+        $customerHandler = new ShopifyWooImporter\Handlers\WMSWL_CustomerHandler();
 
         // Load Order Handler
-        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSW_OrderHandler.php';
-        $orderHandler = new ShopifyWooImporter\Handlers\WMSW_OrderHandler();
+        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSWL_OrderHandler.php';
+        $orderHandler = new ShopifyWooImporter\Handlers\WMSWL_OrderHandler();
 
         // If we're running in WP Cron, add our cron hooks
         if (defined('DOING_CRON') && DOING_CRON) {
@@ -150,25 +150,25 @@ final class WMSW_ShopifyWooImporter
     }    public function activate()
     {
         // Run activation handler
-        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSW_ActivationHandler.php';
-        $activation = new ShopifyWooImporter\Handlers\WMSW_ActivationHandler();
+        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSWL_ActivationHandler.php';
+        $activation = new ShopifyWooImporter\Handlers\WMSWL_ActivationHandler();
         $activation->activate();
     }
 
     public function deactivate()
     {
         // Run deactivation handler
-        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSW_DeactivationHandler.php';
-        $deactivation = new ShopifyWooImporter\Handlers\WMSW_DeactivationHandler();
+        require_once WMSW_PLUGIN_DIR . 'includes/handlers/WMSWL_DeactivationHandler.php';
+        $deactivation = new ShopifyWooImporter\Handlers\WMSWL_DeactivationHandler();
         $deactivation->deactivate();
     }
 
     public function woocommerce_missing_notice()
     {
         echo '<div class="error"><p><strong>';
-        esc_html_e('WP Migrate & Import Shopify to WooCommerce', 'wp-migrate-shopify-woo');
+        esc_html_e('WP Migrate & Import Shopify to WooCommerce', 'wp-migrate-shopify-woo-lite');
         echo '</strong> ';
-        esc_html_e('requires WooCommerce to be installed and active.', 'wp-migrate-shopify-woo');
+        esc_html_e('requires WooCommerce to be installed and active.', 'wp-migrate-shopify-woo-lite');
         echo '</p></div>';
     }
 }

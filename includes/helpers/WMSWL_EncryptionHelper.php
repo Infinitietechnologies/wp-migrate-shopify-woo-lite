@@ -8,7 +8,7 @@ namespace ShopifyWooImporter\Helpers;
  * This class provides methods to encrypt and decrypt sensitive data such as
  * Shopify access tokens before storing them in the database.
  */
-class WMSW_EncryptionHelper
+class WMSWL_EncryptionHelper
 {
     /**
      * Encryption method to use
@@ -59,8 +59,8 @@ class WMSW_EncryptionHelper
 
         // Check if OpenSSL is available
         if (!function_exists('openssl_encrypt')) {
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+            if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                 $logger->warning('SWI Encryption: OpenSSL not available, storing data unencrypted');
             }
             return $data;
@@ -77,8 +77,8 @@ class WMSW_EncryptionHelper
             $encrypted = openssl_encrypt($data, self::ENCRYPTION_METHOD, $key, 0, $iv);
 
             if ($encrypted === false) {
-                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                    $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+                    $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                     $logger->error('SWI Encryption: Failed to encrypt data');
                 }
                 return false;
@@ -89,8 +89,8 @@ class WMSW_EncryptionHelper
 
             return $result;
         } catch (Exception $e) {
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+            if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                 $logger->error('SWI Encryption Error: ' . $e->getMessage());
             }
             return false;
@@ -111,8 +111,8 @@ class WMSW_EncryptionHelper
 
         // Check if OpenSSL is available
         if (!function_exists('openssl_decrypt')) {
-            if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+            if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+                $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                 $logger->warning('SWI Decryption: OpenSSL not available, returning data as-is');
             }
             return $encrypted_data;
@@ -130,8 +130,8 @@ class WMSW_EncryptionHelper
             // Decode from base64
             $data = base64_decode($encrypted_data);
             if ($data === false) {
-                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                    $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+                    $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                     $logger->error('SWI Decryption: Failed to decode base64 data');
                 }
                 return false;
@@ -146,8 +146,8 @@ class WMSW_EncryptionHelper
             $decrypted = openssl_decrypt($encrypted, self::ENCRYPTION_METHOD, $key, 0, $iv);
 
             if ($decrypted === false) {
-                if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger')) {
-                    $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger')) {
+                    $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                     $logger->error('SWI Decryption: Failed to decrypt data');
                 }
                 return false;

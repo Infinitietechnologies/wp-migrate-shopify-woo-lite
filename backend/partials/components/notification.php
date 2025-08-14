@@ -86,7 +86,7 @@ function WMSW_notification($message, $type = 'info', $args = []) {
         </div>
         
         <?php if ($args['dismissible']) : ?>
-            <button type="button" class="swi-notification-dismiss" aria-label="<?php esc_attr_e('Dismiss notification', 'wp-migrate-shopify-woo'); ?>">
+            <button type="button" class="swi-notification-dismiss" aria-label="<?php esc_attr_e('Dismiss notification', 'wp-migrate-shopify-woo-lite'); ?>">
                 <span class="dashicons dashicons-no-alt"></span>
             </button>
         <?php endif; ?>
@@ -170,7 +170,7 @@ function WMSW_banner_notification($message, $type = 'info', $args = []) {
         </div>
         
         <?php if ($args['dismissible']) : ?>
-            <button type="button" class="swi-banner-dismiss" aria-label="<?php esc_attr_e('Dismiss banner', 'wp-migrate-shopify-woo'); ?>">
+            <button type="button" class="swi-banner-dismiss" aria-label="<?php esc_attr_e('Dismiss banner', 'wp-migrate-shopify-woo-lite'); ?>">
                 <span class="dashicons dashicons-no-alt"></span>
             </button>
         <?php endif; ?>

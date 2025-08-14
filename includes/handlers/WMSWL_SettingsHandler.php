@@ -2,9 +2,9 @@
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Models\WMSW_Settings;
-use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
-use ShopifyWooImporter\Services\WMSW_Logger;
+use ShopifyWooImporter\Models\WMSWL_Settings;
+use ShopifyWooImporter\Helpers\WMSWL_SecurityHelper;
+use ShopifyWooImporter\Services\WMSWL_Logger;
 
 // WordPress AJAX and sanitization functions
 use function add_action;
@@ -24,9 +24,9 @@ use function __;
  * Settings Handler
  * Handles AJAX requests for saving and retrieving plugin settings
  */
-class WMSW_SettingsHandler
+class WMSWL_SettingsHandler
 {
-    /** @var WMSW_Logger */
+    /** @var WMSWL_Logger */
     private $logger;
     
     /** @var array */
@@ -41,7 +41,7 @@ class WMSW_SettingsHandler
 
     public function __construct()
     {
-        $this->logger = new WMSW_Logger();
+        $this->logger = new WMSWL_Logger();
         $this->initHooks();
     }
 
@@ -61,12 +61,12 @@ class WMSW_SettingsHandler
     private function validateAjaxRequest($nonceKey = 'swi-admin-nonce')
     {
         if (!isset($_POST['nonce']) || empty($_POST['nonce'])) {
-            wp_send_json_error(['message' => __('Missing nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Missing nonce', 'wp-migrate-shopify-woo-lite')]);
             return false;
         }
 
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), $nonceKey)) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
             return false;
         }
 
@@ -112,12 +112,12 @@ class WMSW_SettingsHandler
         $isGlobal = !empty(sanitize_text_field(wp_unslash($postData['is_global'] ?? '')));
 
         if (!$key) {
-            wp_send_json_error(['message' => __('Missing setting key.', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Missing setting key.', 'wp-migrate-shopify-woo-lite')]);
             return;
         }
 
         try {
-            $setting = WMSW_Settings::get($key, $storeId, $isGlobal);
+            $setting = WMSWL_Settings::get($key, $storeId, $isGlobal);
             
             if ($setting) {
                 wp_send_json_success([
@@ -128,7 +128,7 @@ class WMSW_SettingsHandler
                     'store_id' => $setting->getStoreId(),
                 ]);
             } else {
-                wp_send_json_error(['message' => __('Setting not found.', 'wp-migrate-shopify-woo')]);
+                wp_send_json_error(['message' => __('Setting not found.', 'wp-migrate-shopify-woo-lite')]);
             }
         } catch (\Throwable $e) {
             $this->logger->error('Error getting setting', [
@@ -137,7 +137,7 @@ class WMSW_SettingsHandler
                 'is_global' => $isGlobal,
                 'error' => $e->getMessage()
             ]);
-            wp_send_json_error(['message' => __('Error retrieving setting.', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Error retrieving setting.', 'wp-migrate-shopify-woo-lite')]);
         }
     }
 
@@ -156,17 +156,17 @@ class WMSW_SettingsHandler
         $isGlobal = !empty(sanitize_text_field(wp_unslash($postData['is_global'] ?? '')));
 
         if (!$key) {
-            wp_send_json_error(['message' => __('Missing setting key.', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Missing setting key.', 'wp-migrate-shopify-woo-lite')]);
             return;
         }
 
         try {
-            $result = WMSW_Settings::delete($key, $storeId, $isGlobal);
+            $result = WMSWL_Settings::delete($key, $storeId, $isGlobal);
             
             if ($result) {
-                wp_send_json_success(['message' => __('Setting deleted successfully.', 'wp-migrate-shopify-woo')]);
+                wp_send_json_success(['message' => __('Setting deleted successfully.', 'wp-migrate-shopify-woo-lite')]);
             } else {
-                wp_send_json_error(['message' => __('Failed to delete setting.', 'wp-migrate-shopify-woo')]);
+                wp_send_json_error(['message' => __('Failed to delete setting.', 'wp-migrate-shopify-woo-lite')]);
             }
         } catch (\Throwable $e) {
             $this->logger->error('Error deleting setting', [
@@ -175,7 +175,7 @@ class WMSW_SettingsHandler
                 'is_global' => $isGlobal,
                 'error' => $e->getMessage()
             ]);
-            wp_send_json_error(['message' => __('Error deleting setting.', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Error deleting setting.', 'wp-migrate-shopify-woo-lite')]);
         }
     }
 
@@ -204,13 +204,13 @@ class WMSW_SettingsHandler
 
             if (empty($failedSettings)) {
                 wp_send_json_success([
-                    'message' => __('All settings have been saved successfully and are now active.', 'wp-migrate-shopify-woo'),
+                    'message' => __('All settings have been saved successfully and are now active.', 'wp-migrate-shopify-woo-lite'),
                     'options' => $options
                 ]);
             } else {
-                $errorMsg = __('Some settings could not be saved to the database.', 'wp-migrate-shopify-woo');
+                $errorMsg = __('Some settings could not be saved to the database.', 'wp-migrate-shopify-woo-lite');
                 if (!empty($failedSettings)) {
-                    $errorMsg .= ' ' . __('See details below.', 'wp-migrate-shopify-woo');
+                    $errorMsg .= ' ' . __('See details below.', 'wp-migrate-shopify-woo-lite');
                 }
                 wp_send_json_error([
                     'message' => $errorMsg,
@@ -224,7 +224,7 @@ class WMSW_SettingsHandler
                 'context' => $postData ?? []
             ]);
             wp_send_json_error([
-                'message' => __('An error occurred while saving settings.', 'wp-migrate-shopify-woo'),
+                'message' => __('An error occurred while saving settings.', 'wp-migrate-shopify-woo-lite'),
                 'error' => $e->getMessage()
             ]);
         }
@@ -283,7 +283,7 @@ class WMSW_SettingsHandler
                     'global' => true
                 ]);
 
-                $success = WMSW_Settings::update($key, $value, null, true, 'string');
+                $success = WMSWL_Settings::update($key, $value, null, true, 'string');
                 
                 if (!$success) {
                     $failedSettings[] = [
@@ -291,7 +291,7 @@ class WMSW_SettingsHandler
                         'value' => $value,
                         'reason' => sprintf(
                             /* translators: %s: SQL error message */
-                            __('Custom table update failed. Last SQL error: %s', 'wp-migrate-shopify-woo'),
+                            __('Custom table update failed. Last SQL error: %s', 'wp-migrate-shopify-woo-lite'),
                             $wpdb->last_error
                         )
                     ];

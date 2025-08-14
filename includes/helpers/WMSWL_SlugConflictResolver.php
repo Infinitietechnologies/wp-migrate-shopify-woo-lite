@@ -15,7 +15,7 @@ use function sprintf;
  * 
  * Handles all slug conflicts and edge cases for blog imports
  */
-class WMSW_SlugConflictResolver
+class WMSWL_SlugConflictResolver
 {
     /**
      * WordPress reserved words that cannot be used as post slugs
@@ -48,7 +48,7 @@ class WMSW_SlugConflictResolver
                 'slug' => $sanitized_slug,
                 'message' => sprintf(
                     /* translators: %s: reserved word */
-                    __('"%s" is a WordPress reserved word', 'wp-migrate-shopify-woo'), 
+                    __('"%s" is a WordPress reserved word', 'wp-migrate-shopify-woo-lite'), 
                     $sanitized_slug
                 )
             ];
@@ -124,16 +124,16 @@ class WMSW_SlugConflictResolver
         $options['append_counter'] = [
             'strategy' => 'append_counter',
             'slug' => self::appendCounter($sanitized_slug, $post_type),
-            'label' => __('Append number (e.g., slug-2)', 'wp-migrate-shopify-woo'),
-            'description' => __('Add a number to make the slug unique', 'wp-migrate-shopify-woo')
+            'label' => __('Append number (e.g., slug-2)', 'wp-migrate-shopify-woo-lite'),
+            'description' => __('Add a number to make the slug unique', 'wp-migrate-shopify-woo-lite')
         ];
 
         // Option 2: Append date
         $options['append_date'] = [
             'strategy' => 'append_date',
             'slug' => self::appendDate($sanitized_slug, $post_type),
-            'label' => __('Append date (e.g., slug-jul2025)', 'wp-migrate-shopify-woo'),
-            'description' => __('Add current month/year to make unique', 'wp-migrate-shopify-woo')
+            'label' => __('Append date (e.g., slug-jul2025)', 'wp-migrate-shopify-woo-lite'),
+            'description' => __('Add current month/year to make unique', 'wp-migrate-shopify-woo-lite')
         ];
 
         // Option 3: Add prefix
@@ -143,26 +143,26 @@ class WMSW_SlugConflictResolver
             'slug' => self::appendPrefix($sanitized_slug, $prefix, $post_type),
             'label' => sprintf(
                 /* translators: %s: prefix text */
-                __('Add prefix (%s-slug)', 'wp-migrate-shopify-woo'), 
+                __('Add prefix (%s-slug)', 'wp-migrate-shopify-woo-lite'), 
                 $prefix
             ),
-            'description' => __('Add prefix to identify as imported content', 'wp-migrate-shopify-woo')
+            'description' => __('Add prefix to identify as imported content', 'wp-migrate-shopify-woo-lite')
         ];
 
         // Option 4: WordPress unique slug generator
         $options['unique_wordpress'] = [
             'strategy' => 'unique_wordpress',
             'slug' => self::generateWordPressUniqueSlug($sanitized_slug, $post_type),
-            'label' => __('WordPress auto-generated unique slug', 'wp-migrate-shopify-woo'),
-            'description' => __('Let WordPress generate a unique slug automatically', 'wp-migrate-shopify-woo')
+            'label' => __('WordPress auto-generated unique slug', 'wp-migrate-shopify-woo-lite'),
+            'description' => __('Let WordPress generate a unique slug automatically', 'wp-migrate-shopify-woo-lite')
         ];
 
         // Option 5: Manual entry
         $options['manual'] = [
             'strategy' => 'manual',
             'slug' => '',
-            'label' => __('Enter custom slug manually', 'wp-migrate-shopify-woo'),
-            'description' => __('Specify a custom slug for this content', 'wp-migrate-shopify-woo')
+            'label' => __('Enter custom slug manually', 'wp-migrate-shopify-woo-lite'),
+            'description' => __('Specify a custom slug for this content', 'wp-migrate-shopify-woo-lite')
         ];
 
         return $options;
@@ -201,7 +201,7 @@ class WMSW_SlugConflictResolver
                 'post_type' => $existing_post->post_type,
                 'message' => sprintf(
                     /* translators: 1: post type, 2: post title */
-                    __('A %1$s with this slug already exists: "%2$s"', 'wp-migrate-shopify-woo'),
+                    __('A %1$s with this slug already exists: "%2$s"', 'wp-migrate-shopify-woo-lite'),
                     $post_type,
                     $existing_post->post_title
                 )
@@ -222,7 +222,7 @@ class WMSW_SlugConflictResolver
                     'post_type' => $existing->post_type,
                     'message' => sprintf(
                         /* translators: 1: post type, 2: post title */
-                        __('A %1$s with this slug already exists: "%2$s"', 'wp-migrate-shopify-woo'),
+                        __('A %1$s with this slug already exists: "%2$s"', 'wp-migrate-shopify-woo-lite'),
                         $type,
                         $existing->post_title
                     )

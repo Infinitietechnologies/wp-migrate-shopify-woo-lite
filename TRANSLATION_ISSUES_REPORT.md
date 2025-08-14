@@ -14,7 +14,7 @@ $message = sprintf('Blog import step: %s - %s', $step, $status);
 ```
 **Fix**: Should be:
 ```php
-$message = sprintf(__('Blog import step: %s - %s', 'wp-migrate-shopify-woo'), $step, $status);
+$message = sprintf(__('Blog import step: %s - %s', 'wp-migrate-shopify-woo-lite'), $step, $status);
 ```
 
 #### includes/handlers/WMSW_CouponHandler.php
@@ -30,11 +30,11 @@ $message = sprintf(__('Blog import step: %s - %s', 'wp-migrate-shopify-woo'), $s
 **Fix**: Should be:
 ```php
 'code' => 'DEMO10',
-'description' => __('Demo 10% discount coupon', 'wp-migrate-shopify-woo'),
+'description' => __('Demo 10% discount coupon', 'wp-migrate-shopify-woo-lite'),
 'code' => 'WELCOME20',
-'description' => __('Welcome 20% discount for new customers', 'wp-migrate-shopify-woo'),
+'description' => __('Welcome 20% discount for new customers', 'wp-migrate-shopify-woo-lite'),
 'code' => 'FIXED5', 
-'description' => __('Fixed $5 off any order', 'wp-migrate-shopify-woo'),
+'description' => __('Fixed $5 off any order', 'wp-migrate-shopify-woo-lite'),
 ```
 
 **Line 1170**: Hardcoded exception message
@@ -43,7 +43,7 @@ throw new Exception('WooCommerce is not active or WC_Coupon class not found');
 ```
 **Fix**: Should be:
 ```php
-throw new Exception(__('WooCommerce is not active or WC_Coupon class not found', 'wp-migrate-shopify-woo'));
+throw new Exception(__('WooCommerce is not active or WC_Coupon class not found', 'wp-migrate-shopify-woo-lite'));
 ```
 
 #### includes/core/WMSW_ShopifyClient.php
@@ -53,7 +53,7 @@ $error_message = $response['error_message'] ?? 'Unknown error';
 ```
 **Fix**: Should be:
 ```php
-$error_message = $response['error_message'] ?? __('Unknown error', 'wp-migrate-shopify-woo');
+$error_message = $response['error_message'] ?? __('Unknown error', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Line 135**: Hardcoded error message
@@ -62,7 +62,7 @@ $error_message = "GraphQL query failed: {$errors}";
 ```
 **Fix**: Should be:
 ```php
-$error_message = sprintf(__('GraphQL query failed: %s', 'wp-migrate-shopify-woo'), $errors);
+$error_message = sprintf(__('GraphQL query failed: %s', 'wp-migrate-shopify-woo-lite'), $errors);
 ```
 
 **Line 176**: Hardcoded error message
@@ -71,7 +71,7 @@ $error_message = "GraphQL API request failed with status {$status_code}: {$body}
 ```
 **Fix**: Should be:
 ```php
-$error_message = sprintf(__('GraphQL API request failed with status %s: %s', 'wp-migrate-shopify-woo'), $status_code, $body);
+$error_message = sprintf(__('GraphQL API request failed with status %s: %s', 'wp-migrate-shopify-woo-lite'), $status_code, $body);
 ```
 
 **Line 213**: Hardcoded return value
@@ -80,7 +80,7 @@ return 'Unknown error';
 ```
 **Fix**: Should be:
 ```php
-return __('Unknown error', 'wp-migrate-shopify-woo');
+return __('Unknown error', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Line 224**: Hardcoded message concatenation
@@ -89,7 +89,7 @@ $message .= " (line {$location['line']}, column {$location['column']})";
 ```
 **Fix**: Should be:
 ```php
-$message .= sprintf(__(' (line %s, column %s)', 'wp-migrate-shopify-woo'), $location['line'], $location['column']);
+$message .= sprintf(__(' (line %s, column %s)', 'wp-migrate-shopify-woo-lite'), $location['line'], $location['column']);
 ```
 
 **Line 405**: Hardcoded status message
@@ -98,7 +98,7 @@ $has_more = $has_next_page ? "has more pages" : "complete";
 ```
 **Fix**: Should be:
 ```php
-$has_more = $has_next_page ? __('has more pages', 'wp-migrate-shopify-woo') : __('complete', 'wp-migrate-shopify-woo');
+$has_more = $has_next_page ? __('has more pages', 'wp-migrate-shopify-woo-lite') : __('complete', 'wp-migrate-shopify-woo-lite');
 ```
 
 #### includes/processors/WMSW_ProductProcessor.php
@@ -108,7 +108,7 @@ $tab = 'products';
 ```
 **Fix**: Should be:
 ```php
-$tab = __('products', 'wp-migrate-shopify-woo');
+$tab = __('products', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Lines 211, 215, 219, 224**: Hardcoded status values
@@ -126,7 +126,7 @@ $completion_message = "Page import completed! Imported: {$total_imported}, Updat
 ```
 **Fix**: Should be:
 ```php
-$completion_message = sprintf(__('Page import completed! Imported: %d, Updated: %d, Failed: %d, Skipped: %d', 'wp-migrate-shopify-woo'), $total_imported, $total_updated, $total_failed, $total_skipped);
+$completion_message = sprintf(__('Page import completed! Imported: %d, Updated: %d, Failed: %d, Skipped: %d', 'wp-migrate-shopify-woo-lite'), $total_imported, $total_updated, $total_failed, $total_skipped);
 ```
 
 **Lines 223, 225**: Hardcoded status values
@@ -150,7 +150,7 @@ return 'SKIP'; // Special return value to indicate skip
 ```
 **Fix**: Should be:
 ```php
-return __('SKIP', 'wp-migrate-shopify-woo'); // Special return value to indicate skip
+return __('SKIP', 'wp-migrate-shopify-woo-lite'); // Special return value to indicate skip
 ```
 
 **Lines 489, 492, 495**: Hardcoded post type and status values
@@ -168,7 +168,7 @@ return $status_map[$shopify_status] ?? 'pending';
 ```
 **Fix**: Should be:
 ```php
-return $status_map[$shopify_status] ?? __('pending', 'wp-migrate-shopify-woo');
+return $status_map[$shopify_status] ?? __('pending', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Line 832**: Hardcoded log message
@@ -177,7 +177,7 @@ $log_context['message'] = "Order import status: {$data['status']}";
 ```
 **Fix**: Should be:
 ```php
-$log_context['message'] = sprintf(__('Order import status: %s', 'wp-migrate-shopify-woo'), $data['status']);
+$log_context['message'] = sprintf(__('Order import status: %s', 'wp-migrate-shopify-woo-lite'), $data['status']);
 ```
 
 **Lines 1118, 1121**: Hardcoded value types
@@ -194,7 +194,7 @@ $user_name = $user_data ? $user_data->display_name : 'System';
 ```
 **Fix**: Should be:
 ```php
-$user_name = $user_data ? $user_data->display_name : __('System', 'wp-migrate-shopify-woo');
+$user_name = $user_data ? $user_data->display_name : __('System', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Line 149**: Hardcoded CSV header
@@ -203,7 +203,7 @@ $csv = "ID,Level,Message,Context,Task ID,Created At\n";
 ```
 **Fix**: Should be:
 ```php
-$csv = sprintf(__('ID,Level,Message,Context,Task ID,Created At', 'wp-migrate-shopify-woo')) . "\n";
+$csv = sprintf(__('ID,Level,Message,Context,Task ID,Created At', 'wp-migrate-shopify-woo-lite')) . "\n";
 ```
 
 #### includes/processors/WMSW_CustomerProcessor.php
@@ -213,7 +213,7 @@ $tab = 'customers';
 ```
 **Fix**: Should be:
 ```php
-$tab = __('customers', 'wp-migrate-shopify-woo');
+$tab = __('customers', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Lines 331, 332**: Hardcoded fallback values
@@ -223,8 +223,8 @@ $email = isset($customer['email']) ? $customer['email'] : 'unknown';
 ```
 **Fix**: Should be:
 ```php
-$shopify_customer_id = isset($customer['id']) ? $customer['id'] : __('unknown', 'wp-migrate-shopify-woo');
-$email = isset($customer['email']) ? $customer['email'] : __('unknown', 'wp-migrate-shopify-woo');
+$shopify_customer_id = isset($customer['id']) ? $customer['id'] : __('unknown', 'wp-migrate-shopify-woo-lite');
+$email = isset($customer['email']) ? $customer['email'] : __('unknown', 'wp-migrate-shopify-woo-lite');
 ```
 
 **Line 475**: Hardcoded log message
@@ -233,7 +233,7 @@ $log_message = 'Creating new customer: ' . ($log_name ?: '(Unnamed)') . ' <' . $
 ```
 **Fix**: Should be:
 ```php
-$log_message = sprintf(__('Creating new customer: %s <%s> (Shopify ID: %s)', 'wp-migrate-shopify-woo'), ($log_name ?: __('(Unnamed)', 'wp-migrate-shopify-woo')), $email, $shopify_customer_id_clean);
+$log_message = sprintf(__('Creating new customer: %s <%s> (Shopify ID: %s)', 'wp-migrate-shopify-woo-lite'), ($log_name ?: __('(Unnamed)', 'wp-migrate-shopify-woo-lite')), $email, $shopify_customer_id_clean);
 ```
 
 ### 2. Backend Views - Missing Escaping

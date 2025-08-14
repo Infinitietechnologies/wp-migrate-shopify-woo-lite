@@ -63,13 +63,13 @@ Before installing the plugin, ensure your system meets these requirements:
 
 #### Step 1: Prepare Files
 1. **Extract** the plugin ZIP file on your computer
-2. **Locate** the `wp-migrate-shopify-woo` folder
+2. **Locate** the `wp-migrate-shopify-woo-lite` folder
 3. **Ensure** all files are present
 
 #### Step 2: Upload via FTP
 1. **Connect** to your server via FTP
 2. **Navigate** to `/wp-content/plugins/`
-3. **Upload** the `wp-migrate-shopify-woo` folder
+3. **Upload** the `wp-migrate-shopify-woo-lite` folder
 4. **Verify** all files uploaded successfully
 
 #### Step 3: Activate Plugin
@@ -93,7 +93,7 @@ mv composer.phar /usr/local/bin/composer
 cd /path/to/wordpress
 
 # Install the plugin via Composer
-composer require wp-migrate-shopify-woo/wp-migrate-shopify-woo
+composer require wp-migrate-shopify-woo-lite/wp-migrate-shopify-woo-lite
 ```
 
 #### Step 3: Activate Plugin

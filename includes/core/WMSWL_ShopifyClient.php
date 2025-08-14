@@ -2,12 +2,12 @@
 
 namespace ShopifyWooImporter\Core;
 
-use ShopifyWooImporter\Services\WMSW_Logger;
+use ShopifyWooImporter\Services\WMSWL_Logger;
 
 /**
  * Shopify API Client using GraphQL
  */
-class WMSW_ShopifyClient
+class WMSWL_ShopifyClient
 {
     private $shop_domain;
     private $access_token;
@@ -36,7 +36,7 @@ class WMSW_ShopifyClient
         $this->debug_mode = defined('WP_DEBUG') && \WP_DEBUG;
 
         // Initialize logger
-        $this->logger = new WMSW_Logger();
+        $this->logger = new WMSWL_Logger();
 
         // Set GraphQL endpoint
         $this->graphql_endpoint = $this->build_graphql_url();
@@ -86,11 +86,11 @@ class WMSW_ShopifyClient
     {
         // Validate inputs
         if (empty($query)) {
-            throw new \Exception(\esc_html__('GraphQL query cannot be empty', 'wp-migrate-shopify-woo'));
+            throw new \Exception(\esc_html__('GraphQL query cannot be empty', 'wp-migrate-shopify-woo-lite'));
         }
 
         if (empty($this->shop_domain) || empty($this->access_token)) {
-            throw new \Exception(\esc_html__('Shop domain and access token are required', 'wp-migrate-shopify-woo'));
+            throw new \Exception(\esc_html__('Shop domain and access token are required', 'wp-migrate-shopify-woo-lite'));
         }
 
         return $this->make_graphql_request($query, $variables);

@@ -6,11 +6,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
-use ShopifyWooImporter\Processors\WMSW_LogProcessor;
-use ShopifyWooImporter\Services\WMSW_Logger;
+use ShopifyWooImporter\Helpers\WMSWL_SecurityHelper;
+use ShopifyWooImporter\Processors\WMSWL_LogProcessor;
+use ShopifyWooImporter\Services\WMSWL_Logger;
 
-class WMSW_LogHandler
+class WMSWL_LogHandler
 {
 
     /**
@@ -33,9 +33,9 @@ class WMSW_LogHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
-        $logger = new WMSW_Logger();
+        $logger = new WMSWL_Logger();
         try {
             $logger->info('Log entry created', [
                 'status' => 'pending',
@@ -68,10 +68,10 @@ class WMSW_LogHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
         try {
-            $logs_data = WMSW_LogProcessor::get_logs($_POST);
+            $logs_data = WMSWL_LogProcessor::get_logs($_POST);
             \wp_send_json_success([
                 'logs' => $logs_data['logs'] ?? [],
                 'total' => $logs_data['total'] ?? 0,
@@ -79,7 +79,7 @@ class WMSW_LogHandler
                 'current_page' => $logs_data['current_page'] ?? 1
             ]);
         } catch (\Exception $e) {
-            $logger = new WMSW_Logger();
+            $logger = new WMSWL_Logger();
             $logger->error('Failed to get logs', [
                 'status' => 'failed',
                 'error' => $e->getMessage(),
@@ -96,9 +96,9 @@ class WMSW_LogHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
-        $logger = new WMSW_Logger();
+        $logger = new WMSWL_Logger();
         try {
             $logger->info('Clear old logs started', [
                 'status' => 'pending',
@@ -107,7 +107,7 @@ class WMSW_LogHandler
                 'ip' => isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '',
             ]);
             $days = isset($_POST['days']) ? intval(sanitize_text_field(wp_unslash($_POST['days']))) : 30;
-            $result = WMSW_LogProcessor::clear_old_logs($days);
+            $result = WMSWL_LogProcessor::clear_old_logs($days);
             // Add a special log entry that should never be cleared
             $user_id = \get_current_user_id();
             $user_data = \get_userdata($user_id);
@@ -141,9 +141,9 @@ class WMSW_LogHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
-        $logger = new WMSW_Logger();
+        $logger = new WMSWL_Logger();
         try {
             $logger->info('Export logs started', [
                 'status' => 'pending',
@@ -151,7 +151,7 @@ class WMSW_LogHandler
                 'user_id' => \get_current_user_id(),
                 'ip' => isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '',
             ]);
-            $csv = WMSW_LogProcessor::export_logs_csv($_POST);
+            $csv = WMSWL_LogProcessor::export_logs_csv($_POST);
             $logger->info('Export logs completed', [
                 'status' => 'completed',
             ]);

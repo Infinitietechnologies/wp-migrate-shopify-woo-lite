@@ -2,13 +2,13 @@
 
 namespace ShopifyWooImporter\Models;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Helpers\WMSW_EncryptionHelper;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Helpers\WMSWL_EncryptionHelper;
 
 /**
  * Shopify Store Model
  */
-class WMSW_ShopifyStore
+class WMSWL_ShopifyStore
 {
     private $id;
     private $store_name;
@@ -38,8 +38,8 @@ class WMSW_ShopifyStore
 
         // Decrypt access token if it's encrypted
         $access_token = $data['access_token'] ?? '';
-        if (!empty($access_token) && WMSW_EncryptionHelper::is_encrypted($access_token)) {
-            $this->access_token = WMSW_EncryptionHelper::decrypt($access_token);
+        if (!empty($access_token) && WMSWL_EncryptionHelper::is_encrypted($access_token)) {
+            $this->access_token = WMSWL_EncryptionHelper::decrypt($access_token);
         } else {
             $this->access_token = $access_token;
         }
@@ -63,7 +63,7 @@ class WMSW_ShopifyStore
         // Encrypt access token before saving
         $encrypted_token = '';
         if (!empty($this->access_token)) {
-            $encrypted_token = WMSW_EncryptionHelper::encrypt($this->access_token);
+            $encrypted_token = WMSWL_EncryptionHelper::encrypt($this->access_token);
         }
 
         $data = [
@@ -190,7 +190,7 @@ class WMSW_ShopifyStore
     public function test_connection()
     {
         try {
-            $client = new WMSW_ShopifyClient(
+            $client = new WMSWL_ShopifyClient(
                 $this->shop_domain,
                 $this->access_token,
                 $this->api_version
@@ -329,12 +329,12 @@ class WMSW_ShopifyStore
             $token = $store['access_token'];
 
             // Skip if already encrypted
-            if (WMSW_EncryptionHelper::is_encrypted($token)) {
+            if (WMSWL_EncryptionHelper::is_encrypted($token)) {
                 continue;
             }
 
             // Encrypt the token
-            $encrypted_token = WMSW_EncryptionHelper::encrypt($token);
+            $encrypted_token = WMSWL_EncryptionHelper::encrypt($token);
 
             // Update the database
             // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching

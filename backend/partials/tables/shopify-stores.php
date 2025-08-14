@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Include the model
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
 
 // Verify nonce for security
 $nonce_verified = false;
@@ -33,14 +33,14 @@ $per_page = 20;
 $offset = ($current_page - 1) * $per_page;
 
 // Get stores data using the model methods instead of direct database queries
-$stores = WMSW_ShopifyStore::getStoresPaginated($per_page, $offset, $filter_status);
-$total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
+$stores = WMSWL_ShopifyStore::getStoresPaginated($per_page, $offset, $filter_status);
+$total_stores = WMSWL_ShopifyStore::getStoresCount($filter_status);
 ?>
 
 <div class="swi-table-container">
         <div class="swi-table-actions">
         <a href="#" class="button button-primary" id="add-new-store">
-            <?php esc_html_e('Add New Store', 'wp-migrate-shopify-woo'); ?>
+            <?php esc_html_e('Add New Store', 'wp-migrate-shopify-woo-lite'); ?>
         </a>
 
         <div class="swi-table-filters">
@@ -49,15 +49,15 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                 <input type="hidden" name="page" value="<?php echo esc_attr(sanitize_text_field(wp_unslash($_GET['page'] ?? ''))); ?>" />
 
                 <select name="status">
-                    <option value=""><?php esc_html_e('All Statuses', 'wp-migrate-shopify-woo'); ?></option>
-                    <option value="active" <?php selected($filter_status, 'active'); ?>><?php esc_html_e('Active', 'wp-migrate-shopify-woo'); ?></option>
-                    <option value="inactive" <?php selected($filter_status, 'inactive'); ?>><?php esc_html_e('Inactive', 'wp-migrate-shopify-woo'); ?></option>
-                    <option value="error" <?php selected($filter_status, 'error'); ?>><?php esc_html_e('Error', 'wp-migrate-shopify-woo'); ?></option>
+                    <option value=""><?php esc_html_e('All Statuses', 'wp-migrate-shopify-woo-lite'); ?></option>
+                    <option value="active" <?php selected($filter_status, 'active'); ?>><?php esc_html_e('Active', 'wp-migrate-shopify-woo-lite'); ?></option>
+                    <option value="inactive" <?php selected($filter_status, 'inactive'); ?>><?php esc_html_e('Inactive', 'wp-migrate-shopify-woo-lite'); ?></option>
+                    <option value="error" <?php selected($filter_status, 'error'); ?>><?php esc_html_e('Error', 'wp-migrate-shopify-woo-lite'); ?></option>
                 </select>
 
-                <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'wp-migrate-shopify-woo'); ?>" />
+                <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'wp-migrate-shopify-woo-lite'); ?>" />
                 <a href="<?php echo esc_url(admin_url('admin.php?page=wmsw-stores')); ?>" class="button">
-                    <?php esc_html_e('Clear Filters', 'wp-migrate-shopify-woo'); ?>
+                    <?php esc_html_e('Clear Filters', 'wp-migrate-shopify-woo-lite'); ?>
                 </a>
             </form>
         </div>
@@ -69,24 +69,24 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                 <th scope="col" class="column-cb">
                     <input type="checkbox" />
                 </th>
-                <th scope="col" class="column-name"><?php esc_html_e('Store Name', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-url"><?php esc_html_e('Store URL', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-api-version"><?php esc_html_e('API Version', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-default"><?php esc_html_e('Default', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-status"><?php esc_html_e('Status', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-last-sync"><?php esc_html_e('Last Sync', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-products"><?php esc_html_e('Products', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-created"><?php esc_html_e('Added', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-actions"><?php esc_html_e('Actions', 'wp-migrate-shopify-woo'); ?></th>
+                <th scope="col" class="column-name"><?php esc_html_e('Store Name', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-url"><?php esc_html_e('Store URL', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-api-version"><?php esc_html_e('API Version', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-default"><?php esc_html_e('Default', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-status"><?php esc_html_e('Status', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-last-sync"><?php esc_html_e('Last Sync', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-products"><?php esc_html_e('Products', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-created"><?php esc_html_e('Added', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-actions"><?php esc_html_e('Actions', 'wp-migrate-shopify-woo-lite'); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($stores)) : ?> <tr class="no-items">
                     <td colspan="9" class="colspanchange">
-                        <?php esc_html_e('No Shopify stores found.', 'wp-migrate-shopify-woo'); ?>
+                        <?php esc_html_e('No Shopify stores found.', 'wp-migrate-shopify-woo-lite'); ?>
                         <br><br>
                         <a href="#" class="button button-primary" id="add-first-store">
-                            <?php esc_html_e('Add Your First Store', 'wp-migrate-shopify-woo'); ?>
+                            <?php esc_html_e('Add Your First Store', 'wp-migrate-shopify-woo-lite'); ?>
                         </a>
                     </td>
                 </tr>
@@ -105,26 +105,26 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                             <div class="row-actions visible">
                                 <span class="edit">
                                     <a href="#" class="swi-edit-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Edit', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Edit', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span>
                                 | <span class="test">
                                     <a href="#" class="swi-test-connection" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Test Connection', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Test Connection', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span>
                                 | <span class="sync">
                                     <a href="#" class="swi-sync-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Sync Now', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Sync Now', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span> | <span class="delete">
                                     <a href="#" class="swi-delete-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Delete', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Delete', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span>
                                 | <span class="copy">
                                     <a href="#" class="swi-copy-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Copy', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Copy', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span>
                             </div>
@@ -145,11 +145,11 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                             <?php if (!empty($store->is_default)) : ?>
                                 <span class="swi-default-badge">
                                     <span class="dashicons dashicons-star-filled swi-default-star"></span>
-                                    <span class="screen-reader-text"><?php esc_html_e('Default Store', 'wp-migrate-shopify-woo'); ?></span>
+                                    <span class="screen-reader-text"><?php esc_html_e('Default Store', 'wp-migrate-shopify-woo-lite'); ?></span>
                                 </span>
                             <?php else : ?>
                                 <button type="button" class="button button-small swi-set-default" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                    <?php esc_html_e('Set Default', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Set Default', 'wp-migrate-shopify-woo-lite'); ?>
                                 </button>
                             <?php endif; ?>
                         </td>
@@ -165,7 +165,7 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                                 echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($store->last_sync)));
                             } else {
                                 echo '<span class="swi-never-synced">';
-                                esc_html_e('Never', 'wp-migrate-shopify-woo');
+                                esc_html_e('Never', 'wp-migrate-shopify-woo-lite');
                                 echo '</span>';
                             }
                             ?>
@@ -175,7 +175,7 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                                 <?php
                                 // Product count would need to be calculated from imported products
                                 // For now, show placeholder
-                                echo esc_html(__('N/A', 'wp-migrate-shopify-woo'));
+                                echo esc_html(__('N/A', 'wp-migrate-shopify-woo-lite'));
                                 ?>
                             </span>
                         </td>
@@ -186,11 +186,11 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
                             <div class="swi-store-actions">
                                 <?php if ($store->status === 'active') : ?>
                                     <button type="button" class="button button-small swi-disable-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Disable', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Disable', 'wp-migrate-shopify-woo-lite'); ?>
                                     </button>
                                 <?php else : ?>
                                     <button type="button" class="button button-small swi-enable-store" data-store-id="<?php echo esc_attr($store->id); ?>">
-                                        <?php esc_html_e('Enable', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Enable', 'wp-migrate-shopify-woo-lite'); ?>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -224,7 +224,7 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
 <div id="swi-store-form-modal" class="swi-modal d-none">
     <div class="swi-modal-content swi-modal-large">
         <div class="swi-modal-header">
-            <h3 id="swi-store-form-title"><?php esc_html_e('Add New Shopify Store', 'wp-migrate-shopify-woo'); ?></h3>
+            <h3 id="swi-store-form-title"><?php esc_html_e('Add New Shopify Store', 'wp-migrate-shopify-woo-lite'); ?></h3>
             <span class="swi-modal-close">&times;</span>
         </div>
         <div class="swi-modal-body">
@@ -237,10 +237,10 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
 
                 <div class="swi-form-actions">
                     <button type="submit" class="button button-primary">
-                        <?php esc_html_e('Save Store', 'wp-migrate-shopify-woo'); ?>
+                        <?php esc_html_e('Save Store', 'wp-migrate-shopify-woo-lite'); ?>
                     </button>
                     <button type="button" class="button swi-modal-close">
-                        <?php esc_html_e('Cancel', 'wp-migrate-shopify-woo'); ?>
+                        <?php esc_html_e('Cancel', 'wp-migrate-shopify-woo-lite'); ?>
                     </button>
                 </div>
             </form>
@@ -252,7 +252,7 @@ $total_stores = WMSW_ShopifyStore::getStoresCount($filter_status);
 <div id="swi-connection-test-modal" class="swi-modal d-none">
     <div class="swi-modal-content">
         <div class="swi-modal-header">
-            <h3><?php esc_html_e('Connection Test Results', 'wp-migrate-shopify-woo'); ?></h3>
+            <h3><?php esc_html_e('Connection Test Results', 'wp-migrate-shopify-woo-lite'); ?></h3>
             <span class="swi-modal-close">&times;</span>
         </div>
         <div class="swi-modal-body">

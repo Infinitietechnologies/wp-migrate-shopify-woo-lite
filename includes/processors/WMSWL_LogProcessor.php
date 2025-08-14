@@ -4,7 +4,7 @@ namespace ShopifyWooImporter\Processors;
 
 if (!defined('ABSPATH')) exit;
 
-class WMSW_LogProcessor
+class WMSWL_LogProcessor
 {
     /**
      * Add a log entry

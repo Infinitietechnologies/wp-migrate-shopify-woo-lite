@@ -46,7 +46,7 @@ define('WMSW_CACHE_DURATION', 3600); // 1 hour
 define('WMSW_CACHE_GROUP', 'shopify_woo_importer');
 
 // Pages URLs
-define('WMSW_ADMIN_PAGE', admin_url('admin.php?page=wp-migrate-shopify-woo'));
+define('WMSW_ADMIN_PAGE', admin_url('admin.php?page=wp-migrate-shopify-woo-lite'));
 define('WMSW_STORE_PAGE', admin_url('admin.php?page=wp-migrate-shopify-woo-stores'));
 define('WMSW_SETTINGS_PAGE', admin_url('admin.php?page=wp-migrate-shopify-woo-settings'));
 define('WMSW_LOGS_PAGE', admin_url('admin.php?page=wp-migrate-shopify-woo-logs'));

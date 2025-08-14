@@ -4,19 +4,19 @@ This directory contains the translation files for the WP Migrate & Import Shopif
 
 ## Files
 
-- `wp-migrate-shopify-woo.pot` - The template file containing all translatable strings
-- `wp-migrate-shopify-woo-fr_FR.po` - French translation file (example)
-- `wp-migrate-shopify-woo-fr_FR.mo` - Compiled French translation file
+- `wp-migrate-shopify-woo-lite.pot` - The template file containing all translatable strings
+- `wp-migrate-shopify-woo-lite-fr_FR.po` - French translation file (example)
+- `wp-migrate-shopify-woo-lite-fr_FR.mo` - Compiled French translation file
 
 ## Adding New Translations
 
 ### Method 1: Using Poedit
 
-1. **Download the .pot file**: Copy `wp-migrate-shopify-woo.pot` to your local machine
+1. **Download the .pot file**: Copy `wp-migrate-shopify-woo-lite.pot` to your local machine
 2. **Open with Poedit**: Use Poedit to open the .pot file
 3. **Create new translation**: Save as a new .po file with your language code
-   - Example: `wp-migrate-shopify-woo-fr_FR.po` for French
-   - Example: `wp-migrate-shopify-woo-es_ES.po` for Spanish
+   - Example: `wp-migrate-shopify-woo-lite-fr_FR.po` for French
+   - Example: `wp-migrate-shopify-woo-lite-es_ES.po` for Spanish
 4. **Translate strings**: Translate all the strings in the file
 5. **Save and compile**: Poedit will automatically create the .mo file
 6. **Upload files**: Upload both .po and .mo files to this directory
@@ -27,13 +27,13 @@ If you have WP-CLI installed, you can use these commands:
 
 ```bash
 # Generate .pot file
-wp i18n make-pot . languages/wp-migrate-shopify-woo.pot --domain=wp-migrate-shopify-woo
+wp i18n make-pot . languages/wp-migrate-shopify-woo-lite.pot --domain=wp-migrate-shopify-woo-lite
 
 # Create .po file for a specific language
-wp i18n make-po languages/wp-migrate-shopify-woo.pot languages/wp-migrate-shopify-woo-fr_FR.po
+wp i18n make-po languages/wp-migrate-shopify-woo-lite.pot languages/wp-migrate-shopify-woo-lite-fr_FR.po
 
 # Compile .po to .mo
-wp i18n make-mo languages/wp-migrate-shopify-woo-fr_FR.po languages/
+wp i18n make-mo languages/wp-migrate-shopify-woo-lite-fr_FR.po languages/
 ```
 
 ### Method 3: Manual Translation
@@ -47,43 +47,43 @@ wp i18n make-mo languages/wp-migrate-shopify-woo-fr_FR.po languages/
 
 ```
 languages/
-├── wp-migrate-shopify-woo.pot          # Template file
-├── wp-migrate-shopify-woo-fr_FR.po     # French translation (example)
-├── wp-migrate-shopify-woo-fr_FR.mo     # Compiled French translation
+├── wp-migrate-shopify-woo-lite.pot          # Template file
+├── wp-migrate-shopify-woo-lite-fr_FR.po     # French translation (example)
+├── wp-migrate-shopify-woo-lite-fr_FR.mo     # Compiled French translation
 └── README.md                           # This file
 ```
 
 ## Translation Guidelines
 
 ### Text Domain
-Always use the text domain `wp-migrate-shopify-woo` in your translation functions:
+Always use the text domain `wp-migrate-shopify-woo-lite` in your translation functions:
 
 ```php
-__('Your text here', 'wp-migrate-shopify-woo')
-esc_html__('Your text here', 'wp-migrate-shopify-woo')
-sprintf(__('Your text with %s', 'wp-migrate-shopify-woo'), $variable)
+__('Your text here', 'wp-migrate-shopify-woo-lite')
+esc_html__('Your text here', 'wp-migrate-shopify-woo-lite')
+sprintf(__('Your text with %s', 'wp-migrate-shopify-woo-lite'), $variable)
 ```
 
 ### Plural Forms
 For plural forms, use:
 
 ```php
-_n('1 item', '%d items', $count, 'wp-migrate-shopify-woo')
+_n('1 item', '%d items', $count, 'wp-migrate-shopify-woo-lite')
 ```
 
 ### Context
 For context-specific translations, use:
 
 ```php
-_x('Your text', 'context', 'wp-migrate-shopify-woo')
+_x('Your text', 'context', 'wp-migrate-shopify-woo-lite')
 ```
 
 ### Escaping
 Always escape output appropriately:
 
 ```php
-esc_html__('Your text', 'wp-migrate-shopify-woo')
-esc_attr__('Your text', 'wp-migrate-shopify-woo')
+esc_html__('Your text', 'wp-migrate-shopify-woo-lite')
+esc_attr__('Your text', 'wp-migrate-shopify-woo-lite')
 ```
 
 ## Testing Translations
@@ -109,4 +109,4 @@ For questions about translations or to report issues:
 - Create an issue on the plugin's GitHub repository
 - Contact the plugin author through the support channels
 
-**Note**: This plugin uses the text domain `wp-migrate-shopify-woo`. Make sure your translation files use this exact text domain. 
+**Note**: This plugin uses the text domain `wp-migrate-shopify-woo-lite`. Make sure your translation files use this exact text domain. 

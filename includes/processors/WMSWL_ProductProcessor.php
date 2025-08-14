@@ -21,10 +21,10 @@ use function get_option;
 use function get_transient;
 use function set_transient;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Helpers\WMSW_PaginationHelper;
-use ShopifyWooImporter\Helpers\WMSW_DatabaseHelper;
-use ShopifyWooImporter\Services\WMSW_Logger;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Helpers\WMSWL_PaginationHelper;
+use ShopifyWooImporter\Helpers\WMSWL_DatabaseHelper;
+use ShopifyWooImporter\Services\WMSWL_Logger;
 
 
 
@@ -35,17 +35,17 @@ use ShopifyWooImporter\Services\WMSW_Logger;
  * ALTER TABLE wp_postmeta ADD INDEX idx_wmsw_original_image_url (meta_key, meta_value(191));
  * This will significantly improve the performance of get_existing_attachment_id() method.
  */
-class WMSW_ProductProcessor
+class WMSWL_ProductProcessor
 {
 
     private $shopify_client;
     private $logger;
     private $batch_size;
 
-    public function __construct(WMSW_ShopifyClient $shopify_client, WMSW_Logger $logger = null)
+    public function __construct(WMSWL_ShopifyClient $shopify_client, WMSWL_Logger $logger = null)
     {
         $this->shopify_client = $shopify_client;
-        $this->logger = $logger ?: new WMSW_Logger();
+        $this->logger = $logger ?: new WMSWL_Logger();
         // Get batch size from settings, fallback to constant
     $settings = get_option('wmsw_options', []);
         $this->batch_size = isset($settings['import_batch_size']) ? (int)$settings['import_batch_size'] : WMSW_BATCH_SIZE_PRODUCTS;
@@ -66,7 +66,7 @@ class WMSW_ProductProcessor
 
         // Use a unique tab key for products
         $tab = 'products';
-        $cursor = WMSW_PaginationHelper::getCursor($tab);
+        $cursor = WMSWL_PaginationHelper::getCursor($tab);
         if (!empty($cursor)) {
             $options['after'] = $cursor;
             $this->logger->debug('Resuming product import from cursor: ' . $cursor);
@@ -133,7 +133,7 @@ class WMSW_ProductProcessor
             $next_cursor = $pageInfo['endCursor'];
 
             if ($current_cursor !== $next_cursor) {
-                WMSW_PaginationHelper::setCursor($tab, $next_cursor);
+                WMSWL_PaginationHelper::setCursor($tab, $next_cursor);
                 $has_next_page = true;
                 $results['next_cursor'] = $next_cursor;
                 $this->logger->debug('Pagination cursor updated from ' . $current_cursor . ' to ' . $next_cursor);
@@ -381,7 +381,7 @@ class WMSW_ProductProcessor
 
         if ($import_id) {
             // Get the current status to ensure we're updating the right record
-            $current_obj = WMSW_DatabaseHelper::get_import_log($import_id);
+            $current_obj = WMSWL_DatabaseHelper::get_import_log($import_id);
 
             $current = null;
             if ($current_obj) {
@@ -415,7 +415,7 @@ class WMSW_ProductProcessor
                     $this->logger->debug("Setting processed count to {$new_processed_count}");
                 }
 
-                $result = WMSW_DatabaseHelper::update_import_log($import_id, [
+                $result = WMSWL_DatabaseHelper::update_import_log($import_id, [
                     'items_processed' => $new_processed_count,
                     'updated_at' => gmdate('Y-m-d H:i:s')
                 ]);
@@ -460,7 +460,7 @@ class WMSW_ProductProcessor
         }
 
         // As a fallback, try to get the latest import from the database
-        $latest_import = WMSW_DatabaseHelper::get_latest_in_progress_import_id();
+        $latest_import = WMSWL_DatabaseHelper::get_latest_in_progress_import_id();
 
         if ($latest_import) {
             $this->logger->debug('Found latest in-progress import ID from database: ' . $latest_import);
@@ -492,7 +492,7 @@ class WMSW_ProductProcessor
             return 0;
         }
 
-        $current_obj = WMSW_DatabaseHelper::get_import_log($import_id);
+        $current_obj = WMSWL_DatabaseHelper::get_import_log($import_id);
 
         if ($current_obj && isset($current_obj->items_processed)) {
             $this->logger->debug("Current progress for import ID {$import_id}: {$current_obj->items_processed}");
@@ -508,7 +508,7 @@ class WMSW_ProductProcessor
      */
     private function get_existing_product_id($shopify_id)
     {
-        $product_id = WMSW_DatabaseHelper::get_product_mapping($shopify_id);
+        $product_id = WMSWL_DatabaseHelper::get_product_mapping($shopify_id);
 
         // Double check that the product still exists in WooCommerce
         if ($product_id) {
@@ -544,12 +544,12 @@ class WMSW_ProductProcessor
         $this->logger->debug("Mapping Shopify product ID {$shopify_id} to WooCommerce ID {$woocommerce_id}");
 
         // First check if this WooCommerce ID is already mapped to a different Shopify ID
-        $existing_woo_mapping = WMSW_DatabaseHelper::get_existing_woo_mapping($woocommerce_id);
+        $existing_woo_mapping = WMSWL_DatabaseHelper::get_existing_woo_mapping($woocommerce_id);
 
         if ($existing_woo_mapping && $existing_woo_mapping !== $shopify_id) {
             $this->logger->warning("WooCommerce ID {$woocommerce_id} is already mapped to Shopify ID {$existing_woo_mapping}");
             // Delete conflicting mapping to avoid confusion
-            WMSW_DatabaseHelper::delete_mapping([
+            WMSWL_DatabaseHelper::delete_mapping([
                 'woocommerce_id' => $woocommerce_id,
                 'shopify_id' => $existing_woo_mapping,
                 'object_type' => 'product'
@@ -557,7 +557,7 @@ class WMSW_ProductProcessor
         }
 
         // Use the DatabaseHelper to handle the upsert operation
-        $result = WMSW_DatabaseHelper::upsert_product_mapping($shopify_id, $woocommerce_id, $store_id);
+        $result = WMSWL_DatabaseHelper::upsert_product_mapping($shopify_id, $woocommerce_id, $store_id);
 
         if ($result) {
             $this->logger->debug("Product mapping operation completed successfully");
@@ -1028,7 +1028,7 @@ class WMSW_ProductProcessor
     private function map_category_id($shopify_collection_id, $woocommerce_category_id, $store_id = 1)
     {
         // Use the DatabaseHelper to handle the upsert operation
-        $result = WMSW_DatabaseHelper::upsert_category_mapping($shopify_collection_id, $woocommerce_category_id, $store_id);
+        $result = WMSWL_DatabaseHelper::upsert_category_mapping($shopify_collection_id, $woocommerce_category_id, $store_id);
 
         if ($result) {
             $this->logger->debug("Category mapping operation completed successfully for collection ID: {$shopify_collection_id}");
@@ -1046,7 +1046,7 @@ class WMSW_ProductProcessor
     {
         $batch_count_key = 'wmsw_product_batch_count_' . $tab;
     delete_transient($batch_count_key);
-        WMSW_PaginationHelper::deleteCursor($tab);
+        WMSWL_PaginationHelper::deleteCursor($tab);
         $this->logger->debug('Cleaned up batch tracking for tab: ' . $tab);
     }
 
@@ -1069,7 +1069,7 @@ class WMSW_ProductProcessor
             return;
         }
 
-        $result = WMSW_DatabaseHelper::update_import_log($import_id, [
+        $result = WMSWL_DatabaseHelper::update_import_log($import_id, [
             'items_total' => $total_count,
             'updated_at' => gmdate('Y-m-d H:i:s')
         ]);

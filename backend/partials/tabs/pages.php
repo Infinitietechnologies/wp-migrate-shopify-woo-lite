@@ -18,10 +18,10 @@ if (!defined('ABSPATH')) {
             </svg>
         </div>
         
-        <h2 class="wmsw-locked-title"><?php esc_html_e('Pages Import', 'wp-migrate-shopify-woo'); ?></h2>
+        <h2 class="wmsw-locked-title"><?php esc_html_e('Pages Import', 'wp-migrate-shopify-woo-lite'); ?></h2>
         
         <p class="wmsw-locked-description">
-            <?php esc_html_e('Convert Shopify pages into WordPress pages with professional SEO optimization and content preservation.', 'wp-migrate-shopify-woo'); ?>
+            <?php esc_html_e('Convert Shopify pages into WordPress pages with professional SEO optimization and content preservation.', 'wp-migrate-shopify-woo-lite'); ?>
         </p>
 
         <!-- Feature Highlights Grid -->
@@ -30,51 +30,51 @@ if (!defined('ABSPATH')) {
                 <div class="wmsw-feature-icon">
                     <span class="dashicons dashicons-admin-page"></span>
                 </div>
-                <span><?php esc_html_e('Smart Import', 'wp-migrate-shopify-woo'); ?></span>
+                <span><?php esc_html_e('Smart Import', 'wp-migrate-shopify-woo-lite'); ?></span>
             </div>
             <div class="wmsw-feature-highlight">
                 <div class="wmsw-feature-icon">
                     <span class="dashicons dashicons-search"></span>
                 </div>
-                <span><?php esc_html_e('SEO Ready', 'wp-migrate-shopify-woo'); ?></span>
+                <span><?php esc_html_e('SEO Ready', 'wp-migrate-shopify-woo-lite'); ?></span>
             </div>
             <div class="wmsw-feature-highlight">
                 <div class="wmsw-feature-icon">
                     <span class="dashicons dashicons-admin-links"></span>
                 </div>
-                <span><?php esc_html_e('Link Fix', 'wp-migrate-shopify-woo'); ?></span>
+                <span><?php esc_html_e('Link Fix', 'wp-migrate-shopify-woo-lite'); ?></span>
             </div>
             <div class="wmsw-feature-highlight">
                 <div class="wmsw-feature-icon">
                     <span class="dashicons dashicons-admin-tools"></span>
                 </div>
-                <span><?php esc_html_e('Auto Fix', 'wp-migrate-shopify-woo'); ?></span>
+                <span><?php esc_html_e('Auto Fix', 'wp-migrate-shopify-woo-lite'); ?></span>
             </div>
         </div>
         
         <div class="wmsw-locked-features">
             <ul>
-                <li><?php esc_html_e('✓ Full page content import with HTML preservation', 'wp-migrate-shopify-woo'); ?></li>
-                <li><?php esc_html_e('✓ SEO metadata preservation & optimization', 'wp-migrate-shopify-woo'); ?></li>
-                <li><?php esc_html_e('✓ Automatic slug conflict resolution', 'wp-migrate-shopify-woo'); ?></li>
-                <li><?php esc_html_e('✓ Bulk import with real-time progress tracking', 'wp-migrate-shopify-woo'); ?></li>
-                <li><?php esc_html_e('✓ Content quality validation & cleanup', 'wp-migrate-shopify-woo'); ?></li>
-                <li><?php esc_html_e('✓ Link validation & automatic fixing', 'wp-migrate-shopify-woo'); ?></li>
+                <li><?php esc_html_e('✓ Full page content import with HTML preservation', 'wp-migrate-shopify-woo-lite'); ?></li>
+                <li><?php esc_html_e('✓ SEO metadata preservation & optimization', 'wp-migrate-shopify-woo-lite'); ?></li>
+                <li><?php esc_html_e('✓ Automatic slug conflict resolution', 'wp-migrate-shopify-woo-lite'); ?></li>
+                <li><?php esc_html_e('✓ Bulk import with real-time progress tracking', 'wp-migrate-shopify-woo-lite'); ?></li>
+                <li><?php esc_html_e('✓ Content quality validation & cleanup', 'wp-migrate-shopify-woo-lite'); ?></li>
+                <li><?php esc_html_e('✓ Link validation & automatic fixing', 'wp-migrate-shopify-woo-lite'); ?></li>
             </ul>
         </div>
 
         <!-- Call to Action Section -->
         <div class="wmsw-cta-section">
             <div class="wmsw-cta-text">
-                <strong><?php esc_html_e('Ready to unlock the full potential?', 'wp-migrate-shopify-woo'); ?></strong>
-                <p><?php esc_html_e('Join thousands of successful migrations with our Pro version.', 'wp-migrate-shopify-woo'); ?></p>
+                <strong><?php esc_html_e('Ready to unlock the full potential?', 'wp-migrate-shopify-woo-lite'); ?></strong>
+                <p><?php esc_html_e('Join thousands of successful migrations with our Pro version.', 'wp-migrate-shopify-woo-lite'); ?></p>
             </div>
             
             <a href="https://codecanyon.net/item/wp-shopify-to-woocommerce-migrate-import-shopify-store-to-wordpress/59187755?s_rank=1" 
                target="_blank" 
                class="wmsw-upgrade-button">
                 <span class="dashicons dashicons-star-filled"></span>
-                <?php esc_html_e('Upgrade to Pro', 'wp-migrate-shopify-woo'); ?>
+                <?php esc_html_e('Upgrade to Pro', 'wp-migrate-shopify-woo-lite'); ?>
             </a>
         </div>
     </div>

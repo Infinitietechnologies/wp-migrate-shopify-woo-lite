@@ -1,10 +1,9 @@
-
 <?php
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
-use ShopifyWooImporter\Services\WMSW_DatabaseService;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
+use ShopifyWooImporter\Services\WMSWL_DatabaseService;
 
 
 // Prevent direct access
@@ -15,7 +14,7 @@ if (!defined('ABSPATH')) {
 /**
  * Plugin Activation Handler
  */
-class WMSW_ActivationHandler
+class WMSWL_ActivationHandler
 {
     public function activate()
     {
@@ -193,11 +192,11 @@ class WMSW_ActivationHandler
             // Migrate existing tokens to encrypted format (for version 1.1+)
             if (version_compare($current_version, '1.1.0', '<')) {
                 // Import the ShopifyStore model to handle token migration
-                require_once WMSW_PLUGIN_DIR . 'includes/models/WMSW_ShopifyStore.php';
+                require_once WMSW_PLUGIN_DIR . 'includes/models/WMSWL_ShopifyStore.php';
 
                 // Run the token migration
                 try {
-                    WMSW_ShopifyStore::migrate_tokens_to_encrypted();
+                    WMSWL_ShopifyStore::migrate_tokens_to_encrypted();
                 } catch (\Exception $e) {
                 }
             }
@@ -281,7 +280,7 @@ class WMSW_ActivationHandler
         ];
 
         // Use database service to drop tables
-        WMSW_DatabaseService::drop_tables($tables);
+        WMSWL_DatabaseService::drop_tables($tables);
     }
 
     /**

@@ -1,5 +1,5 @@
 {
-    "name": "wp-migrate-shopify-woo/wp-migrate-shopify-woo",
+    "name": "wp-migrate-shopify-woo-lite/wp-migrate-shopify-woo-lite",
     "description": "Multi-Store Product & Data Migration Tool - Import from Shopify to WooCommerce in just a few clicks",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
@@ -61,7 +61,7 @@
         }
     },
     "extra": {
-        "installer-name": "wp-migrate-shopify-woo",
-        "text-domain": "wp-migrate-shopify-woo"
+        "installer-name": "wp-migrate-shopify-woo-lite",
+        "text-domain": "wp-migrate-shopify-woo-lite"
     }
 }

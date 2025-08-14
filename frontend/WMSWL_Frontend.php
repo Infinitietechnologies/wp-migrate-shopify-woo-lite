@@ -4,7 +4,7 @@ namespace ShopifyWooImporter\Frontend;
 /**
  * Frontend Handler
  */
-class WMSW_Frontend {
+class WMSWL_Frontend {
     
     public function __construct() {
         $this->init_hooks();

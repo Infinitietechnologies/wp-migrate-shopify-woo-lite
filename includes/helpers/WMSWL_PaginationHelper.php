@@ -5,7 +5,7 @@ namespace ShopifyWooImporter\Helpers;
 /**
  * Helper for storing and retrieving pagination cursors per tab (e.g., products, customers)
  */
-class WMSW_PaginationHelper
+class WMSWL_PaginationHelper
 {
     // Import WordPress option functions
     public static function setCursor($tab, $cursor)

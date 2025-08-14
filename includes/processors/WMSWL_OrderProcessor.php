@@ -2,10 +2,10 @@
 
 namespace ShopifyWooImporter\Processors;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
-use ShopifyWooImporter\Services\WMSW_Logger;
-use ShopifyWooImporter\Processors\WMSW_CustomerProcessor;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
+use ShopifyWooImporter\Services\WMSWL_Logger;
+use ShopifyWooImporter\Processors\WMSWL_CustomerProcessor;
 
 // WordPress functions
 use function set_transient;
@@ -18,20 +18,20 @@ use function update_post_meta;
  *
  * Handles the processing and import of orders from Shopify to WooCommerce
  */
-class WMSW_OrderProcessor
+class WMSWL_OrderProcessor
 {
     /**
-     * @var WMSW_ShopifyClient
+     * @var WMSWL_ShopifyClient
      */
     private $shopify_client;
 
     /**
-     * @var WMSW_Logger
+     * @var WMSWL_Logger
      */
     private $logger;
 
     /**
-     * @var WMSW_CustomerProcessor
+     * @var WMSWL_CustomerProcessor
      */
     private $customer_processor;
 
@@ -53,10 +53,10 @@ class WMSW_OrderProcessor
     /**
      * Constructor
      */
-    public function __construct(WMSW_ShopifyClient $shopify_client, WMSW_Logger $logger = null)
+    public function __construct(WMSWL_ShopifyClient $shopify_client, WMSWL_Logger $logger = null)
     {
         $this->shopify_client = $shopify_client;
-        $this->logger = $logger ?: new WMSW_Logger();
+        $this->logger = $logger ?: new WMSWL_Logger();
 
         // Get batch size from settings if available, otherwise from constant, or fall back to default
         $settings = \get_option('wmsw_settings', []);
@@ -67,7 +67,7 @@ class WMSW_OrderProcessor
     /**
      * Import orders from Shopify store
      *
-     * @param WMSW_ShopifyStore $store
+     * @param WMSWL_ShopifyStore $store
      * @param array $import_options
      * @param string $progress_key
      * @return array
@@ -81,14 +81,14 @@ class WMSW_OrderProcessor
             // Initialize progress
             $this->update_progress($progress_key, [
                 'status' => 'fetching',
-                'message' => __('Fetching orders from Shopify...', 'wp-migrate-shopify-woo'),
+                'message' => __('Fetching orders from Shopify...', 'wp-migrate-shopify-woo-lite'),
                 'current' => 0,
                 'total' => 0,
                 'start_time' => $this->import_start_time
             ]);
 
             // Initialize Shopify client
-            $client = new WMSW_ShopifyClient(
+            $client = new WMSWL_ShopifyClient(
                 $store->get_shop_domain(),
                 $store->get_access_token(),
                 $store->get_api_version()
@@ -101,7 +101,7 @@ class WMSW_OrderProcessor
                 'total' => $total_orders,
                 'message' => sprintf(
                     /* translators: %d: number of orders found */
-                    __('Found %d orders. Starting import...', 'wp-migrate-shopify-woo'), 
+                    __('Found %d orders. Starting import...', 'wp-migrate-shopify-woo-lite'), 
                     $total_orders
                 )
             ]);
@@ -111,7 +111,7 @@ class WMSW_OrderProcessor
                 $this->update_progress($progress_key, [
                     'status' => 'completed',
                     'current' => 0,
-                    'message' => __('No orders found to import.', 'wp-migrate-shopify-woo'),
+                    'message' => __('No orders found to import.', 'wp-migrate-shopify-woo-lite'),
                     'imported_count' => 0,
                     'skipped_count' => 0,
                     'error_count' => 0,
@@ -165,7 +165,7 @@ class WMSW_OrderProcessor
                         'current' => $imported_count + $skipped_count + $error_count,
                         'message' => sprintf(
                             /* translators: 1: number of processed orders, 2: number of batches */
-                            __('Import stopped due to timeout. Processed %1$d orders in %2$d batches.', 'wp-migrate-shopify-woo'),
+                            __('Import stopped due to timeout. Processed %1$d orders in %2$d batches.', 'wp-migrate-shopify-woo-lite'),
                             $imported_count + $skipped_count + $error_count,
                             $batch_number - 1
                         ),
@@ -230,7 +230,7 @@ class WMSW_OrderProcessor
                             'current' => $imported_count + $skipped_count + $error_count + 1,
                             'message' => sprintf(
                                 /* translators: %s: order name or ID */
-                                __('Processing order %s...', 'wp-migrate-shopify-woo'),
+                                __('Processing order %s...', 'wp-migrate-shopify-woo-lite'),
                                 $order['name'] ?? $order['order_number'] ?? $order['id']
                             )
                         ]);
@@ -249,7 +249,7 @@ class WMSW_OrderProcessor
                         $error_count++;
                         $error_message = sprintf(
                             /* translators: 1: order name or ID, 2: error message */
-                            __('Error processing order %1$s: %2$s', 'wp-migrate-shopify-woo'),
+                            __('Error processing order %1$s: %2$s', 'wp-migrate-shopify-woo-lite'),
                             $order['name'] ?? $order['id'],
                             $e->getMessage()
                         );
@@ -317,7 +317,7 @@ class WMSW_OrderProcessor
                 'current' => $imported_count + $skipped_count + $error_count,
                 'message' => sprintf(
                     /* translators: 1: number of imported orders, 2: number of skipped orders, 3: number of errors */
-                    __('Import completed. Imported: %1$d, Skipped: %2$d, Errors: %3$d', 'wp-migrate-shopify-woo'),
+                    __('Import completed. Imported: %1$d, Skipped: %2$d, Errors: %3$d', 'wp-migrate-shopify-woo-lite'),
                     $imported_count,
                     $skipped_count,
                     $error_count
@@ -420,7 +420,7 @@ class WMSW_OrderProcessor
                     'status' => 'skipped',
                     'message' => sprintf(
                     /* translators: %s: order name or ID */
-                    __('Order %s already exists', 'wp-migrate-shopify-woo'), 
+                    __('Order %s already exists', 'wp-migrate-shopify-woo-lite'), 
                     $order['name'] ?? $order['id']
                 )
                 ];
@@ -436,7 +436,7 @@ class WMSW_OrderProcessor
             $wc_order = $this->create_woocommerce_order($order, $customer_id, $store, $import_options);
 
             if (!$wc_order) {
-                throw new \Exception(__('Failed to create WooCommerce order', 'wp-migrate-shopify-woo'));
+                throw new \Exception(__('Failed to create WooCommerce order', 'wp-migrate-shopify-woo-lite'));
             }
 
             // Import refunds if requested
@@ -462,7 +462,7 @@ class WMSW_OrderProcessor
                 'order_id' => $wc_order->get_id(),
                 'message' => sprintf(
                     /* translators: %s: order name or ID */
-                    __('Order %s imported successfully', 'wp-migrate-shopify-woo'), 
+                    __('Order %s imported successfully', 'wp-migrate-shopify-woo-lite'), 
                     $order['name'] ?? $order['id']
                 )
             ];
@@ -712,7 +712,7 @@ class WMSW_OrderProcessor
                     $item->set_name($product->get_name());
                 } else {
                     // Product not found locally, create a simple line item with basic info
-                    $product_title = $line_item['title'] ?? __('Product not found', 'wp-migrate-shopify-woo');
+                    $product_title = $line_item['title'] ?? __('Product not found', 'wp-migrate-shopify-woo-lite');
                     $item->set_name($product_title);
                 }
 
@@ -746,7 +746,7 @@ class WMSW_OrderProcessor
     {
         foreach ($shipping_lines as $shipping_line) {
             $item = new \WC_Order_Item_Shipping();
-            $item->set_method_title($shipping_line['title'] ?? __('Shipping', 'wp-migrate-shopify-woo'));
+            $item->set_method_title($shipping_line['title'] ?? __('Shipping', 'wp-migrate-shopify-woo-lite'));
             $item->set_method_id('shopify_import');
             $item->set_total($shipping_line['price'] ?? 0);
 
@@ -761,7 +761,7 @@ class WMSW_OrderProcessor
     {
         foreach ($tax_lines as $tax_line) {
             $item = new \WC_Order_Item_Tax();
-            $item->set_name($tax_line['title'] ?? __('Tax', 'wp-migrate-shopify-woo'));
+            $item->set_name($tax_line['title'] ?? __('Tax', 'wp-migrate-shopify-woo-lite'));
             $item->set_tax_total($tax_line['price'] ?? 0);
             $item->set_rate_id(0); // We don't have WC tax rate ID
 
@@ -810,7 +810,7 @@ class WMSW_OrderProcessor
             try {
                 $refund_data = [
                     'amount' => $refund['total_amount'] ?? 0,
-                    'reason' => $refund['note'] ?? __('Shopify refund', 'wp-migrate-shopify-woo'),
+                    'reason' => $refund['note'] ?? __('Shopify refund', 'wp-migrate-shopify-woo-lite'),
                     'order_id' => $wc_order->get_id(),
                     'line_items' => [],
                     'refund_payment' => false, // Don't actually process payment

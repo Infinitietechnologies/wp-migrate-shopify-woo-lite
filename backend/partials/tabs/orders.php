@@ -4,7 +4,7 @@
  * Orders Import Tab
  */
 
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Get available stores
-$stores = WMSW_ShopifyStore::get_all_active_stores();
+$stores = WMSWL_ShopifyStore::get_all_active_stores();
 
 ?>
 
@@ -25,13 +25,13 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
             <!-- Store Selection - Full Width -->
             <div class="swi-col-12 swi-form-card">
                 <div class="swi-card-header">
-                    <h3 class="swi-card-title"><?php esc_html_e('Store', 'wp-migrate-shopify-woo'); ?></h3>
+                    <h3 class="swi-card-title"><?php esc_html_e('Store', 'wp-migrate-shopify-woo-lite'); ?></h3>
                 </div>
                 <div class="swi-card-body">
                     <div class="swi-form-field">
-                        <label for="store_id"><?php esc_html_e('Select Store', 'wp-migrate-shopify-woo'); ?></label>
+                        <label for="store_id"><?php esc_html_e('Select Store', 'wp-migrate-shopify-woo-lite'); ?></label>
                         <select name="store_id" id="store_id" required>
-                            <option value=""><?php esc_html_e('Choose a store...', 'wp-migrate-shopify-woo'); ?></option>
+                            <option value=""><?php esc_html_e('Choose a store...', 'wp-migrate-shopify-woo-lite'); ?></option>
                             <?php foreach ($stores as $store): ?>
                                 <option value="<?php echo esc_attr($store->id); ?>"
                                     <?php echo $store->is_default == 1 ? 'selected' : '' ?>>
@@ -40,7 +40,7 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <?php endforeach; ?>
                         </select>
                         <p class="description">
-                            <?php esc_html_e('Select the Shopify store to import orders from.', 'wp-migrate-shopify-woo'); ?>
+                            <?php esc_html_e('Select the Shopify store to import orders from.', 'wp-migrate-shopify-woo-lite'); ?>
                         </p>
                     </div>
                 </div>
@@ -49,7 +49,7 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
             <!-- Order Status Filter -->
             <div class="swi-col-12 swi-form-card">
                 <div class="swi-card-header">
-                    <h3 class="swi-card-title"><?php esc_html_e('Order Status Filter', 'wp-migrate-shopify-woo'); ?></h3>
+                    <h3 class="swi-card-title"><?php esc_html_e('Order Status Filter', 'wp-migrate-shopify-woo-lite'); ?></h3>
                 </div>
                 <div class="swi-card-body">
                     <div class="swi-action-grid">
@@ -57,10 +57,10 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <div class="swi-form-field">
                                 <label>
                                     <input type="checkbox" name="order_status[]" value="open" checked>
-                                    <?php esc_html_e('Open Orders', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Open Orders', 'wp-migrate-shopify-woo-lite'); ?>
                                 </label>
                                 <p class="description">
-                                    <?php esc_html_e('Orders that are still active and can be modified', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Orders that are still active and can be modified', 'wp-migrate-shopify-woo-lite'); ?>
                                 </p>
                             </div>
                         </div>
@@ -69,10 +69,10 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <div class="swi-form-field">
                                 <label>
                                     <input type="checkbox" name="order_status[]" value="closed" checked>
-                                    <?php esc_html_e('Closed Orders', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Closed Orders', 'wp-migrate-shopify-woo-lite'); ?>
                                 </label>
                                 <p class="description">
-                                    <?php esc_html_e('Orders that have been fulfilled and closed', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Orders that have been fulfilled and closed', 'wp-migrate-shopify-woo-lite'); ?>
                                 </p>
                             </div>
                         </div>
@@ -81,10 +81,10 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <div class="swi-form-field">
                                 <label>
                                     <input type="checkbox" name="order_status[]" value="cancelled">
-                                    <?php esc_html_e('Cancelled Orders', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Cancelled Orders', 'wp-migrate-shopify-woo-lite'); ?>
                                 </label>
                                 <p class="description">
-                                    <?php esc_html_e('Orders that have been cancelled', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Orders that have been cancelled', 'wp-migrate-shopify-woo-lite'); ?>
                                 </p>
                             </div>
                         </div>
@@ -95,7 +95,7 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
             <!-- Import Options -->
             <div class="swi-col-12 swi-form-card">
                 <div class="swi-card-header">
-                    <h3 class="swi-card-title"><?php esc_html_e('Import Options', 'wp-migrate-shopify-woo'); ?></h3>
+                    <h3 class="swi-card-title"><?php esc_html_e('Import Options', 'wp-migrate-shopify-woo-lite'); ?></h3>
                 </div>
                 <div class="swi-card-body">
                     <div class="swi-action-grid swi-options-group">
@@ -103,11 +103,11 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <div class="swi-form-field">
                                 <label>
                                     <input type="checkbox" name="create_customers" value="1" checked>
-                                    <?php esc_html_e('Create Customers', 'wp-migrate-shopify-woo'); ?>
-                                    <span class="swi-help-tip" title="<?php esc_attr_e('If checked, new WooCommerce customers will be created for Shopify customers that do not already exist.', 'wp-migrate-shopify-woo'); ?>">&#9432;</span>
+                                    <?php esc_html_e('Create Customers', 'wp-migrate-shopify-woo-lite'); ?>
+                                    <span class="swi-help-tip" title="<?php esc_attr_e('If checked, new WooCommerce customers will be created for Shopify customers that do not already exist.', 'wp-migrate-shopify-woo-lite'); ?>">&#9432;</span>
                                 </label>
                                 <p class="description">
-                                    <?php esc_html_e('Automatically create customer accounts if they don\'t exist.', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Automatically create customer accounts if they don\'t exist.', 'wp-migrate-shopify-woo-lite'); ?>
                                 </p>
                             </div>
                         </div>
@@ -115,11 +115,11 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <div class="swi-form-field">
                                 <label>
                                     <input type="checkbox" name="import_notes" value="1" checked>
-                                    <?php esc_html_e('Import Order Notes', 'wp-migrate-shopify-woo'); ?>
-                                    <span class="swi-help-tip" title="<?php esc_attr_e('If checked, order notes and comments from Shopify will be imported into WooCommerce.', 'wp-migrate-shopify-woo'); ?>">&#9432;</span>
+                                    <?php esc_html_e('Import Order Notes', 'wp-migrate-shopify-woo-lite'); ?>
+                                    <span class="swi-help-tip" title="<?php esc_attr_e('If checked, order notes and comments from Shopify will be imported into WooCommerce.', 'wp-migrate-shopify-woo-lite'); ?>">&#9432;</span>
                                 </label>
                                 <p class="description">
-                                    <?php esc_html_e('Include order notes and comments from Shopify.', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Include order notes and comments from Shopify.', 'wp-migrate-shopify-woo-lite'); ?>
                                 </p>
                             </div>
                         </div>
@@ -127,11 +127,11 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                             <div class="swi-form-field">
                                 <label>
                                     <input type="checkbox" name="import_refunds" value="1">
-                                    <?php esc_html_e('Import Refunds', 'wp-migrate-shopify-woo'); ?>
-                                    <span class="swi-help-tip" title="<?php esc_attr_e('If checked, refund information and transaction history will be imported.', 'wp-migrate-shopify-woo'); ?>">&#9432;</span>
+                                    <?php esc_html_e('Import Refunds', 'wp-migrate-shopify-woo-lite'); ?>
+                                    <span class="swi-help-tip" title="<?php esc_attr_e('If checked, refund information and transaction history will be imported.', 'wp-migrate-shopify-woo-lite'); ?>">&#9432;</span>
                                 </label>
                                 <p class="description">
-                                    <?php esc_html_e('Import refund information and transaction history.', 'wp-migrate-shopify-woo'); ?>
+                                    <?php esc_html_e('Import refund information and transaction history.', 'wp-migrate-shopify-woo-lite'); ?>
                                 </p>
                             </div>
                         </div>
@@ -143,12 +143,12 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
                 <div class="swi-form-actions">
                     <button type="submit" class="button button-primary" id="start-orders-import">
                         <span class="dashicons dashicons-download"></span>
-                        <?php esc_html_e('Start Orders Import', 'wp-migrate-shopify-woo'); ?>
+                        <?php esc_html_e('Start Orders Import', 'wp-migrate-shopify-woo-lite'); ?>
                     </button>
 
                     <button type="button" class="button" id="preview-orders">
                         <span class="dashicons dashicons-visibility"></span>
-                        <?php esc_html_e('Preview Orders', 'wp-migrate-shopify-woo'); ?>
+                        <?php esc_html_e('Preview Orders', 'wp-migrate-shopify-woo-lite'); ?>
                     </button>
                 </div>
             </div>
@@ -161,7 +161,7 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
     <div class="swi-card-header">
         <h3 class="swi-card-title">
             <span class="dashicons dashicons-chart-line"></span>
-            <?php esc_html_e('Import Progress', 'wp-migrate-shopify-woo'); ?>
+            <?php esc_html_e('Import Progress', 'wp-migrate-shopify-woo-lite'); ?>
         </h3>
     </div>
     <div class="swi-card-body">
@@ -179,7 +179,7 @@ $stores = WMSW_ShopifyStore::get_all_active_stores();
 <!-- Orders Preview Section -->
 <div id="orders-preview" class="swi-progress-container swi-card">
     <div class="swi-card-header">
-        <h3 class="swi-card-title"><?php esc_html_e('Orders Preview', 'wp-migrate-shopify-woo'); ?></h3>
+        <h3 class="swi-card-title"><?php esc_html_e('Orders Preview', 'wp-migrate-shopify-woo-lite'); ?></h3>
         <button type="button" class="button" id="close-preview">
             <span class="dashicons dashicons-no-alt"></span>
         </button>

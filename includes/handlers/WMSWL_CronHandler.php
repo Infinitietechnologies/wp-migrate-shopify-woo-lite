@@ -2,14 +2,14 @@
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Models\WMSW_ImportLog;
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
-use ShopifyWooImporter\Models\WMSW_Task;
+use ShopifyWooImporter\Models\WMSWL_ImportLog;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
+use ShopifyWooImporter\Models\WMSWL_Task;
 
 /**
  * Cron Handler for scheduled tasks
  */
-class WMSW_CronHandler
+class WMSWL_CronHandler
 {
 
     public function __construct()
@@ -29,7 +29,7 @@ class WMSW_CronHandler
      */
     public function sync_stores()
     {
-        $active_stores = WMSW_ShopifyStore::get_all_active_stores(1);
+        $active_stores = WMSWL_ShopifyStore::get_all_active_stores(1);
 
         if (empty($active_stores)) {
             return;
@@ -74,7 +74,7 @@ class WMSW_CronHandler
         // Calculate cutoff date
         $cutoff_date = gmdate('Y-m-d H:i:s', strtotime("-{$retention_days} days"));
 
-        WMSW_ImportLog::cleanup_logs_by_date($cutoff_date);
+        WMSWL_ImportLog::cleanup_logs_by_date($cutoff_date);
     }
 
     /**
@@ -103,7 +103,7 @@ class WMSW_CronHandler
     private function get_pending_tasks($limit = 5)
     {
         // Use the Task model to get pending tasks
-        return WMSW_Task::get_pending_tasks($limit);
+        return WMSWL_Task::get_pending_tasks($limit);
     }
 
     /**
@@ -143,7 +143,7 @@ class WMSW_CronHandler
         $options = json_decode($task->options, true);
 
         // Get store handler
-        $store_handler = new WMSW_StoreHandler();
+        $store_handler = new WMSWL_StoreHandler();
         $store = $store_handler->get_store($task->store_id);
 
         if (!$store) {
@@ -177,7 +177,7 @@ class WMSW_CronHandler
     private function update_task_status($task_id, $status)
     {
         // Use the Task model to update task status
-        WMSW_Task::update_status($task_id, $status);
+        WMSWL_Task::update_status($task_id, $status);
     }
 
     /**
@@ -189,7 +189,7 @@ class WMSW_CronHandler
         $next_run = $this->calculate_next_run_time($task->frequency);
 
         // Use the Task model to update task schedule
-        WMSW_Task::update_schedule($task->id, $next_run, current_time('mysql'));
+        WMSWL_Task::update_schedule($task->id, $next_run, current_time('mysql'));
     }
 
     /**
@@ -198,7 +198,7 @@ class WMSW_CronHandler
     private function calculate_next_run_time($frequency)
     {
         // Use the Task model's method to calculate next run time
-        return WMSW_Task::calculate_next_run_time($frequency);
+        return WMSWL_Task::calculate_next_run_time($frequency);
     }
 
     /**
@@ -207,7 +207,7 @@ class WMSW_CronHandler
     private function add_background_task($task_type, $data = [])
     {
         // Use the Task model to create a new task
-        $task = WMSW_Task::schedule_one_time(
+        $task = WMSWL_Task::schedule_one_time(
             $data['store_id'] ?? 0,
             $task_type,
             current_time('mysql'),

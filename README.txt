@@ -1,4 +1,4 @@
-=== WP Migrate & Import Shopify to WooCommerce ===
+=== WP Migrate & Import Shopify to WC Lite ===
 Contributors: infinitietech
 Tags: shopify, WooCommerce, migration, import, ecommerce
 Requires at least: 5.0
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Professional multi-store migration tool for seamless data transfer from Shopify to WooCommerce with advanced mapping, batch processing, and comprehensive logging.
+Migrate data from Shopify to WooCommerce with multi-store support, advanced mapping, batch processing, and logging.
 
 == Description ==
 
@@ -64,13 +64,13 @@ Professional multi-store migration tool for seamless data transfer from Shopify 
 ### Method 2: FTP Upload
 
 1. **Extract** the plugin ZIP file
-2. **Upload** the `wp-migrate-shopify-woo` folder to `/wp-content/plugins/`
+2. **Upload** the `wp-migrate-shopify-woo-lite` folder to `/wp-content/plugins/`
 3. **Activate** the plugin via WordPress admin
 
 ### Method 3: Composer Installation
 
 ```bash
-composer require wp-migrate-shopify-woo/wp-migrate-shopify-woo
+composer require wp-migrate-shopify-woo-lite/wp-migrate-shopify-woo-lite
 ```
 
 ## ⚙️ Configuration
@@ -329,7 +329,7 @@ composer require wp-migrate-shopify-woo/wp-migrate-shopify-woo
 ## 🌐 Internationalization
 
 ### Translation Support
-- **Text Domain**: `wp-migrate-shopify-woo`
+- **Text Domain**: `wp-migrate-shopify-woo-lite`
 - **Translation Files**: Located in `/languages/`
 - **RTL Support**: Right-to-left language support
 - **Locale Support**: Multiple locale support

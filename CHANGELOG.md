@@ -132,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### 🌐 Internationalization
 - **Translation Support**
-  - Text domain: `wp-migrate-shopify-woo`
+  - Text domain: `wp-migrate-shopify-woo-lite`
   - POT file for translations
   - French translation included
   - RTL language support

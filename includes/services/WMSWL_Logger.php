@@ -5,7 +5,7 @@ namespace ShopifyWooImporter\Services;
 /**
  * Logger Service
  */
-class WMSW_Logger
+class WMSWL_Logger
 {
 
     private $task_id;

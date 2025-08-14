@@ -2,12 +2,12 @@
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Services\WMSW_DatabaseService;
+use ShopifyWooImporter\Services\WMSWL_DatabaseService;
 
 /**
  * Plugin Deactivation Handler
  */
-class WMSW_DeactivationHandler
+class WMSWL_DeactivationHandler
 {
 
     public function deactivate()
@@ -44,7 +44,7 @@ class WMSW_DeactivationHandler
     private function cleanup_temporary_data()
     {
         // Remove transients using database service
-        WMSW_DatabaseService::cleanup_transients('WMSW_');
+        WMSWL_DatabaseService::cleanup_transients('WMSW_');
 
         // Delete any temporary files
         $upload_dir = wp_upload_dir();

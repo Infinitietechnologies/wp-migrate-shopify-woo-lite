@@ -2,8 +2,8 @@
 // We'll be using global namespace functions with backslash prefix
 namespace ShopifyWooImporter\Processors;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Services\WMSW_Logger;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Services\WMSWL_Logger;
 
 // We need to use the global namespace for WordPress functions
 use function \wc_create_new_customer;
@@ -29,17 +29,17 @@ use function \__;
  *
  * Handles importing customers from Shopify to WooCommerce
  */
-use ShopifyWooImporter\Helpers\WMSW_PaginationHelper;
+use ShopifyWooImporter\Helpers\WMSWL_PaginationHelper;
 
-class WMSW_CustomerProcessor
+class WMSWL_CustomerProcessor
 {
     /**
-     * @var WMSW_ShopifyClient
+     * @var WMSWL_ShopifyClient
      */
     private $shopify_client;
 
     /**
-     * @var WMSW_Logger
+     * @var WMSWL_Logger
      */
     private $logger;
 
@@ -51,13 +51,13 @@ class WMSW_CustomerProcessor
     /**
      * Constructor
      *
-     * @param WMSW_ShopifyClient $shopify_client The Shopify API client
-     * @param WMSW_Logger $logger Optional logger instance
+     * @param WMSWL_ShopifyClient $shopify_client The Shopify API client
+     * @param WMSWL_Logger $logger Optional logger instance
      */
-    public function __construct(WMSW_ShopifyClient $shopify_client, WMSW_Logger $logger = null)
+    public function __construct(WMSWL_ShopifyClient $shopify_client, WMSWL_Logger $logger = null)
     {
         $this->shopify_client = $shopify_client;
-        $this->logger = $logger ?: new WMSW_Logger();
+        $this->logger = $logger ?: new WMSWL_Logger();
 
         // Get batch size from settings if available, otherwise from constant, or fall back to default
         $settings = \get_option('wmsw_settings', []);
@@ -86,7 +86,7 @@ class WMSW_CustomerProcessor
         // Use a unique tab key for customers
         $tab = 'customers';
         // Support resuming from a cursor (from options or stored)
-        $cursor = isset($options['after']) ? $options['after'] : WMSW_PaginationHelper::getCursor($tab);
+        $cursor = isset($options['after']) ? $options['after'] : WMSWL_PaginationHelper::getCursor($tab);
         if (!empty($cursor)) {
             $options['after'] = $cursor;
             $this->logger->debug('Resuming customer import from cursor: ' . $cursor);
@@ -101,7 +101,7 @@ class WMSW_CustomerProcessor
         if (empty($customers)) {
             $this->logger->error('No customers found to import');
             // Clean up cursor if nothing found
-            WMSW_PaginationHelper::deleteCursor($tab);
+            WMSWL_PaginationHelper::deleteCursor($tab);
             return [
                 'success' => false,
                 'message' => 'No customers found to import',
@@ -119,11 +119,11 @@ class WMSW_CustomerProcessor
 
         // Handle pagination cursor
         if (!empty($pageInfo['hasNextPage']) && !empty($pageInfo['endCursor'])) {
-            WMSW_PaginationHelper::setCursor($tab, $pageInfo['endCursor']);
+            WMSWL_PaginationHelper::setCursor($tab, $pageInfo['endCursor']);
             $results['has_next_page'] = true;
             $results['next_cursor'] = $pageInfo['endCursor'];
         } else {
-            WMSW_PaginationHelper::deleteCursor($tab);
+            WMSWL_PaginationHelper::deleteCursor($tab);
             $results['has_next_page'] = false;
         }
 
@@ -1053,7 +1053,7 @@ class WMSW_CustomerProcessor
 
             $subject = sprintf(
                 /* translators: %s: site title */
-                \__('Welcome to %s', 'wp-migrate-shopify-woo'), 
+                \__('Welcome to %s', 'wp-migrate-shopify-woo-lite'), 
                 $site_title
             );
 
@@ -1066,33 +1066,33 @@ class WMSW_CustomerProcessor
             $message = '<div style="max-width: 600px; margin: 0 auto; padding: 20px;">';
             $message .= '<h2>' . sprintf(
                 /* translators: %s: site title */
-                \__('Welcome to %s!', 'wp-migrate-shopify-woo'), 
+                \__('Welcome to %s!', 'wp-migrate-shopify-woo-lite'), 
                 $site_title
             ) . '</h2>';
 
             if (!empty($first_name)) {
                 $message .= '<p>' . sprintf(
                     /* translators: %s: customer first name */
-                    \__('Hello %s,', 'wp-migrate-shopify-woo'), 
+                    \__('Hello %s,', 'wp-migrate-shopify-woo-lite'), 
                     \esc_html($first_name)
                 ) . '</p>';
             } else {
-                $message .= '<p>' . \__('Hello,', 'wp-migrate-shopify-woo') . '</p>';
+                $message .= '<p>' . \__('Hello,', 'wp-migrate-shopify-woo-lite') . '</p>';
             }
 
-            $message .= '<p>' . \__('Your account has been created on our store. You can now log in to manage your account, view orders, and more.', 'wp-migrate-shopify-woo') . '</p>';
-            $message .= '<p>' . \__('Please use the password reset feature on the login page to set your password.', 'wp-migrate-shopify-woo') . '</p>';
+            $message .= '<p>' . \__('Your account has been created on our store. You can now log in to manage your account, view orders, and more.', 'wp-migrate-shopify-woo-lite') . '</p>';
+            $message .= '<p>' . \__('Please use the password reset feature on the login page to set your password.', 'wp-migrate-shopify-woo-lite') . '</p>';
 
             // Add link to my account page
             $account_url = \wc_get_page_permalink('myaccount');
             if ($account_url) {
-                $message .= '<p><a href="' . \esc_url($account_url) . '" style="display: inline-block; padding: 10px 15px; background-color: #7f54b3; color: white; text-decoration: none; border-radius: 3px;">' . \__('Visit Your Account', 'wp-migrate-shopify-woo') . '</a></p>';
+                $message .= '<p><a href="' . \esc_url($account_url) . '" style="display: inline-block; padding: 10px 15px; background-color: #7f54b3; color: white; text-decoration: none; border-radius: 3px;">' . \__('Visit Your Account', 'wp-migrate-shopify-woo-lite') . '</a></p>';
             }
 
-            $message .= '<p>' . \__('Thank you for being our customer!', 'wp-migrate-shopify-woo') . '</p>';
+            $message .= '<p>' . \__('Thank you for being our customer!', 'wp-migrate-shopify-woo-lite') . '</p>';
             $message .= '<p>' . sprintf(
                 /* translators: %s: site title */
-                \__('The %s Team', 'wp-migrate-shopify-woo'), 
+                \__('The %s Team', 'wp-migrate-shopify-woo-lite'), 
                 $site_title
             ) . '</p>';
             $message .= '</div>';

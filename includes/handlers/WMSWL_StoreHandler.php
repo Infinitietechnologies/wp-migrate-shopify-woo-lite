@@ -2,16 +2,16 @@
 
 namespace ShopifyWooImporter\Handlers;
 
-use ShopifyWooImporter\Core\WMSW_ShopifyClient;
-use ShopifyWooImporter\Models\WMSW_ShopifyStore;
-use ShopifyWooImporter\Helpers\WMSW_SecurityHelper;
-use ShopifyWooImporter\Services\WMSW_StoreLogger;
+use ShopifyWooImporter\Core\WMSWL_ShopifyClient;
+use ShopifyWooImporter\Models\WMSWL_ShopifyStore;
+use ShopifyWooImporter\Helpers\WMSWL_SecurityHelper;
+use ShopifyWooImporter\Services\WMSWL_StoreLogger;
 
 
 /**
  * Handler for store management
  */
-class WMSW_StoreHandler
+class WMSWL_StoreHandler
 {
 
     public function __construct()
@@ -35,7 +35,7 @@ class WMSW_StoreHandler
      */
     public function get_stores()
     {
-        return WMSW_ShopifyStore::get_all();
+        return WMSWL_ShopifyStore::get_all();
     }
 
     /**
@@ -46,7 +46,7 @@ class WMSW_StoreHandler
      */
     public function get_store($store_id)
     {
-        return WMSW_ShopifyStore::find($store_id);
+        return WMSWL_ShopifyStore::find($store_id);
     }
 
 
@@ -57,7 +57,7 @@ class WMSW_StoreHandler
      * Create or update a store
      *
      * @param array $data Store data
-     * @return WMSW_ShopifyStore|void Store object or sends json error response
+     * @return WMSWL_ShopifyStore|void Store object or sends json error response
      */    /**
      * AJAX handler for saving a store
      */
@@ -65,19 +65,19 @@ class WMSW_StoreHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Validate required fields using enhanced security helper
         $required_fields = ['store_name', 'shop_domain', 'access_token', 'api_version'];
-        WMSW_SecurityHelper::validateRequiredFields($required_fields);
+        WMSWL_SecurityHelper::validateRequiredFields($required_fields);
 
         // Get sanitized data using enhanced security helper
-        $store_id = WMSW_SecurityHelper::getPostData('store_id', 0, 'intval');
-        $store_name = WMSW_SecurityHelper::getPostData('store_name');
-        $shop_domain = WMSW_SecurityHelper::getPostData('shop_domain');
-        $access_token = WMSW_SecurityHelper::getPostData('access_token');
-        $api_version = WMSW_SecurityHelper::getPostData('api_version', '2023-10');
+        $store_id = WMSWL_SecurityHelper::getPostData('store_id', 0, 'intval');
+        $store_name = WMSWL_SecurityHelper::getPostData('store_name');
+        $shop_domain = WMSWL_SecurityHelper::getPostData('shop_domain');
+        $access_token = WMSWL_SecurityHelper::getPostData('access_token');
+        $api_version = WMSWL_SecurityHelper::getPostData('api_version', '2023-10');
         $is_active = !empty($_POST['is_active']) ? 1 : 0;
         $is_default = !empty($_POST['is_default']) ? 1 : 0;
 
@@ -88,9 +88,9 @@ class WMSW_StoreHandler
 
             if ($store_id > 0) {
                 // Update existing store
-                $store = WMSW_ShopifyStore::find($store_id);
+                $store = WMSWL_ShopifyStore::find($store_id);
                 if (!$store) {
-                    wp_send_json_error(['message' => __('Store not found', 'wp-migrate-shopify-woo')]);
+                    wp_send_json_error(['message' => __('Store not found', 'wp-migrate-shopify-woo-lite')]);
                 }
                 $store->set_store_name($store_name);
                 $store->set_shop_domain($shop_domain);
@@ -101,7 +101,7 @@ class WMSW_StoreHandler
                 // Handle default store logic
                 if ($is_default) {
                     // Reset all other stores to not default
-                    WMSW_ShopifyStore::resetAllDefault();
+                    WMSWL_ShopifyStore::resetAllDefault();
                 }
                 $store->set_is_default($is_default);
             } else {
@@ -109,10 +109,10 @@ class WMSW_StoreHandler
                 // Handle default store logic for new stores
                 if ($is_default) {
                     // Reset all other stores to not default
-                    WMSW_ShopifyStore::resetAllDefault();
+                    WMSWL_ShopifyStore::resetAllDefault();
                 }
 
-                $store = new WMSW_ShopifyStore([
+                $store = new WMSWL_ShopifyStore([
                     'store_name' => $store_name,
                     'shop_domain' => $shop_domain,
                     'access_token' => $access_token,
@@ -124,15 +124,15 @@ class WMSW_StoreHandler
             if ($store->save()) {
                 wp_send_json_success([
                     'message' => $store_id > 0
-                        ? __('Store updated successfully', 'wp-migrate-shopify-woo')
-                        : __('Store added successfully', 'wp-migrate-shopify-woo'),
+                        ? __('Store updated successfully', 'wp-migrate-shopify-woo-lite')
+                        : __('Store added successfully', 'wp-migrate-shopify-woo-lite'),
                     'store_id' => $store->get_id()
                 ]);
             } else {
                 // Get last database error for debugging
                 global $wpdb;
                 $db_error = $wpdb->last_error;
-                $error_message = __('Failed to save store', 'wp-migrate-shopify-woo');
+                $error_message = __('Failed to save store', 'wp-migrate-shopify-woo-lite');
 
                 if (!empty($db_error) && defined('WP_DEBUG') && WP_DEBUG) {
                     $error_message .= ': ' . $db_error;
@@ -142,7 +142,7 @@ class WMSW_StoreHandler
                     'message' => $error_message,
                     'debug_info' => [
                         'db_error' => $db_error,
-                        'table_exists' => WMSW_ShopifyStore::tableExists(),
+                        'table_exists' => WMSWL_ShopifyStore::tableExists(),
                         'store_data' => [
                             'store_name' => $store_name,
                             'shop_domain' => $shop_domain,
@@ -169,20 +169,20 @@ class WMSW_StoreHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Get sanitized store ID using enhanced security helper
-        $store_id = WMSW_SecurityHelper::sanitizeStoreId();
+        $store_id = WMSWL_SecurityHelper::sanitizeStoreId();
 
 
         try {
-            $store = WMSW_ShopifyStore::find($store_id);
+            $store = WMSWL_ShopifyStore::find($store_id);
             // Get store
 
             if (!$store) {
                 wp_send_json_error([
-                    'message' => __('Store not found', 'wp-migrate-shopify-woo')
+                    'message' => __('Store not found', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
@@ -191,12 +191,12 @@ class WMSW_StoreHandler
 
             if (!$result) {
                 wp_send_json_error([
-                    'message' => __('Failed to delete store', 'wp-migrate-shopify-woo')
+                    'message' => __('Failed to delete store', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
 
             wp_send_json_success([
-                'message' => __('Store deleted successfully', 'wp-migrate-shopify-woo')
+                'message' => __('Store deleted successfully', 'wp-migrate-shopify-woo-lite')
             ]);
         } catch (\Exception $e) {
             wp_send_json_error([
@@ -212,27 +212,27 @@ class WMSW_StoreHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         $store_id = absint($_POST['store_id'] ?? 0);
 
         if (!$store_id) {
             wp_send_json_error([
-                'message' => esc_html__('Invalid store ID', 'wp-migrate-shopify-woo')
+                'message' => esc_html__('Invalid store ID', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
         // Get previous default store for logging
-        $previous_default = WMSW_ShopifyStore::getDefaultStoreId();
+        $previous_default = WMSWL_ShopifyStore::getDefaultStoreId();
 
         // Set the selected store as default (this also resets all others)
-        $result = WMSW_ShopifyStore::setAsDefault($store_id);
+        $result = WMSWL_ShopifyStore::setAsDefault($store_id);
 
         if ($result) {
             // Log the change
-            if (class_exists(WMSW_StoreLogger::class)) {
-                WMSW_StoreLogger::log(
+            if (class_exists(WMSWL_StoreLogger::class)) {
+                WMSWL_StoreLogger::log(
                     $store_id,
                     'set_default',
                     [
@@ -242,11 +242,11 @@ class WMSW_StoreHandler
             }
 
             wp_send_json_success([
-                'message' => esc_html__('Default store set successfully', 'wp-migrate-shopify-woo')
+                'message' => esc_html__('Default store set successfully', 'wp-migrate-shopify-woo-lite')
             ]);
         } else {
             wp_send_json_error([
-                'message' => esc_html__('Failed to set default store', 'wp-migrate-shopify-woo')
+                'message' => esc_html__('Failed to set default store', 'wp-migrate-shopify-woo-lite')
             ]);
         }
     }
@@ -260,19 +260,19 @@ class WMSW_StoreHandler
     public function set_default_store($store_id)
     {
         if (!$store_id) {
-            return new \WP_Error('invalid_store_id', esc_html__('Invalid store ID', 'wp-migrate-shopify-woo'));
+            return new \WP_Error('invalid_store_id', esc_html__('Invalid store ID', 'wp-migrate-shopify-woo-lite'));
         }
         
         // Use the model method to set as default
-        $result = WMSW_ShopifyStore::setAsDefault($store_id);
+        $result = WMSWL_ShopifyStore::setAsDefault($store_id);
         
         if ($result) {
             if (class_exists('wmsw_StoreLogger')) {
-                \ShopifyWooImporter\Services\WMSW_StoreLogger::log($store_id, 'set_default', []);
+                \ShopifyWooImporter\Services\WMSWL_StoreLogger::log($store_id, 'set_default', []);
             }
             return true;
         } else {
-            return new \WP_Error('db_error', esc_html__('Failed to set default store', 'wp-migrate-shopify-woo'));
+            return new \WP_Error('db_error', esc_html__('Failed to set default store', 'wp-migrate-shopify-woo-lite'));
         }
     }
 
@@ -285,17 +285,17 @@ class WMSW_StoreHandler
     public function get_store_client($store_id)
     {
         // Get store
-        $store = WMSW_ShopifyStore::find($store_id);
+        $store = WMSWL_ShopifyStore::find($store_id);
 
         if (!$store) {
             \wp_send_json_error([
-                'message' => \__('Store not found', 'wp-migrate-shopify-woo')
+                'message' => \__('Store not found', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
         try {
             // Create client
-            $client = new WMSW_ShopifyClient(
+            $client = new WMSWL_ShopifyClient(
                 $store->shop_url,
                 $store->api_key,
                 $store->api_password,
@@ -320,17 +320,17 @@ class WMSW_StoreHandler
 
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
 
         $store_id_raw = absint($_POST['store_id'] ?? 0);
         $store_id     = $store_id_raw;
-        $store        = WMSW_ShopifyStore::find($store_id);
+        $store        = WMSWL_ShopifyStore::find($store_id);
 
         if (!$store) {
             wp_send_json_error([
-                'message'    => esc_html__('Store not found', 'wp-migrate-shopify-woo'),
+                'message'    => esc_html__('Store not found', 'wp-migrate-shopify-woo-lite'),
                 'error_type' => 'not_found',
             ]);
         }
@@ -343,26 +343,26 @@ class WMSW_StoreHandler
 
             if ($store->save()) {
                 $status_text = $new_status
-                    ? esc_html__('activated', 'wp-migrate-shopify-woo')
-                    : esc_html__('deactivated', 'wp-migrate-shopify-woo');
+                    ? esc_html__('activated', 'wp-migrate-shopify-woo-lite')
+                    : esc_html__('deactivated', 'wp-migrate-shopify-woo-lite');
 
                 wp_send_json_success([
                     'message' => sprintf(
                         /* translators: %s: status text (activated/deactivated) */
-                        esc_html__('Store %s successfully', 'wp-migrate-shopify-woo'),
+                        esc_html__('Store %s successfully', 'wp-migrate-shopify-woo-lite'),
                         $status_text
                     ),
                 ]);
             } else {
                 wp_send_json_error([
-                    'message' => esc_html__('Failed to update store status', 'wp-migrate-shopify-woo'),
+                    'message' => esc_html__('Failed to update store status', 'wp-migrate-shopify-woo-lite'),
                 ]);
             }
         } catch (Exception $e) {
             wp_send_json_error([
                 'message' => sprintf(
                     /* translators: %s: error message */
-                    esc_html__('Error updating store status: %s', 'wp-migrate-shopify-woo'),
+                    esc_html__('Error updating store status: %s', 'wp-migrate-shopify-woo-lite'),
                     esc_html($e->getMessage())
                 ),
             ]);
@@ -379,24 +379,24 @@ class WMSW_StoreHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         // Sanitize and get store ID
         $store_id_raw = absint($_POST['store_id'] ?? 0);
         $store_id     = $store_id_raw;
-        $store        = WMSW_ShopifyStore::find($store_id);
+        $store        = WMSWL_ShopifyStore::find($store_id);
 
         if (!$store) {
             wp_send_json_error([
-                'message' => esc_html__('Store not found', 'wp-migrate-shopify-woo'),
+                'message' => esc_html__('Store not found', 'wp-migrate-shopify-woo-lite'),
             ]);
         }
 
         // Check if store is active
         if (!$store->get_is_active()) {
             wp_send_json_error([
-                'message' => esc_html__('Store is not active', 'wp-migrate-shopify-woo'),
+                'message' => esc_html__('Store is not active', 'wp-migrate-shopify-woo-lite'),
             ]);
         }
 
@@ -404,7 +404,7 @@ class WMSW_StoreHandler
         $access_token = $store->get_access_token();
         if (empty($access_token)) {
             wp_send_json_error([
-                'message' => esc_html__('Store does not have a valid access token', 'wp-migrate-shopify-woo'),
+                'message' => esc_html__('Store does not have a valid access token', 'wp-migrate-shopify-woo-lite'),
             ]);
         }
 
@@ -414,11 +414,11 @@ class WMSW_StoreHandler
 
         if (empty($shop_domain) || empty($access_token) || empty($api_version)) {
             wp_send_json_error([
-                'message' => esc_html__('Store is not configured properly', 'wp-migrate-shopify-woo'),
+                'message' => esc_html__('Store is not configured properly', 'wp-migrate-shopify-woo-lite'),
             ]);
         }
 
-        $client = new WMSW_ShopifyClient($shop_domain, $access_token, $api_version);
+        $client = new WMSWL_ShopifyClient($shop_domain, $access_token, $api_version);
 
         // Try to fetch shop info
         $shop_info = $client->get('shop');
@@ -427,26 +427,26 @@ class WMSW_StoreHandler
 
             if (isset($shop_info['shop'])) {
                 wp_send_json_success([
-                    'message' => esc_html__('Connection successful!', 'wp-migrate-shopify-woo'),
+                    'message' => esc_html__('Connection successful!', 'wp-migrate-shopify-woo-lite'),
                     'details' => sprintf(
                         /* translators: 1: shop name, 2: shop domain */
-                        esc_html__('Connected to: %1$s (%2$s)', 'wp-migrate-shopify-woo'),
+                        esc_html__('Connected to: %1$s (%2$s)', 'wp-migrate-shopify-woo-lite'),
                         esc_html($shop_info['shop']['name'] ?? $shop_domain),
                         esc_html($shop_info['shop']['domain'] ?? $shop_domain . '.myshopify.com')
                     ),
                 ]);
             } else {
                 wp_send_json_error([
-                    'message' => esc_html__('Connection failed. Invalid response from Shopify.', 'wp-migrate-shopify-woo'),
-                    'details' => esc_html__('The API returned an unexpected response format.', 'wp-migrate-shopify-woo'),
+                    'message' => esc_html__('Connection failed. Invalid response from Shopify.', 'wp-migrate-shopify-woo-lite'),
+                    'details' => esc_html__('The API returned an unexpected response format.', 'wp-migrate-shopify-woo-lite'),
                 ]);
             }
         } catch (Exception $e) {
             wp_send_json_error([
-                'message' => esc_html__('Connection failed.', 'wp-migrate-shopify-woo'),
+                'message' => esc_html__('Connection failed.', 'wp-migrate-shopify-woo-lite'),
                 'details' => sprintf(
                     /* translators: %s: error message */
-                    esc_html__('Error: %s', 'wp-migrate-shopify-woo'),
+                    esc_html__('Error: %s', 'wp-migrate-shopify-woo-lite'),
                     esc_html($e->getMessage())
                 ),
             ]);
@@ -463,23 +463,23 @@ class WMSW_StoreHandler
     {
         // Verify nonce
         if (!isset($_POST['nonce']) || empty($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'swi-admin-nonce')) {
-            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo')]);
+            wp_send_json_error(['message' => __('Invalid nonce', 'wp-migrate-shopify-woo-lite')]);
         }
 
         $store_id = absint($_POST['store_id'] ?? 0);
 
         if (!$store_id) {
             wp_send_json_error([
-                'message' => esc_html__('Invalid store ID', 'wp-migrate-shopify-woo')
+                'message' => esc_html__('Invalid store ID', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
         // Get the source store
-        $source_store = WMSW_ShopifyStore::find($store_id);
+        $source_store = WMSWL_ShopifyStore::find($store_id);
 
         if (!$source_store) {
             wp_send_json_error([
-                'message' => esc_html__('Source store not found', 'wp-migrate-shopify-woo')
+                'message' => esc_html__('Source store not found', 'wp-migrate-shopify-woo-lite')
             ]);
         }
 
@@ -499,7 +499,7 @@ class WMSW_StoreHandler
                 $store_name = $store_name . ' (Copy)';
             }
 
-            $new_store = new WMSW_ShopifyStore([
+            $new_store = new WMSWL_ShopifyStore([
                 'store_name' => $store_name,
                 'shop_domain' => $unique_domain,
                 'access_token' => $source_store->get_access_token(),
@@ -510,8 +510,8 @@ class WMSW_StoreHandler
 
             if ($new_store->save()) {
                 // Log the store creation
-                if (class_exists(WMSW_StoreLogger::class)) {
-                    WMSW_StoreLogger::log(
+                if (class_exists(WMSWL_StoreLogger::class)) {
+                    WMSWL_StoreLogger::log(
                         $new_store->get_id(),
                         'copy',
                         [
@@ -521,19 +521,19 @@ class WMSW_StoreHandler
                     );
                 }
                 wp_send_json_success([
-                    'message' => esc_html__('Store copied successfully. Note: The store domain has been modified for system compatibility.', 'wp-migrate-shopify-woo'),
+                    'message' => esc_html__('Store copied successfully. Note: The store domain has been modified for system compatibility.', 'wp-migrate-shopify-woo-lite'),
                     'new_store_id' => $new_store->get_id()
                 ]);
             } else {
                 wp_send_json_error([
-                    'message' => esc_html__('Failed to copy store', 'wp-migrate-shopify-woo')
+                    'message' => esc_html__('Failed to copy store', 'wp-migrate-shopify-woo-lite')
                 ]);
             }
         } catch (\Exception $e) {
             wp_send_json_error([
                 'message' => sprintf(
                     /* translators: %s: error message */
-                    esc_html__('Error copying store: %s', 'wp-migrate-shopify-woo'),
+                    esc_html__('Error copying store: %s', 'wp-migrate-shopify-woo-lite'),
                     $e->getMessage()
                 )
             ]);

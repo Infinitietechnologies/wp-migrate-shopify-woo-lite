@@ -6,7 +6,7 @@ namespace ShopifyWooImporter\Models;
  * Settings Model
  * Handles CRUD operations for plugin settings (global and per-store)
  */
-class WMSW_Settings
+class WMSWL_Settings
 {
     private $id;
     private $storeId;
@@ -41,8 +41,8 @@ class WMSW_Settings
         global $wpdb;
         $table = $wpdb->prefix . WMSW_SETTINGS_TABLE;
 
-        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-            $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+        if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger') && \ShopifyWooImporter\Services\WMSWL_Logger::isDebugModeEnabled()) {
+            $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
             $logger->debug("[WMSW_Settings::save] Saving setting: " . json_encode([
                 'id' => $this->id,
                 'key' => $this->settingKey,
@@ -61,16 +61,16 @@ class WMSW_Settings
                 ];
 
                 if ($this->id) {
-                    if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                        $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                    if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger') && \ShopifyWooImporter\Services\WMSWL_Logger::isDebugModeEnabled()) {
+                        $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                         $logger->debug("[WMSW_Settings::save] Updating existing record ID: " . $this->id);
                     }
                     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     $result = $wpdb->update($table, $data, ['id' => $this->id]);
                     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                     if ($result === false) {
-                        if (class_exists('ShopifyWooImporter\\Services\\WMSW_Logger') && \ShopifyWooImporter\Services\WMSW_Logger::isDebugModeEnabled()) {
-                            $logger = new \ShopifyWooImporter\Services\WMSW_Logger();
+                        if (class_exists('ShopifyWooImporter\\Services\\WMSWL_Logger') && \ShopifyWooImporter\Services\WMSWL_Logger::isDebugModeEnabled()) {
+                            $logger = new \ShopifyWooImporter\Services\WMSWL_Logger();
                             $logger->error("[WMSW_Settings::save] Update failed. SQL Error: " . $wpdb->last_error);
                         }
                         return false;

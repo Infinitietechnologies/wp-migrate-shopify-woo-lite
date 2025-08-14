@@ -37,10 +37,10 @@ $logs = []; // This should be populated by the Logger service
 $total_logs = 0; // This should be the total count from the Logger service
 
 // Use the ImportLog model for database operations
-use ShopifyWooImporter\Models\WMSW_ImportLog;
+use ShopifyWooImporter\Models\WMSWL_ImportLog;
 
 // Get available stores for filter
-$stores = WMSW_ImportLog::get_available_stores();
+$stores = WMSWL_ImportLog::get_available_stores();
 ?>
 
 <div class="swi-table-container">
@@ -50,7 +50,7 @@ $stores = WMSW_ImportLog::get_available_stores();
             <input type="hidden" name="page" value="<?php echo esc_attr(sanitize_text_field(wp_unslash($_GET['page'] ?? ''))); ?>" />
 
             <select name="store_id">
-                <option value=""><?php esc_html_e('All Stores', 'wp-migrate-shopify-woo'); ?></option>
+                <option value=""><?php esc_html_e('All Stores', 'wp-migrate-shopify-woo-lite'); ?></option>
                 <?php foreach ($stores as $store) : ?>
                     <option value="<?php echo esc_attr($store->id); ?>" <?php selected($filter_store, $store->id); ?>>
                         <?php echo esc_html($store->name); ?>
@@ -59,27 +59,27 @@ $stores = WMSW_ImportLog::get_available_stores();
             </select>
 
             <select name="import_type">
-                <option value=""><?php esc_html_e('All Types', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="products" <?php selected($filter_type, 'products'); ?>><?php esc_html_e('Products', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="customers" <?php selected($filter_type, 'customers'); ?>><?php esc_html_e('Customers', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="orders" <?php selected($filter_type, 'orders'); ?>><?php esc_html_e('Orders', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="pages" <?php selected($filter_type, 'pages'); ?>><?php esc_html_e('Pages', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="blogs" <?php selected($filter_type, 'blogs'); ?>><?php esc_html_e('Blogs', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="coupons" <?php selected($filter_type, 'coupons'); ?>><?php esc_html_e('Coupons', 'wp-migrate-shopify-woo'); ?></option>
+                <option value=""><?php esc_html_e('All Types', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="products" <?php selected($filter_type, 'products'); ?>><?php esc_html_e('Products', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="customers" <?php selected($filter_type, 'customers'); ?>><?php esc_html_e('Customers', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="orders" <?php selected($filter_type, 'orders'); ?>><?php esc_html_e('Orders', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="pages" <?php selected($filter_type, 'pages'); ?>><?php esc_html_e('Pages', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="blogs" <?php selected($filter_type, 'blogs'); ?>><?php esc_html_e('Blogs', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="coupons" <?php selected($filter_type, 'coupons'); ?>><?php esc_html_e('Coupons', 'wp-migrate-shopify-woo-lite'); ?></option>
             </select>
 
             <select name="status">
-                <option value=""><?php esc_html_e('All Statuses', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="pending" <?php selected($filter_status, 'pending'); ?>><?php esc_html_e('Pending', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="processing" <?php selected($filter_status, 'processing'); ?>><?php esc_html_e('Processing', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="completed" <?php selected($filter_status, 'completed'); ?>><?php esc_html_e('Completed', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="failed" <?php selected($filter_status, 'failed'); ?>><?php esc_html_e('Failed', 'wp-migrate-shopify-woo'); ?></option>
-                <option value="cancelled" <?php selected($filter_status, 'cancelled'); ?>><?php esc_html_e('Cancelled', 'wp-migrate-shopify-woo'); ?></option>
+                <option value=""><?php esc_html_e('All Statuses', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="pending" <?php selected($filter_status, 'pending'); ?>><?php esc_html_e('Pending', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="processing" <?php selected($filter_status, 'processing'); ?>><?php esc_html_e('Processing', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="completed" <?php selected($filter_status, 'completed'); ?>><?php esc_html_e('Completed', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="failed" <?php selected($filter_status, 'failed'); ?>><?php esc_html_e('Failed', 'wp-migrate-shopify-woo-lite'); ?></option>
+                <option value="cancelled" <?php selected($filter_status, 'cancelled'); ?>><?php esc_html_e('Cancelled', 'wp-migrate-shopify-woo-lite'); ?></option>
             </select>
 
-            <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'wp-migrate-shopify-woo'); ?>" />
+            <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'wp-migrate-shopify-woo-lite'); ?>" />
             <a href="<?php echo esc_url(admin_url('admin.php?page=' . sanitize_text_field(wp_unslash($_GET['page'] ?? '')))); ?>" class="button">
-                <?php esc_html_e('Clear Filters', 'wp-migrate-shopify-woo'); ?>
+                <?php esc_html_e('Clear Filters', 'wp-migrate-shopify-woo-lite'); ?>
             </a>
         </form>
     </div>
@@ -87,22 +87,22 @@ $stores = WMSW_ImportLog::get_available_stores();
     <table class="wp-list-table widefat fixed striped swi-import-log-table">
         <thead>
             <tr>
-                <th scope="col" class="column-id"><?php esc_html_e('ID', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-store"><?php esc_html_e('Store', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-type"><?php esc_html_e('Import Type', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-status"><?php esc_html_e('Status', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-items"><?php esc_html_e('Items', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-progress"><?php esc_html_e('Progress', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-started"><?php esc_html_e('Started', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-completed"><?php esc_html_e('Completed', 'wp-migrate-shopify-woo'); ?></th>
-                <th scope="col" class="column-actions"><?php esc_html_e('Actions', 'wp-migrate-shopify-woo'); ?></th>
+                <th scope="col" class="column-id"><?php esc_html_e('ID', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-store"><?php esc_html_e('Store', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-type"><?php esc_html_e('Import Type', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-status"><?php esc_html_e('Status', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-items"><?php esc_html_e('Items', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-progress"><?php esc_html_e('Progress', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-started"><?php esc_html_e('Started', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-completed"><?php esc_html_e('Completed', 'wp-migrate-shopify-woo-lite'); ?></th>
+                <th scope="col" class="column-actions"><?php esc_html_e('Actions', 'wp-migrate-shopify-woo-lite'); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($logs)) : ?>
                 <tr class="no-items">
                     <td colspan="9" class="colspanchange">
-                        <?php esc_html_e('No import logs found.', 'wp-migrate-shopify-woo'); ?>
+                        <?php esc_html_e('No import logs found.', 'wp-migrate-shopify-woo-lite'); ?>
                     </td>
                 </tr>
             <?php else : ?>
@@ -112,7 +112,7 @@ $stores = WMSW_ImportLog::get_available_stores();
                             <strong>#<?php echo esc_html($log->id); ?></strong>
                         </td>
                         <td class="column-store">
-                            <?php echo esc_html($log->store_name ?? esc_html__('Unknown', 'wp-migrate-shopify-woo')); ?>
+                            <?php echo esc_html($log->store_name ?? esc_html__('Unknown', 'wp-migrate-shopify-woo-lite')); ?>
                         </td>
                         <td class="column-type">
                             <span class="swi-import-type-badge swi-type-<?php echo esc_attr($log->import_type); ?>">
@@ -147,7 +147,7 @@ $stores = WMSW_ImportLog::get_available_stores();
                             if (isset($log->started_at)) {
                                 echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($log->started_at)));
                             } else {
-                                esc_html_e('-', 'wp-migrate-shopify-woo');
+                                esc_html_e('-', 'wp-migrate-shopify-woo-lite');
                             }
                             ?>
                         </td>
@@ -158,7 +158,7 @@ $stores = WMSW_ImportLog::get_available_stores();
                                     wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($log->completed_at))
                                 );
                             } else {
-                                esc_html_e('-', 'wp-migrate-shopify-woo');
+                                esc_html_e('-', 'wp-migrate-shopify-woo-lite');
                             }
                             ?>
                         </td>
@@ -166,26 +166,26 @@ $stores = WMSW_ImportLog::get_available_stores();
                             <div class="row-actions">
                                 <span class="view">
                                     <a href="#" class="swi-view-log" data-log-id="<?php echo esc_attr($log->id); ?>">
-                                        <?php esc_html_e('View Details', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('View Details', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span>
                                 <?php if (in_array($log->status, ['pending', 'processing'])) : ?>
                                     | <span class="cancel">
                                         <a href="#" class="swi-cancel-import" data-log-id="<?php echo esc_attr($log->id); ?>">
-                                            <?php esc_html_e('Cancel', 'wp-migrate-shopify-woo'); ?>
+                                            <?php esc_html_e('Cancel', 'wp-migrate-shopify-woo-lite'); ?>
                                         </a>
                                     </span>
                                 <?php endif; ?>
                                 <?php if (in_array($log->status, ['failed', 'cancelled'])) : ?>
                                     | <span class="retry">
                                         <a href="#" class="swi-retry-import" data-log-id="<?php echo esc_attr($log->id); ?>">
-                                            <?php esc_html_e('Retry', 'wp-migrate-shopify-woo'); ?>
+                                            <?php esc_html_e('Retry', 'wp-migrate-shopify-woo-lite'); ?>
                                         </a>
                                     </span>
                                 <?php endif; ?>
                                 | <span class="delete">
                                     <a href="#" class="swi-delete-log" data-log-id="<?php echo esc_attr($log->id); ?>">
-                                        <?php esc_html_e('Delete', 'wp-migrate-shopify-woo'); ?>
+                                        <?php esc_html_e('Delete', 'wp-migrate-shopify-woo-lite'); ?>
                                     </a>
                                 </span>
                             </div>
@@ -219,7 +219,7 @@ $stores = WMSW_ImportLog::get_available_stores();
 <div id="swi-log-details-modal" class="swi-modal d-none">
     <div class="swi-modal-content">
         <div class="swi-modal-header">
-            <h3><?php esc_html_e('Import Log Details', 'wp-migrate-shopify-woo'); ?></h3>
+            <h3><?php esc_html_e('Import Log Details', 'wp-migrate-shopify-woo-lite'); ?></h3>
             <span class="swi-modal-close">&times;</span>
         </div>
         <div class="swi-modal-body">
