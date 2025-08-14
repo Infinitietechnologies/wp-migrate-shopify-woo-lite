@@ -1,4 +1,4 @@
-=== WP Migrate & Import Shopify to WooCommerce ===
+=== WP Migrate & Import Shopify to WC Lite ===
 Contributors: infinitietech
 Tags: shopify, WooCommerce, migration, import, ecommerce
 Requires at least: 5.0

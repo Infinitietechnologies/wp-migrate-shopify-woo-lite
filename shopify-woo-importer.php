@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: WP Migrate & Import Shopify to WooCommerce
+ * Plugin Name: WP Migrate & Import Shopify to WC Lite
  * Plugin URI: https://infinitietech.com/shopify-woo-importer
  * Description: Multi-Store Product & Data Migration Tool - Import from Shopify to WooCommerce in just a few clicks
  * Version: 1.0.0
@@ -9,7 +9,7 @@
  * Author URI: https://infinitietech.com/
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-migrate-shopify-woo
+ * Text Domain: wp-migrate-shopify-woo-lite
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.8
